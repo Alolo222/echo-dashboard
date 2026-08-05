@@ -11,6 +11,15 @@ on:
       - main
   workflow_dispatch:
 
+# The Kubernetes Job name below (echo-dashboard-buildkit) is static, not
+# scoped per-run — two runs in flight at once would race on the same Job
+# (one deleting/recreating it while the other is still polling it). Group is
+# a fixed string rather than a ref-based expression since there's only ever
+# one branch driving builds here anyway.
+concurrency:
+  group: echo-dashboard-build
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: native
