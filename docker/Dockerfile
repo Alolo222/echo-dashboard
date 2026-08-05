@@ -31,7 +31,12 @@ RUN chmod +x gradlew && ./gradlew help --no-daemon
 FROM deps AS build
 COPY . .
 
-RUN ./gradlew assembleDebug testDebugUnitTest lint --no-daemon --stacktrace
+# mkdir -p afterwards: there are no test source files yet in this scaffold,
+# so testDebugUnitTest never creates app/build/test-results/ at all (no
+# tests to report on) — without this, the artifacts stage's COPY of that
+# directory fails outright ("not found") since it doesn't exist yet.
+RUN ./gradlew assembleDebug testDebugUnitTest lint --no-daemon --stacktrace \
+    && mkdir -p app/build/test-results app/build/reports
 
 # --- Étape 3 : artefacts seuls -----------------------------------------------
 FROM alpine:3.20 AS artifacts
