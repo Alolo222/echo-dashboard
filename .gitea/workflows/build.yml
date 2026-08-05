@@ -111,10 +111,15 @@ jobs:
         # `kubectl wait --for=condition=complete` only ever resolves on the
         # Complete condition: a Job that fails (e.g. InitError in `prepare`,
         # backoffLimit: 0) never gets one, so that call would just block for
-        # the full --timeout instead of reporting the failure. Poll both
-        # conditions instead and exit as soon as either is true, so a failed
-        # job fails this step (and the workflow run) within seconds instead
-        # of after 2h.
+        # the full --timeout instead of reporting the failure.
+        #
+        # Poll `.status.succeeded` / `.status.failed` instead of
+        # `.status.conditions[?(@.type==...)]`: those are plain top-level
+        # integers set as soon as the (single, since backoffLimit: 0) pod
+        # finishes, with no bracket-filter jsonpath involved — the filter
+        # syntax turned out to be unreliable on this runner's kubectl and
+        # silently returned nothing (swallowed by `2>/dev/null`), so the loop
+        # never saw a failure and ran until the full timeout anyway.
         run: |
           NS=ci
           JOB=echo-dashboard-buildkit
@@ -123,17 +128,21 @@ jobs:
           ELAPSED=0
 
           while true; do
-            COMPLETE=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
-            FAILED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
+            SUCCEEDED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.succeeded}' 2>/dev/null)
+            FAILED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.failed}' 2>/dev/null)
+            SUCCEEDED=${SUCCEEDED:-0}
+            FAILED=${FAILED:-0}
 
-            if [ "$COMPLETE" = "True" ]; then
+            if [ "$SUCCEEDED" -ge 1 ]; then
               echo "Job $JOB completed successfully."
               exit 0
             fi
 
-            if [ "$FAILED" = "True" ]; then
-              REASON=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].reason}{" - "}{.status.conditions[?(@.type=="Failed")].message}' 2>/dev/null || true)
-              echo "Job $JOB failed: $REASON"
+            if [ "$FAILED" -ge 1 ]; then
+              # Best-effort extra detail; must not gate control flow above,
+              # only the succeeded/failed counts do.
+              REASON=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].reason}{" - "}{.status.conditions[?(@.type=="Failed")].message}' 2>/dev/null)
+              echo "Job $JOB failed (backoffLimit: 0, no retries). $REASON"
               echo "See the 'Show build logs' step below for container logs."
               exit 1
             fi
