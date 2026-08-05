@@ -129,11 +129,18 @@ jobs:
         # syntax turned out to be unreliable on this runner's kubectl and
         # silently returned nothing (swallowed by `2>/dev/null`), so the loop
         # never saw a failure and ran until the full timeout anyway.
+        #
+        # Also print a heartbeat periodically: a long stretch with zero
+        # stdout (this loop otherwise stays silent between checks) risks the
+        # same idle-timeout class of issue called out in Verso's workflow
+        # (Traefik killing long quiet connections) — keep the log stream
+        # visibly alive instead of going dark for minutes at a time.
         run: |
           NS=ci
           JOB=echo-dashboard-buildkit
           TIMEOUT=7200
           INTERVAL=5
+          HEARTBEAT_EVERY=30
           ELAPSED=0
 
           while true; do
@@ -159,6 +166,10 @@ jobs:
             if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
               echo "Timed out after ${TIMEOUT}s waiting for job $JOB."
               exit 1
+            fi
+
+            if [ $((ELAPSED % HEARTBEAT_EVERY)) -eq 0 ]; then
+              echo "Still waiting for job $JOB... (${ELAPSED}s elapsed)"
             fi
 
             sleep "$INTERVAL"
