@@ -108,8 +108,44 @@ jobs:
           EOF
 
       - name: Wait for build
+        # `kubectl wait --for=condition=complete` only ever resolves on the
+        # Complete condition: a Job that fails (e.g. InitError in `prepare`,
+        # backoffLimit: 0) never gets one, so that call would just block for
+        # the full --timeout instead of reporting the failure. Poll both
+        # conditions instead and exit as soon as either is true, so a failed
+        # job fails this step (and the workflow run) within seconds instead
+        # of after 2h.
         run: |
-          kubectl -n ci wait --for=condition=complete job/echo-dashboard-buildkit --timeout=7200s
+          NS=ci
+          JOB=echo-dashboard-buildkit
+          TIMEOUT=7200
+          INTERVAL=5
+          ELAPSED=0
+
+          while true; do
+            COMPLETE=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)
+            FAILED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)
+
+            if [ "$COMPLETE" = "True" ]; then
+              echo "Job $JOB completed successfully."
+              exit 0
+            fi
+
+            if [ "$FAILED" = "True" ]; then
+              REASON=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].reason}{" - "}{.status.conditions[?(@.type=="Failed")].message}' 2>/dev/null || true)
+              echo "Job $JOB failed: $REASON"
+              echo "See the 'Show build logs' step below for container logs."
+              exit 1
+            fi
+
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out after ${TIMEOUT}s waiting for job $JOB."
+              exit 1
+            fi
+
+            sleep "$INTERVAL"
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
 
       - name: Show build logs
         if: always()
