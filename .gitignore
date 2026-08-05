@@ -1,0 +1,33 @@
+## Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+## Android Studio / IntelliJ
+.idea/
+*.iml
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+## Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+
+## Keystores (never commit signing material)
+*.jks
+*.keystore
+
+## Logs
+*.log
+
+## OS
+Thumbs.db

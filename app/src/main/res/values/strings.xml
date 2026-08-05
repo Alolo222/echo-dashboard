@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default (fallback) locale is English, per standard Android convention:
+         unqualified `values/` is served to any locale without a dedicated
+         translation. French translation lives in `values-fr/`. -->
+    <string name="app_name">Echo Dashboard</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_music">Music</string>
+    <string name="nav_assist">Assistant</string>
+    <string name="placeholder_screen">%1$s screen — coming soon</string>
+</resources>
