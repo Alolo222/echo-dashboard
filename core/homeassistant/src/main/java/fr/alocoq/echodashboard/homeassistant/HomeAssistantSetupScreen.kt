@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -47,11 +49,17 @@ fun HomeAssistantSetupScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    // L'écran de l'Echo Show 5 (960x480 en paysage) ne fait qu'environ 384dp
+    // de haut : titre + 2 champs + bouton dépassent facilement cette hauteur,
+    // surtout une fois le clavier virtuel ouvert pour saisir le jeton. Sans
+    // défilement, le bouton "Valider" se retrouve poussé hors écran sans
+    // aucun moyen de l'atteindre (voir historique du projet).
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

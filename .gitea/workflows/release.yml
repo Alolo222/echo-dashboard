@@ -1,0 +1,239 @@
+name: Release Echo Dashboard
+
+# Publie automatiquement l'APK debug en asset d'une release Gitea à chaque
+# tag poussé (ex: v0.1.0-alpha). Workflow séparé de build.yml (qui, lui, ne
+# fait que compiler/tester sur push main) pour ne pas complexifier son
+# déclencheur avec une condition tag/branche.
+#
+# Nécessite le secret de repo RELEASE_TOKEN (token d'accès Gitea, scope
+# write:repository) — à créer manuellement dans Réglages > Actions > Secrets,
+# car la création de secrets requiert d'être propriétaire du dépôt.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: echo-dashboard-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: native
+    timeout-minutes: 60
+
+    steps:
+      - name: Build APK and publish as a Gitea release asset
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          kubectl -n ci delete job echo-dashboard-release --ignore-not-found=true --wait=true
+
+          TAG=${GITEA_REF_NAME:-${GITHUB_REF_NAME}}
+          if [ -z "$TAG" ]; then
+            echo "Impossible de déterminer le tag (GITEA_REF_NAME/GITHUB_REF_NAME vides) — ce workflow doit être déclenché par un push de tag." >&2
+            exit 1
+          fi
+          if [ -z "$RELEASE_TOKEN" ]; then
+            echo "Secret RELEASE_TOKEN absent — voir Réglages > Actions > Secrets du dépôt." >&2
+            exit 1
+          fi
+
+          cat <<'EOF' | sed "s|__TAG__|${TAG}|g; s|__RELEASE_TOKEN__|${RELEASE_TOKEN}|g" | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: echo-dashboard-release
+            namespace: ci
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                # buildkit tourne en initContainer (pas en container normal) pour
+                # garantir qu'il a bien terminé avant que "publish" (le container
+                # principal) ne démarre — les containers normaux d'un Pod
+                # démarrent en parallèle, contrairement aux initContainers qui
+                # s'exécutent en séquence.
+                initContainers:
+                  - name: prepare
+                    image: alpine/git:latest
+                    command: ["sh", "-c"]
+                    args:
+                      - |
+                        set -eux
+                        REG=registry.git.svc.cluster.local:5000
+                        git clone --depth 1 --branch __TAG__ https://git.alocoq.fr/alois/Echo-dashboard.git /workspace/repo
+
+                        BTAG=$(sha256sum /workspace/repo/docker/ci-base.Dockerfile | cut -c1-16)
+                        printf '%s' "$BTAG" > /workspace/base_tag
+                        if wget -qO- "http://$REG/v2/echo-dashboard-ci-base/tags/list" 2>/dev/null | grep -q "\"base-$BTAG\""; then
+                          echo "Base image base-$BTAG already present - skipping base build"
+                        else
+                          touch /workspace/build-base
+                          echo "Base image base-$BTAG not found - base will be built"
+                        fi
+                    volumeMounts:
+                      - name: workspace
+                        mountPath: /workspace
+
+                  - name: buildkit
+                    image: moby/buildkit:latest
+                    securityContext:
+                      privileged: true
+                    command: ["sh", "-c"]
+                    args:
+                      - |
+                        set -eux
+                        REG=registry.git.svc.cluster.local:5000
+
+                        mkdir -p /etc/buildkit
+                        printf '[registry."%s"]\n  http = true\n  insecure = true\n' "$REG" > /etc/buildkit/buildkitd.toml
+
+                        BTAG=$(cat /workspace/base_tag)
+                        BASE_REF="$REG/echo-dashboard-ci-base:base-$BTAG"
+
+                        if [ -f /workspace/build-base ]; then
+                          buildctl-daemonless.sh build \
+                            --frontend=dockerfile.v0 \
+                            --local context=/workspace/repo \
+                            --local dockerfile=/workspace/repo/docker \
+                            --opt filename=ci-base.Dockerfile \
+                            --output type=image,name=$BASE_REF,push=true,registry.insecure=true
+                        else
+                          echo "Reusing existing base image $BASE_REF"
+                        fi
+
+                        # Exporte directement le stage "artifacts" (APK + rapports)
+                        # sur le volume partagé, sans passer par un push/pull
+                        # d'image — pas besoin de docker côté runner pour
+                        # récupérer l'APK ensuite.
+                        mkdir -p /workspace/artifacts
+                        buildctl-daemonless.sh build \
+                          --frontend=dockerfile.v0 \
+                          --local context=/workspace/repo \
+                          --local dockerfile=/workspace/repo/docker \
+                          --opt filename=Dockerfile \
+                          --opt build-arg:CI_BASE_IMAGE=$BASE_REF \
+                          --import-cache type=registry,ref=$REG/echo-dashboard-cache:app \
+                          --output type=local,dest=/workspace/artifacts
+                    volumeMounts:
+                      - name: workspace
+                        mountPath: /workspace
+
+                containers:
+                  - name: publish
+                    image: alpine:3.20
+                    command: ["sh", "-c"]
+                    args:
+                      - |
+                        set -eux
+                        apk add --no-cache curl jq >/dev/null
+
+                        APK=$(find /workspace/artifacts -maxdepth 1 -iname "*.apk" | head -1)
+                        if [ -z "$APK" ]; then
+                          echo "Aucun APK trouvé dans /workspace/artifacts" >&2
+                          exit 1
+                        fi
+
+                        TAG="__TAG__"
+                        TOKEN="__RELEASE_TOKEN__"
+                        API="https://git.alocoq.fr/api/v1/repos/alois/Echo-dashboard"
+                        AUTH="Authorization: token ${TOKEN}"
+                        ASSET_NAME="echo-dashboard-${TAG}-debug.apk"
+
+                        # Suffixe de pré-version (ex: v0.1.0-alpha) => prerelease,
+                        # convention semver.
+                        case "$TAG" in
+                          *-*) PRERELEASE=true ;;
+                          *)   PRERELEASE=false ;;
+                        esac
+
+                        RELEASE_ID=$(curl -sf -H "$AUTH" "$API/releases/tags/$TAG" 2>/dev/null | jq -r '.id // empty' || true)
+
+                        if [ -z "$RELEASE_ID" ]; then
+                          RELEASE_ID=$(curl -sf -X POST -H "$AUTH" -H "Content-Type: application/json" \
+                            -d "{\"tag_name\":\"$TAG\",\"name\":\"$TAG\",\"body\":\"Build automatique (CI). APK debug, non signé (clé de debug Android) — à sideloader pour tests.\",\"draft\":false,\"prerelease\":$PRERELEASE}" \
+                            "$API/releases" | jq -r '.id')
+                        else
+                          # Relance sur le même tag : purge l'éventuel ancien
+                          # asset de même nom avant réupload (l'API n'écrase pas).
+                          OLD_ID=$(curl -sf -H "$AUTH" "$API/releases/$RELEASE_ID" \
+                            | jq -r --arg n "$ASSET_NAME" '.assets[] | select(.name == $n) | .id' | head -1)
+                          if [ -n "$OLD_ID" ]; then
+                            curl -sf -X DELETE -H "$AUTH" "$API/releases/$RELEASE_ID/assets/$OLD_ID" || true
+                          fi
+                        fi
+
+                        if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
+                          echo "Impossible de créer/retrouver la release pour $TAG" >&2
+                          exit 1
+                        fi
+
+                        curl -sf -X POST -H "$AUTH" \
+                          "$API/releases/$RELEASE_ID/assets?name=${ASSET_NAME}" \
+                          -F "attachment=@${APK};type=application/vnd.android.package-archive"
+
+                        echo "APK publié sur la release $TAG."
+                    volumeMounts:
+                      - name: workspace
+                        mountPath: /workspace
+
+                volumes:
+                  - name: workspace
+                    emptyDir: {}
+          EOF
+
+      - name: Wait for release job
+        run: |
+          NS=ci
+          JOB=echo-dashboard-release
+          TIMEOUT=3600
+          INTERVAL=5
+          HEARTBEAT_EVERY=30
+          ELAPSED=0
+
+          while true; do
+            SUCCEEDED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.succeeded}' 2>/dev/null)
+            FAILED=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.failed}' 2>/dev/null)
+            SUCCEEDED=${SUCCEEDED:-0}
+            FAILED=${FAILED:-0}
+
+            if [ "$SUCCEEDED" -ge 1 ]; then
+              echo "Job $JOB completed successfully."
+              exit 0
+            fi
+
+            if [ "$FAILED" -ge 1 ]; then
+              REASON=$(kubectl -n "$NS" get job "$JOB" -o jsonpath='{.status.conditions[?(@.type=="Failed")].reason}{" - "}{.status.conditions[?(@.type=="Failed")].message}' 2>/dev/null)
+              echo "Job $JOB failed (backoffLimit: 0, no retries). $REASON"
+              echo "See the 'Show job logs' step below for container logs."
+              exit 1
+            fi
+
+            if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+              echo "Timed out after ${TIMEOUT}s waiting for job $JOB."
+              exit 1
+            fi
+
+            if [ $((ELAPSED % HEARTBEAT_EVERY)) -eq 0 ]; then
+              echo "Still waiting for job $JOB... (${ELAPSED}s elapsed)"
+            fi
+
+            sleep "$INTERVAL"
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+      - name: Show job logs
+        if: always()
+        run: |
+          kubectl -n ci logs job/echo-dashboard-release -c prepare || true
+          kubectl -n ci logs job/echo-dashboard-release -c buildkit || true
+          kubectl -n ci logs job/echo-dashboard-release -c publish || true
+
+      - name: Cleanup
+        if: always()
+        run: |
+          kubectl -n ci delete job echo-dashboard-release --ignore-not-found=true --wait=true

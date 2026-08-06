@@ -33,3 +33,27 @@ kubectl -n ci logs job/echo-dashboard-buildkit -c buildkit -f
 ```
 
 L'onglet Actions du repo Gitea affiche aussi la sortie du workflow (orchestration + logs remontés en fin de job).
+
+## Releases (APK téléchargeable)
+
+`.gitea/workflows/release.yml` se déclenche sur chaque tag poussé au format `v*` (ex: `v0.1.0-alpha`) et publie automatiquement l'APK debug en asset d'une release Gitea, sans passer par le registre d'images : le stage `artifacts` du `Dockerfile` est exporté directement sur le disque du Job (`buildctl --output type=local`) plutôt que poussé en image, puis un dernier container (`publish`) l'upload via l'API Releases de Gitea.
+
+Contrairement à `build.yml`, ce workflow a besoin d'un secret : **`RELEASE_TOKEN`**, un token d'accès Gitea (scope `write:repository`) sur un compte ayant les droits d'écriture sur le repo. À créer dans *Réglages du dépôt > Actions > Secrets* — la création de secrets nécessite d'être propriétaire du dépôt, ce qu'un simple collaborateur (ex: le compte `claude`) ne peut pas faire lui-même.
+
+Convention de version : un tag contenant un tiret (`v0.1.0-alpha`, `v0.2.0-rc1`...) est publié comme *prerelease* ; un tag `vX.Y.Z` propre est publié comme release normale.
+
+```bash
+git tag -a v0.1.0-alpha -m "..."
+git push origin v0.1.0-alpha
+```
+
+### Télécharger l'APK d'une release
+
+Gitea sert les assets avec `Content-Disposition: inline`, ce qui fait que certains navigateurs ignorent l'extension `.apk` suggérée et enregistrent le fichier en `.bin`. Le plus fiable est de télécharger en ligne de commande, qui respecte le nom qu'on lui donne :
+
+```bash
+curl -L -o echo-dashboard.apk <browser_download_url de l'asset>
+adb install -r echo-dashboard.apk
+```
+
+Sinon, dans le navigateur, utiliser "Enregistrer la cible du lien sous..." (clic droit sur le lien de téléchargement) plutôt que d'ouvrir le lien directement, ou renommer le fichier après coup.
