@@ -28,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import fr.alocoq.echodashboard.feature.dashboard.DashboardScreen
 
 /**
  * Shell de navigation entre les 3 modes principaux de l'app. À terme, chaque route
@@ -88,7 +89,7 @@ private fun EchoDashboardApp() {
             startDestination = Destination.Dashboard.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Destination.Dashboard.route) { PlaceholderScreen(Destination.Dashboard.labelRes) }
+            composable(Destination.Dashboard.route) { DashboardScreen() }
             composable(Destination.Music.route) { PlaceholderScreen(Destination.Music.labelRes) }
             composable(Destination.Assist.route) { PlaceholderScreen(Destination.Assist.labelRes) }
         }

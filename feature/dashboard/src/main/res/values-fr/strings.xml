@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_load_error">Impossible de charger le tableau de bord : %1$s</string>
+    <string name="dashboard_retry">Réessayer</string>
+</resources>

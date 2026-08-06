@@ -45,4 +45,15 @@ Copyleft fort — empêche qu'un fork propriétaire (le problème même qu'on re
 
 ## Statut
 
-Phase actuelle : scaffolding initial. Voir les issues du repo pour le détail des tâches.
+- `:core:homeassistant` — implémenté : stockage des paramètres de connexion (DataStore), client REST minimal (vérification de connexion), pont d'External Authentication v2 sécurisé (`ExternalAuthBridge`, voir ci-dessous), écran de couplage.
+- `:feature:dashboard` — implémenté : écran WebView du Lovelace utilisateur, avec gestion des états de chargement/erreur et retry.
+- Le client WebSocket HA (pipeline Assist, `subscribe_events`, `call_service`) reste à faire — nécessaire pour `:feature:assist`, pas pour l'écran Dashboard.
+- Reste à faire : `:core:musicassistant` + `:feature:music`, puis `:feature:assist`, puis `:feature:kiosk-settings` (ordre retenu : gain visible rapide d'abord, verrouillage Device Owner en dernier car difficilement réversible pendant le développement).
+
+### Note sur l'authentification WebView (`ExternalAuthBridge`)
+Utilise `WebViewCompat.addWebMessageListener` (API v2, vérifie l'origine) plutôt que `addJavascriptInterface`, pour éviter l'exfiltration de token via des iframes cross-origin (cf. l'avis de sécurité GHSA-7jp2-p2fw-mgvf sur ce genre de pont). Chaque message est vérifié contre l'origine de l'instance HA configurée et contre `isMainFrame`, et seuls des noms de callback whitelistés sont interpolés dans le JS renvoyé.
+
+## Appareils cibles
+
+- Amazon Echo Show 5 1ère génération (LineageOS 18.1 / Android 11) — cible principale, voir Contexte ci-dessus.
+- Amazon Echo Spot 1ère génération (2017), également jailbreakable sous LineageOS — envisagé comme cible secondaire à terme. Écran rond (480×480, ~2.5"), donc probablement pas le même layout que le Show : à garder en tête pour la conception UI (éviter le texte/les contrôles collés aux bords, prévoir un mode d'affichage adapté à un écran circulaire) mais pas encore une contrainte active tant que le Show 5 n'est pas fonctionnel.
