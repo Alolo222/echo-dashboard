@@ -287,9 +287,26 @@ class EchoWeatherCard extends LitElement {
       });
     }
 
-    const dewPoint = stateObj.attributes.dew_point;
-    if (this._config.show_dew_point && dewPoint != null) {
-      const unit = stateObj.attributes.temperature_unit || "°C";
+    // Certaines intégrations météo (Météo-France notamment) n'exposent pas
+    // de point de rosée natif sur l'entité weather.* : dew_point_entity
+    // permet de brancher un capteur externe (ex: template sensor calculé
+    // via la formule de Magnus) à la place.
+    const dewPointObj =
+      this._config.dew_point_entity &&
+      this._hass.states[this._config.dew_point_entity];
+    const dewPoint = dewPointObj
+      ? Number(dewPointObj.state)
+      : stateObj.attributes.dew_point;
+    if (
+      this._config.show_dew_point &&
+      dewPoint != null &&
+      Number.isFinite(dewPoint)
+    ) {
+      const unit = dewPointObj
+        ? dewPointObj.attributes.unit_of_measurement ||
+          stateObj.attributes.temperature_unit ||
+          "°C"
+        : stateObj.attributes.temperature_unit || "°C";
       tiles.push({
         type: "dew-point",
         icon: "mdi:thermometer-water",

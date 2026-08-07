@@ -27,6 +27,7 @@ export const DEFAULT_CONFIG = {
   show_precipitation_probability: true,
   show_humidity: true,
   show_dew_point: true,
+  dew_point_entity: null,
   show_clock: true,
   show_date: true,
   show_last_updated: true,
