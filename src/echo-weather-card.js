@@ -142,6 +142,48 @@ class EchoWeatherCard extends LitElement {
               </div>`
             : nothing}
         </div>
+        ${this._renderEnvStrip(stateObj)}
+      </div>
+    `;
+  }
+
+  // Petits indicateurs additionnels (humidité, UV, qualité de l'air) casés
+  // dans l'espace libre à droite de la météo actuelle. Chacun n'apparaît
+  // que si la donnée existe : pas de case à cocher dédiée, l'entité (ou
+  // l'attribut natif pour l'humidité) fait office de toggle.
+  _renderEnvStrip(stateObj) {
+    const tiles = [];
+
+    const humidity = stateObj.attributes.humidity;
+    if (this._config.show_humidity && humidity != null) {
+      tiles.push(["Humidité", `${Math.round(humidity)}%`]);
+    }
+
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
+      tiles.push(["UV", uvObj.state]);
+    }
+
+    const aqiObj =
+      this._config.air_quality_entity &&
+      this._hass.states[this._config.air_quality_entity];
+    if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
+      tiles.push(["Air", aqiObj.state]);
+    }
+
+    if (!tiles.length) return nothing;
+
+    return html`
+      <div class="env-strip">
+        ${tiles.map(
+          ([label, value]) => html`
+            <div class="env-tile">
+              <span class="env-label">${label}</span>
+              <span class="env-value">${value}</span>
+            </div>
+          `
+        )}
       </div>
     `;
   }
@@ -304,6 +346,36 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(0.85rem, 1.4cqw, 1rem);
       margin-top: 2px;
     }
+    .current-info {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    /* --- Indicateurs additionnels (humidité/UV/air), espace libre à droite --- */
+    .env-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+    .env-tile {
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .env-label {
+      font-size: clamp(0.75rem, 1.3cqw, 0.9rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--_secondary-color);
+    }
+    .env-value {
+      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
+      font-weight: 700;
+    }
 
     /* --- Prévisions horaires : contenu principal --- */
     .hourly {
@@ -382,6 +454,7 @@ class EchoWeatherCard extends LitElement {
     }
 
     /* --- Breakpoint portrait/étroit (posé via ResizeObserver) --- */
+    :host(.portrait) .current,
     :host(.portrait) .hourly,
     :host(.portrait) .daily {
       flex-wrap: wrap;
@@ -389,6 +462,12 @@ class EchoWeatherCard extends LitElement {
     :host(.portrait) .hourly-item,
     :host(.portrait) .daily-item {
       flex: 1 1 30%;
+    }
+    :host(.portrait) .env-strip {
+      flex-direction: row;
+      margin-left: 0;
+      width: 100%;
+      gap: 14px;
     }
   `;
 }

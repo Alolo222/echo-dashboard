@@ -25,6 +25,9 @@ export const DEFAULT_CONFIG = {
   show_daily: true,
   show_feels_like: true,
   show_precipitation_probability: true,
+  show_humidity: true,
+  uv_entity: null,
+  air_quality_entity: null,
   title: null,
   background: "transparent",
 };
