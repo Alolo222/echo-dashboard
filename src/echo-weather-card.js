@@ -145,7 +145,6 @@ class EchoWeatherCard extends LitElement {
     const temp = stateObj.attributes.temperature;
     const tempUnit = stateObj.attributes.temperature_unit || "°C";
     const feelsLike = stateObj.attributes.apparent_temperature;
-    const humidity = stateObj.attributes.humidity;
 
     const lastUpdated = stateObj.last_updated
       ? new Date(stateObj.last_updated)
@@ -158,7 +157,7 @@ class EchoWeatherCard extends LitElement {
       metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
     }
 
-    const showSide = this._config.show_clock || this._config.show_date || (this._config.show_humidity && humidity != null);
+    const showSide = this._config.show_clock || this._config.show_date;
 
     const now = new Date();
     const saint = this._config.show_date ? saintOfDay(now) : null;
@@ -169,7 +168,7 @@ class EchoWeatherCard extends LitElement {
         <div class="current-info">
           <div class="current-top-row">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
-            ${this._renderIndicators()}
+            ${this._renderIndicators(stateObj)}
           </div>
           <div class="current-condition">${conditionLabel}</div>
           ${metaParts.length
@@ -179,35 +178,18 @@ class EchoWeatherCard extends LitElement {
         ${showSide
           ? html`
               <div class="current-side">
-                ${this._config.show_clock || this._config.show_date
-                  ? html`
-                      <div class="clock-group">
-                        ${this._config.show_clock
-                          ? html`<div class="clock">
-                              ${formatTime(now, locale, timeFormat)}
-                            </div>`
-                          : nothing}
-                        ${this._config.show_date
-                          ? html`<div class="date-line">
-                              ${formatDate(now, locale)}${saint
-                                ? ` · ${saint}`
-                                : ""}
-                            </div>`
-                          : nothing}
-                      </div>
-                    `
-                  : nothing}
-                ${this._config.show_humidity && humidity != null
-                  ? html`
-                      <div class="humidity-badge">
-                        <ha-icon
-                          class="humidity-icon"
-                          icon=${"mdi:water-percent"}
-                        ></ha-icon>
-                        <span>${Math.round(humidity)}%</span>
-                      </div>
-                    `
-                  : nothing}
+                <div class="clock-group">
+                  ${this._config.show_clock
+                    ? html`<div class="clock">
+                        ${formatTime(now, locale, timeFormat)}
+                      </div>`
+                    : nothing}
+                  ${this._config.show_date
+                    ? html`<div class="date-line">
+                        ${formatDate(now, locale)}${saint ? ` · ${saint}` : ""}
+                      </div>`
+                    : nothing}
+                </div>
               </div>
             `
           : nothing}
@@ -215,54 +197,69 @@ class EchoWeatherCard extends LitElement {
     `;
   }
 
-  // Indice UV + qualité de l'air, côte à côte à droite de la température —
-  // deux tuiles explicitement étiquetées plutôt que des chiffres nus.
-  // L'UV a une échelle universelle (OMS) donc on peut afficher une
-  // catégorie qualitative (Faible/Modéré/...) ; la qualité de l'air
-  // dépend de l'entité choisie par l'utilisateur (AQI US, indice ATMO,
-  // concentration brute...) donc on se contente de bien la libeller avec
-  // son unité, sans inventer une catégorie sur une échelle qu'on ne
-  // connaît pas.
-  _renderIndicators() {
-    const boxes = [];
+  // Humidité + indice UV + qualité de l'air, côte à côte à droite de la
+  // température — des puces sur une seule ligne (icône + valeur +
+  // catégorie/unité) plutôt que des tuiles à deux lignes, plus compactes
+  // et cohérentes avec le style du bandeau bas. L'UV a une échelle
+  // universelle (OMS) donc on peut afficher une catégorie qualitative
+  // (Faible/Modéré/...) ; la qualité de l'air dépend de l'entité choisie
+  // par l'utilisateur (AQI US, indice ATMO, concentration brute...) donc
+  // on se contente de son unité native, sans inventer une catégorie sur
+  // une échelle qu'on ne connaît pas. L'humidité vit ici plutôt que dans
+  // la colonne horloge/date : elle y encombrait cette zone sans rapport
+  // avec l'heure.
+  _renderIndicators(stateObj) {
+    const chips = [];
+
+    const humidity = stateObj.attributes.humidity;
+    if (this._config.show_humidity && humidity != null) {
+      chips.push({
+        type: "humidity",
+        icon: "mdi:water-percent",
+        value: `${Math.round(humidity)}%`,
+      });
+    }
 
     const uvObj =
       this._config.uv_entity && this._hass.states[this._config.uv_entity];
     if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
-      const category = uvCategory(uvObj.state);
-      boxes.push(html`
-        <div class="indicator-box indicator-uv">
-          <div class="indicator-label">Indice UV</div>
-          <div class="indicator-row">
-            <span class="indicator-value">${uvObj.state}</span>
-            ${category
-              ? html`<span class="indicator-category">${category}</span>`
-              : nothing}
-          </div>
-        </div>
-      `);
+      chips.push({
+        type: "uv",
+        icon: "mdi:weather-sunny-alert",
+        value: uvObj.state,
+        tag: uvCategory(uvObj.state),
+      });
     }
 
     const aqiObj =
       this._config.air_quality_entity &&
       this._hass.states[this._config.air_quality_entity];
     if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
-      const unit = aqiObj.attributes.unit_of_measurement || "";
-      boxes.push(html`
-        <div class="indicator-box indicator-air">
-          <div class="indicator-label">Qualité de l'air</div>
-          <div class="indicator-row">
-            <span class="indicator-value">${aqiObj.state}</span>
-            ${unit
-              ? html`<span class="indicator-category">${unit}</span>`
-              : nothing}
-          </div>
-        </div>
-      `);
+      chips.push({
+        type: "air",
+        icon: "mdi:air-filter",
+        value: aqiObj.state,
+        tag: aqiObj.attributes.unit_of_measurement || null,
+      });
     }
 
-    if (!boxes.length) return nothing;
-    return html`<div class="indicators-row">${boxes}</div>`;
+    if (!chips.length) return nothing;
+
+    return html`
+      <div class="indicators-row">
+        ${chips.map(
+          (chip) => html`
+            <div class="indicator-box indicator-${chip.type}">
+              <ha-icon class="indicator-icon" icon=${chip.icon}></ha-icon>
+              <span class="indicator-value">${chip.value}</span>
+              ${chip.tag
+                ? html`<span class="indicator-category">${chip.tag}</span>`
+                : nothing}
+            </div>
+          `
+        )}
+      </div>
+    `;
   }
 
   // Bandeau bas : vent, lever/coucher de soleil. Chaque tuile n'apparaît
@@ -522,42 +519,41 @@ class EchoWeatherCard extends LitElement {
       font-weight: 500;
       margin-top: 4px;
     }
-    /* Indice UV / qualité de l'air : petites tuiles étiquetées (label +
-       valeur + catégorie ou unité) plutôt que des badges inline nus —
-       inspiré des tuiles AIR QUALITY/POLLEN de RadarWise. */
+    /* Humidité / UV / qualité de l'air : puces sur une seule ligne (icône +
+       valeur + catégorie ou unité) — plus compact qu'une tuile à deux
+       lignes, et cohérent avec le style du bandeau bas. */
     .indicators-row {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
     .indicator-box {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 4px 12px;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
     }
-    .indicator-label {
-      font-size: clamp(0.75rem, 1.2cqw, 0.85rem);
-      font-weight: 600;
-      color: var(--_secondary-color);
-      white-space: nowrap;
+    .indicator-icon {
+      --mdc-icon-size: clamp(20px, 3cqw, 25px);
+      flex-shrink: 0;
     }
-    .indicator-row {
-      display: flex;
-      align-items: baseline;
-      gap: 7px;
+    .indicator-humidity .indicator-icon {
+      color: var(--echo-weather-humidity-color, #4fc3f7);
     }
-    .indicator-value {
-      font-size: clamp(1.2rem, 2.2cqw, 1.45rem);
-      font-weight: 800;
-    }
-    .indicator-uv .indicator-value {
+    .indicator-uv .indicator-icon {
       color: var(--echo-weather-uv-color, #ffb74d);
     }
-    .indicator-air .indicator-value {
+    .indicator-air .indicator-icon {
       color: var(--echo-weather-air-color, #81c784);
+    }
+    .indicator-value {
+      font-size: clamp(1.15rem, 2.1cqw, 1.4rem);
+      font-weight: 800;
+      white-space: nowrap;
     }
     .indicator-category {
       font-size: clamp(0.8rem, 1.3cqw, 0.95rem);
@@ -575,13 +571,13 @@ class EchoWeatherCard extends LitElement {
       min-width: 0;
     }
 
-    /* --- Colonne de droite : horloge + humidité, dans l'espace resté
-       libre à côté de la météo actuelle. --- */
+    /* --- Colonne de droite : horloge + date, seules désormais (l'humidité
+       a rejoint les autres indicateurs près de la température — elle
+       encombrait cette zone sans rapport avec l'heure). --- */
     .current-side {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 10px;
       flex-shrink: 0;
       margin-left: auto;
     }
@@ -604,24 +600,6 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
       font-weight: 500;
       text-align: right;
-    }
-    .humidity-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 15px;
-      border-radius: 16px;
-      background: var(--_tile-background);
-      border: 1px solid var(--_divider-color);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-      font-size: clamp(1.15rem, 2.3cqw, 1.5rem);
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .humidity-icon {
-      --mdc-icon-size: clamp(22px, 3.4cqw, 28px);
-      color: var(--echo-weather-humidity-color, #4fc3f7);
-      flex-shrink: 0;
     }
 
     /* --- Prévisions horaires : contenu principal --- */
