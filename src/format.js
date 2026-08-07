@@ -34,3 +34,16 @@ export function localizeCondition(hass, condition) {
   );
   return translated || condition;
 }
+
+// Catégorie qualitative de l'indice UV — échelle standard (OMS/Météo-France),
+// universelle contrairement à la qualité de l'air (dont l'échelle dépend de
+// l'intégration/du capteur choisi par l'utilisateur, donc non déductible ici).
+export function uvCategory(value) {
+  const v = Number(value);
+  if (!Number.isFinite(v)) return null;
+  if (v < 3) return "Faible";
+  if (v < 6) return "Modéré";
+  if (v < 8) return "Élevé";
+  if (v < 11) return "Très élevé";
+  return "Extrême";
+}

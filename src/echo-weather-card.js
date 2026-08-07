@@ -6,6 +6,7 @@ import {
   formatTime,
   formatWeekday,
   localizeCondition,
+  uvCategory,
 } from "./format.js";
 import { subscribeForecasts } from "./forecast.js";
 
@@ -143,13 +144,6 @@ class EchoWeatherCard extends LitElement {
     const feelsLike = stateObj.attributes.apparent_temperature;
     const humidity = stateObj.attributes.humidity;
 
-    const uvObj =
-      this._config.uv_entity && this._hass.states[this._config.uv_entity];
-    const uvValue =
-      uvObj && !["unknown", "unavailable"].includes(uvObj.state)
-        ? uvObj.state
-        : null;
-
     const lastUpdated = stateObj.last_updated
       ? new Date(stateObj.last_updated)
       : null;
@@ -168,12 +162,8 @@ class EchoWeatherCard extends LitElement {
         <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
           <div class="current-temp">${Math.round(temp)}°</div>
-          <div class="current-condition">
-            ${conditionLabel}
-            ${uvValue != null
-              ? html`<span class="uv-badge">UV ${uvValue}</span>`
-              : nothing}
-          </div>
+          <div class="current-condition">${conditionLabel}</div>
+          ${this._renderIndicators()}
           ${metaParts.length
             ? html`<div class="current-meta">${metaParts.join(" · ")}</div>`
             : nothing}
@@ -204,11 +194,60 @@ class EchoWeatherCard extends LitElement {
     `;
   }
 
-  // Bandeau bas : vent, lever/coucher de soleil, qualité de l'air. Chaque
-  // tuile n'apparaît que si la donnée existe (attribut natif de l'entité
-  // météo pour le vent, `sun.sun` pour lever/coucher, entité dédiée pour
-  // la qualité de l'air) — pas de case à cocher requise pour un usage de
-  // base. `ha-icon` est déjà défini par le frontend HA : rien à bundler.
+  // Indice UV + qualité de l'air, côte à côte sous la condition — deux
+  // tuiles explicitement étiquetées plutôt que des chiffres nus. L'UV a une
+  // échelle universelle (OMS) donc on peut afficher une catégorie
+  // qualitative (Faible/Modéré/...) ; la qualité de l'air dépend de
+  // l'entité choisie par l'utilisateur (AQI US, indice ATMO, concentration
+  // brute...) donc on se contente de bien la libeller avec son unité,
+  // sans inventer une catégorie sur une échelle qu'on ne connaît pas.
+  _renderIndicators() {
+    const boxes = [];
+
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
+      const category = uvCategory(uvObj.state);
+      boxes.push(html`
+        <div class="indicator-box indicator-uv">
+          <div class="indicator-label">Indice UV</div>
+          <div class="indicator-row">
+            <span class="indicator-value">${uvObj.state}</span>
+            ${category
+              ? html`<span class="indicator-category">${category}</span>`
+              : nothing}
+          </div>
+        </div>
+      `);
+    }
+
+    const aqiObj =
+      this._config.air_quality_entity &&
+      this._hass.states[this._config.air_quality_entity];
+    if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
+      const unit = aqiObj.attributes.unit_of_measurement || "";
+      boxes.push(html`
+        <div class="indicator-box indicator-air">
+          <div class="indicator-label">Qualité de l'air</div>
+          <div class="indicator-row">
+            <span class="indicator-value">${aqiObj.state}</span>
+            ${unit
+              ? html`<span class="indicator-category">${unit}</span>`
+              : nothing}
+          </div>
+        </div>
+      `);
+    }
+
+    if (!boxes.length) return nothing;
+    return html`<div class="indicators-row">${boxes}</div>`;
+  }
+
+  // Bandeau bas : vent, lever/coucher de soleil. Chaque tuile n'apparaît
+  // que si la donnée existe (attribut natif de l'entité météo pour le
+  // vent, `sun.sun` pour lever/coucher) — pas de case à cocher requise
+  // pour un usage de base. Libellé texte à côté de l'icône : une icône
+  // seule pour lever/coucher est ambiguë (laquelle est laquelle ?).
   _renderBottomBand(stateObj, locale, timeFormat) {
     const tiles = [];
 
@@ -218,6 +257,7 @@ class EchoWeatherCard extends LitElement {
       tiles.push({
         type: "wind",
         icon: "mdi:weather-windy",
+        label: "Vent",
         value: `${Math.round(windSpeed)} ${unit}`.trim(),
       });
     }
@@ -234,6 +274,7 @@ class EchoWeatherCard extends LitElement {
         tiles.push({
           type: "sunrise",
           icon: "mdi:weather-sunset-up",
+          label: "Lever",
           value: formatTime(rising, locale, timeFormat),
         });
       }
@@ -241,21 +282,10 @@ class EchoWeatherCard extends LitElement {
         tiles.push({
           type: "sunset",
           icon: "mdi:weather-sunset-down",
+          label: "Coucher",
           value: formatTime(setting, locale, timeFormat),
         });
       }
-    }
-
-    const aqiObj =
-      this._config.air_quality_entity &&
-      this._hass.states[this._config.air_quality_entity];
-    if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
-      const unit = aqiObj.attributes.unit_of_measurement || "";
-      tiles.push({
-        type: "air",
-        icon: "mdi:air-filter",
-        value: `${aqiObj.state} ${unit}`.trim(),
-      });
     }
 
     if (!tiles.length) return nothing;
@@ -266,6 +296,7 @@ class EchoWeatherCard extends LitElement {
           (tile) => html`
             <div class="band-tile band-${tile.type}">
               <ha-icon class="band-icon" icon=${tile.icon}></ha-icon>
+              <span class="band-label">${tile.label}</span>
               <span class="band-value">${tile.value}</span>
             </div>
           `
@@ -358,8 +389,8 @@ class EchoWeatherCard extends LitElement {
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
-      --_row-gap: var(--echo-weather-row-gap, 10px);
-      --_icon-size: var(--echo-weather-icon-size, clamp(76px, 11cqw, 108px));
+      --_row-gap: var(--echo-weather-row-gap, 8px);
+      --_icon-size: var(--echo-weather-icon-size, clamp(70px, 9.5cqw, 92px));
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
         clamp(2.75rem, 7cqw, 4.25rem)
@@ -431,24 +462,50 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(1rem, 1.8cqw, 1.25rem);
       font-weight: 500;
       margin-top: 2px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
-    /* Badge UV : collé à la condition plutôt qu'isolé dans une tuile à
-       part, comme sur RadarWise — précis et compact, sans bouffer de
-       hauteur dans un bloc déjà serré. */
-    .uv-badge {
-      display: inline-flex;
-      align-items: center;
-      font-size: clamp(0.72rem, 1.2cqw, 0.85rem);
-      font-weight: 700;
-      color: var(--echo-weather-uv-color, #ffb74d);
+    /* Indice UV / qualité de l'air : petites tuiles étiquetées (label +
+       valeur + catégorie ou unité) plutôt que des badges inline nus —
+       inspiré des tuiles AIR QUALITY/POLLEN de RadarWise. */
+    .indicators-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .indicator-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 3px 9px;
+      border-radius: 12px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
-      border-radius: 999px;
-      padding: 2px 9px;
-      line-height: 1.5;
+    }
+    .indicator-label {
+      font-size: clamp(0.68rem, 1.1cqw, 0.78rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
+      white-space: nowrap;
+    }
+    .indicator-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .indicator-value {
+      font-size: clamp(1rem, 1.8cqw, 1.2rem);
+      font-weight: 800;
+    }
+    .indicator-uv .indicator-value {
+      color: var(--echo-weather-uv-color, #ffb74d);
+    }
+    .indicator-air .indicator-value {
+      color: var(--echo-weather-air-color, #81c784);
+    }
+    .indicator-category {
+      font-size: clamp(0.72rem, 1.2cqw, 0.85rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
+      white-space: nowrap;
     }
     .current-meta {
       color: var(--_secondary-color);
@@ -542,10 +599,10 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       flex: 1;
       min-width: 0;
-      padding: 8px 4px;
+      padding: 6px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
     }
@@ -606,8 +663,11 @@ class EchoWeatherCard extends LitElement {
     .band-sunset .band-icon {
       color: var(--echo-weather-sunset-color, #ff8a65);
     }
-    .band-air .band-icon {
-      color: var(--echo-weather-air-color, #81c784);
+    .band-label {
+      color: var(--_secondary-color);
+      font-size: clamp(0.8rem, 1.4cqw, 0.95rem);
+      font-weight: 600;
+      white-space: nowrap;
     }
     .band-value {
       font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
