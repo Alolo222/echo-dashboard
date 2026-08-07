@@ -6,7 +6,7 @@ var q = (r, e, t) => Me(r, typeof e != "symbol" ? e + "" : e, t);
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const H = globalThis, Y = H.ShadowRoot && (H.ShadyCSS === void 0 || H.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, Z = Symbol(), ee = /* @__PURE__ */ new WeakMap();
+const k = globalThis, Y = k.ShadowRoot && (k.ShadyCSS === void 0 || k.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, Z = Symbol(), ee = /* @__PURE__ */ new WeakMap();
 let ye = class {
   constructor(e, t, i) {
     if (this._$cssResult$ = !0, i !== Z) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -35,7 +35,7 @@ const Pe = (r) => new ye(typeof r == "string" ? r : r + "", void 0, Z), ze = (r,
 }, Te = (r, e) => {
   if (Y) r.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
-    const i = document.createElement("style"), s = H.litNonce;
+    const i = document.createElement("style"), s = k.litNonce;
     s !== void 0 && i.setAttribute("nonce", s), i.textContent = t.cssText, r.appendChild(i);
   }
 }, te = Y ? (r) => r : (r) => r instanceof CSSStyleSheet ? ((e) => {
@@ -48,7 +48,7 @@ const Pe = (r) => new ye(typeof r == "string" ? r : r + "", void 0, Z), ze = (r,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Re, defineProperty: Ue, getOwnPropertyDescriptor: Ne, getOwnPropertyNames: He, getOwnPropertySymbols: ke, getPrototypeOf: De } = Object, g = globalThis, ie = g.trustedTypes, Oe = ie ? ie.emptyScript : "", L = g.reactiveElementPolyfillSupport, C = (r, e) => r, j = { toAttribute(r, e) {
+const { is: Ue, defineProperty: Re, getOwnPropertyDescriptor: Ne, getOwnPropertyNames: ke, getOwnPropertySymbols: He, getPrototypeOf: De } = Object, g = globalThis, ie = g.trustedTypes, Oe = ie ? ie.emptyScript : "", L = g.reactiveElementPolyfillSupport, C = (r, e) => r, j = { toAttribute(r, e) {
   switch (e) {
     case Boolean:
       r = r ? Oe : null;
@@ -76,7 +76,7 @@ const { is: Re, defineProperty: Ue, getOwnPropertyDescriptor: Ne, getOwnProperty
       }
   }
   return t;
-} }, $e = (r, e) => !Re(r, e), se = { attribute: !0, type: String, converter: j, reflect: !1, useDefault: !1, hasChanged: $e };
+} }, $e = (r, e) => !Ue(r, e), se = { attribute: !0, type: String, converter: j, reflect: !1, useDefault: !1, hasChanged: $e };
 var pe, me;
 (pe = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (me = g.litPropertyMetadata) != null || (g.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let A = class extends HTMLElement {
@@ -90,7 +90,7 @@ let A = class extends HTMLElement {
   static createProperty(e, t = se) {
     if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
       const i = Symbol(), s = this.getPropertyDescriptor(e, i, t);
-      s !== void 0 && Ue(this.prototype, e, s);
+      s !== void 0 && Re(this.prototype, e, s);
     }
   }
   static getPropertyDescriptor(e, t, i) {
@@ -117,7 +117,7 @@ let A = class extends HTMLElement {
   static finalize() {
     if (this.hasOwnProperty(C("finalized"))) return;
     if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(C("properties"))) {
-      const t = this.properties, i = [...He(t), ...ke(t)];
+      const t = this.properties, i = [...ke(t), ...He(t)];
       for (const s of i) this.createProperty(s, t[s]);
     }
     const e = this[Symbol.metadata];
@@ -294,7 +294,7 @@ A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const M = globalThis, re = (r) => r, k = M.trustedTypes, ne = k ? k.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, we = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, be = "?" + f, qe = `<${be}>`, b = document, z = () => b.createComment(""), T = (r) => r === null || typeof r != "object" && typeof r != "function", K = Array.isArray, Le = (r) => K(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", B = `[ 	
+const M = globalThis, re = (r) => r, H = M.trustedTypes, ne = H ? H.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, we = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, be = "?" + f, qe = `<${be}>`, b = document, z = () => b.createComment(""), T = (r) => r === null || typeof r != "object" && typeof r != "function", K = Array.isArray, Le = (r) => K(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", B = `[ 	
 \f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, oe = /-->/g, ae = />/g, y = RegExp(`>|${B}(?:([^\\s"'>=/]+)(${B}*=${B}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), le = /'/g, ce = /"/g, Ae = /^(?:script|style|textarea|title)$/i, Be = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), p = Be(1), x = Symbol.for("lit-noChange"), h = Symbol.for("lit-nothing"), he = /* @__PURE__ */ new WeakMap(), $ = b.createTreeWalker(b, 129);
 function xe(r, e) {
@@ -313,13 +313,13 @@ const Ie = (r, e) => {
   }
   return [xe(r, n + (r[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), i];
 };
-class R {
+class U {
   constructor({ strings: e, _$litType$: t }, i) {
     let s;
     this.parts = [];
     let n = 0, o = 0;
     const l = e.length - 1, a = this.parts, [c, d] = Ie(e, t);
-    if (this.el = R.createElement(c, i), $.currentNode = this.el.content, t === 2 || t === 3) {
+    if (this.el = U.createElement(c, i), $.currentNode = this.el.content, t === 2 || t === 3) {
       const u = this.el.content.firstChild;
       u.replaceWith(...u.childNodes);
     }
@@ -332,7 +332,7 @@ class R {
         if (Ae.test(s.tagName)) {
           const u = s.textContent.split(f), m = u.length - 1;
           if (m > 0) {
-            s.textContent = k ? k.emptyScript : "";
+            s.textContent = H ? H.emptyScript : "";
             for (let _ = 0; _ < m; _++) s.append(u[_], z()), $.nextNode(), a.push({ type: 2, index: ++n });
             s.append(u[m], z());
           }
@@ -375,7 +375,7 @@ class Fe {
     for (; a !== void 0; ) {
       if (o === a.index) {
         let d;
-        a.type === 2 ? d = new U(n, n.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (d = new je(n, this, e)), this._$AV.push(d), a = i[++l];
+        a.type === 2 ? d = new R(n, n.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (d = new je(n, this, e)), this._$AV.push(d), a = i[++l];
       }
       o !== (a == null ? void 0 : a.index) && (n = $.nextNode(), o++);
     }
@@ -386,7 +386,7 @@ class Fe {
     for (const i of this._$AV) i !== void 0 && (i.strings !== void 0 ? (i._$AI(e, i, t), t += i.strings.length - 2) : i._$AI(e[t])), t++;
   }
 }
-class U {
+class R {
   get _$AU() {
     var e, t;
     return (t = (e = this._$AM) == null ? void 0 : e._$AU) != null ? t : this._$Cv;
@@ -420,7 +420,7 @@ class U {
   }
   $(e) {
     var n;
-    const { values: t, _$litType$: i } = e, s = typeof i == "number" ? this._$AC(e) : (i.el === void 0 && (i.el = R.createElement(xe(i.h, i.h[0]), this.options)), i);
+    const { values: t, _$litType$: i } = e, s = typeof i == "number" ? this._$AC(e) : (i.el === void 0 && (i.el = U.createElement(xe(i.h, i.h[0]), this.options)), i);
     if (((n = this._$AH) == null ? void 0 : n._$AD) === s) this._$AH.p(t);
     else {
       const o = new Fe(s, this), l = o.u(this.options);
@@ -429,13 +429,13 @@ class U {
   }
   _$AC(e) {
     let t = he.get(e.strings);
-    return t === void 0 && he.set(e.strings, t = new R(e)), t;
+    return t === void 0 && he.set(e.strings, t = new U(e)), t;
   }
   k(e) {
     K(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, s = 0;
-    for (const n of e) s === t.length ? t.push(i = new U(this.O(z()), this.O(z()), this, this.options)) : i = t[s], i._$AI(n), s++;
+    for (const n of e) s === t.length ? t.push(i = new R(this.O(z()), this.O(z()), this, this.options)) : i = t[s], i._$AI(n), s++;
     s < t.length && (this._$AR(i && i._$AB.nextSibling, s), t.length = s);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -519,14 +519,14 @@ class je {
 }
 const I = M.litHtmlPolyfillSupport;
 var fe;
-I == null || I(R, U), ((fe = M.litHtmlVersions) != null ? fe : M.litHtmlVersions = []).push("3.3.3");
+I == null || I(U, R), ((fe = M.litHtmlVersions) != null ? fe : M.litHtmlVersions = []).push("3.3.3");
 const We = (r, e, t) => {
   var n, o;
   const i = (n = t == null ? void 0 : t.renderBefore) != null ? n : e;
   let s = i._$litPart$;
   if (s === void 0) {
     const l = (o = t == null ? void 0 : t.renderBefore) != null ? o : null;
-    i._$litPart$ = s = new U(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = s = new R(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
   }
   return s._$AI(r), s;
 };
@@ -1162,7 +1162,11 @@ class W extends P {
                   <div class="uv-group">
                     ${v ? this._renderIndicators(_) : h}
                     ${X ? p`<div class="humidity-line">
-                          Humidité ${Math.round(d)}%
+                          <ha-icon
+                            class="humidity-icon"
+                            icon=${"mdi:water-percent"}
+                          ></ha-icon>
+                          <span>${Math.round(d)}%</span>
                         </div>` : h}
                   </div>
                 ` : h}
@@ -1464,17 +1468,26 @@ q(W, "properties", {
       white-space: nowrap;
     }
     /* Regroupe la tuile UV et l'humidité juste en dessous — l'humidité
-       reste du texte simple, sans fond ni bordure (pas un badge). */
+       reste sans fond ni bordure (pas un badge) : juste une icône goutte
+       et la valeur, en aussi grand que la place sous la tuile UV le
+       permet. */
     .uv-group {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
     .humidity-line {
-      font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
-      font-weight: 600;
-      color: var(--_secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: clamp(1.35rem, 2.7cqw, 1.8rem);
+      font-weight: 800;
       white-space: nowrap;
+    }
+    .humidity-icon {
+      --mdc-icon-size: clamp(24px, 3.6cqw, 32px);
+      color: var(--echo-weather-humidity-color, #4fc3f7);
+      flex-shrink: 0;
     }
     .current-meta {
       color: var(--_secondary-color);

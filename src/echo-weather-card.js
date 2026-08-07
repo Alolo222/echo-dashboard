@@ -181,7 +181,11 @@ class EchoWeatherCard extends LitElement {
                     ${showUv ? this._renderIndicators(uvObj) : nothing}
                     ${showHumidityLine
                       ? html`<div class="humidity-line">
-                          Humidité ${Math.round(humidity)}%
+                          <ha-icon
+                            class="humidity-icon"
+                            icon=${"mdi:water-percent"}
+                          ></ha-icon>
+                          <span>${Math.round(humidity)}%</span>
                         </div>`
                       : nothing}
                   </div>
@@ -531,17 +535,26 @@ class EchoWeatherCard extends LitElement {
       white-space: nowrap;
     }
     /* Regroupe la tuile UV et l'humidité juste en dessous — l'humidité
-       reste du texte simple, sans fond ni bordure (pas un badge). */
+       reste sans fond ni bordure (pas un badge) : juste une icône goutte
+       et la valeur, en aussi grand que la place sous la tuile UV le
+       permet. */
     .uv-group {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
     .humidity-line {
-      font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
-      font-weight: 600;
-      color: var(--_secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: clamp(1.35rem, 2.7cqw, 1.8rem);
+      font-weight: 800;
       white-space: nowrap;
+    }
+    .humidity-icon {
+      --mdc-icon-size: clamp(24px, 3.6cqw, 32px);
+      color: var(--echo-weather-humidity-color, #4fc3f7);
+      flex-shrink: 0;
     }
     .current-meta {
       color: var(--_secondary-color);
