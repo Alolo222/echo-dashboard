@@ -33,6 +33,8 @@ export const DEFAULT_CONFIG = {
   show_wind: true,
   show_sun: true,
   sun_entity: null,
+  show_moon: true,
+  moon_entity: null,
   uv_entity: null,
   air_quality_entity: null,
   title: null,

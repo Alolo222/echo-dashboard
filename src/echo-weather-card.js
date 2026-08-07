@@ -11,6 +11,7 @@ import {
 } from "./format.js";
 import { subscribeForecasts } from "./forecast.js";
 import { saintOfDay } from "./saints.js";
+import { moonPhase } from "./moon.js";
 
 class EchoWeatherCard extends LitElement {
   static properties = {
@@ -169,32 +170,45 @@ class EchoWeatherCard extends LitElement {
     const now = new Date();
     const saint = this._config.show_date ? saintOfDay(now) : null;
 
+    const moonObj =
+      this._config.show_moon &&
+      this._hass.states[this._config.moon_entity || "sensor.moon_phase"];
+    const phase =
+      moonObj && !["unknown", "unavailable"].includes(moonObj.state)
+        ? moonPhase(moonObj.state)
+        : null;
+    const moonLineParts = [];
+    if (phase) moonLineParts.push(phase.label);
+    if (saint) moonLineParts.push(saint);
+
     return html`
       <div class="current">
         <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
-          <div class="current-top-row">
+          <div class="current-main">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
-            ${showUv || showHumidityLine
-              ? html`
-                  <div class="uv-group">
-                    ${showUv ? this._renderIndicators(uvObj) : nothing}
-                    ${showHumidityLine
-                      ? html`<div class="humidity-line">
-                          <ha-icon
-                            class="humidity-icon"
-                            icon=${"mdi:water-percent"}
-                          ></ha-icon>
-                          <span>${Math.round(humidity)}%</span>
-                        </div>`
-                      : nothing}
-                  </div>
-                `
+            <div class="current-condition">${conditionLabel}</div>
+            ${metaParts.length
+              ? html`<div class="current-meta">
+                  ${metaParts.join(" · ")}
+                </div>`
               : nothing}
           </div>
-          <div class="current-condition">${conditionLabel}</div>
-          ${metaParts.length
-            ? html`<div class="current-meta">${metaParts.join(" · ")}</div>`
+          ${showUv || showHumidityLine
+            ? html`
+                <div class="uv-group">
+                  ${showUv ? this._renderIndicators(uvObj) : nothing}
+                  ${showHumidityLine
+                    ? html`<div class="humidity-line">
+                        <ha-icon
+                          class="humidity-icon"
+                          icon=${"mdi:water-percent"}
+                        ></ha-icon>
+                        <span>${Math.round(humidity)}%</span>
+                      </div>`
+                    : nothing}
+                </div>
+              `
             : nothing}
         </div>
         ${showSide
@@ -208,7 +222,18 @@ class EchoWeatherCard extends LitElement {
                     : nothing}
                   ${this._config.show_date
                     ? html`<div class="date-line">
-                        ${formatDate(now, locale)}${saint ? ` · ${saint}` : ""}
+                        ${formatDate(now, locale)}
+                      </div>`
+                    : nothing}
+                  ${moonLineParts.length
+                    ? html`<div class="moon-line">
+                        ${phase
+                          ? html`<ha-icon
+                              class="moon-icon"
+                              icon=${phase.icon}
+                            ></ha-icon>`
+                          : nothing}
+                        <span>${moonLineParts.join(" · ")}</span>
                       </div>`
                     : nothing}
                 </div>
@@ -484,13 +509,11 @@ class EchoWeatherCard extends LitElement {
       line-height: 1;
       letter-spacing: -0.01em;
     }
-    /* Température + indice UV sur la même ligne, avec un espace généreux
-       entre les deux. */
-    .current-top-row {
+    .current-main {
       display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 28px;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1 1 auto;
     }
     .current-condition {
       color: var(--_secondary-color);
@@ -534,25 +557,29 @@ class EchoWeatherCard extends LitElement {
       color: var(--_secondary-color);
       white-space: nowrap;
     }
-    /* Regroupe la tuile UV et l'humidité juste en dessous — l'humidité
+    /* Colonne UV + humidité, à côté du bloc temp/condition/météo plutôt
+       qu'empilée dedans : elle s'étire (stretch) sur toute la hauteur du
+       bloc actuel, tuile UV en haut et humidité poussée en bas (proche de
+       la bordure séparant du bloc horaire) via justify-content. L'humidité
        reste sans fond ni bordure (pas un badge) : juste une icône goutte
-       et la valeur, en aussi grand que la place sous la tuile UV le
-       permet. */
+       et la valeur, aussi grande que l'espace disponible le permet. */
     .uv-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-shrink: 0;
     }
     .humidity-line {
       display: flex;
       align-items: center;
-      gap: 7px;
-      font-size: clamp(1.35rem, 2.7cqw, 1.8rem);
+      gap: 8px;
+      font-size: clamp(1.6rem, 3.4cqw, 2.3rem);
       font-weight: 800;
       white-space: nowrap;
     }
     .humidity-icon {
-      --mdc-icon-size: clamp(24px, 3.6cqw, 32px);
+      --mdc-icon-size: clamp(28px, 4.2cqw, 38px);
       color: var(--echo-weather-humidity-color, #4fc3f7);
       flex-shrink: 0;
     }
@@ -562,13 +589,16 @@ class EchoWeatherCard extends LitElement {
       margin-top: 2px;
     }
     .current-info {
+      display: flex;
+      align-items: stretch;
+      gap: 28px;
       flex: 1 1 auto;
       min-width: 0;
     }
 
-    /* --- Colonne de droite : horloge + date, seules désormais (l'humidité
-       a rejoint les autres indicateurs près de la température — elle
-       encombrait cette zone sans rapport avec l'heure). --- */
+    /* --- Colonne de droite : horloge + date + phase de lune/saint, aussi
+       grandes que possible dans l'espace laissé libre à côté de la météo
+       actuelle. --- */
     .current-side {
       display: flex;
       flex-direction: column;
@@ -576,8 +606,9 @@ class EchoWeatherCard extends LitElement {
       flex-shrink: 0;
       margin-left: auto;
     }
-    /* Horloge + date collées ensemble (petit gap) plutôt qu'espacées comme
-       le reste de la colonne — elles se lisent comme une seule unité. */
+    /* Horloge + date + lune/saint collées ensemble (petit gap) plutôt
+       qu'espacées comme le reste de la colonne — elles se lisent comme
+       une seule unité. */
     .clock-group {
       display: flex;
       flex-direction: column;
@@ -585,16 +616,32 @@ class EchoWeatherCard extends LitElement {
       gap: 2px;
     }
     .clock {
-      font-size: clamp(1.6rem, 3.4cqw, 2.15rem);
+      font-size: clamp(2.1rem, 4.4cqw, 2.9rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
     .date-line {
       color: var(--_secondary-color);
-      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-size: clamp(1.1rem, 2.2cqw, 1.5rem);
+      font-weight: 600;
+      text-align: right;
+      margin-top: 2px;
+    }
+    .moon-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--_secondary-color);
+      font-size: clamp(0.78rem, 1.3cqw, 0.95rem);
       font-weight: 500;
       text-align: right;
+      margin-top: 2px;
+    }
+    .moon-icon {
+      --mdc-icon-size: clamp(15px, 2.1cqw, 18px);
+      color: var(--echo-weather-moon-color, #b0bec5);
+      flex-shrink: 0;
     }
 
     /* --- Prévisions horaires : contenu principal --- */
