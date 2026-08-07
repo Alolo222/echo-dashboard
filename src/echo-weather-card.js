@@ -179,17 +179,23 @@ class EchoWeatherCard extends LitElement {
         ${showSide
           ? html`
               <div class="current-side">
-                ${this._config.show_clock
-                  ? html`<div class="clock">
-                      ${formatTime(now, locale, timeFormat)}
-                    </div>`
-                  : nothing}
-                ${this._config.show_date
-                  ? html`<div class="date-line">
-                      ${formatDate(now, locale)}${saint
-                        ? ` · ${saint}`
-                        : ""}
-                    </div>`
+                ${this._config.show_clock || this._config.show_date
+                  ? html`
+                      <div class="clock-group">
+                        ${this._config.show_clock
+                          ? html`<div class="clock">
+                              ${formatTime(now, locale, timeFormat)}
+                            </div>`
+                          : nothing}
+                        ${this._config.show_date
+                          ? html`<div class="date-line">
+                              ${formatDate(now, locale)}${saint
+                                ? ` · ${saint}`
+                                : ""}
+                            </div>`
+                          : nothing}
+                      </div>
+                    `
                   : nothing}
                 ${this._config.show_humidity && humidity != null
                   ? html`
@@ -416,8 +422,15 @@ class EchoWeatherCard extends LitElement {
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
-      --_row-gap: var(--echo-weather-row-gap, 6px);
+      --_row-gap: var(--echo-weather-row-gap, 5px);
       --_icon-size: var(--echo-weather-icon-size, clamp(64px, 8.5cqw, 84px));
+      /* Icône météo actuelle : dimensionnée séparément des icônes horaire/
+         quotidien (dérivées de --_icon-size, cf. plus bas) — la ligne
+         actuelle a de la marge verticale que les prévisions n'ont pas. */
+      --_current-icon-size: var(
+        --echo-weather-current-icon-size,
+        clamp(88px, 13cqw, 132px)
+      );
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
         clamp(2.75rem, 7cqw, 4.25rem)
@@ -483,8 +496,8 @@ class EchoWeatherCard extends LitElement {
       border-bottom: 1px solid var(--_divider-color);
     }
     .current-icon {
-      width: var(--_icon-size);
-      height: var(--_icon-size);
+      width: var(--_current-icon-size);
+      height: var(--_current-icon-size);
       flex-shrink: 0;
     }
     .current-temp {
@@ -572,10 +585,19 @@ class EchoWeatherCard extends LitElement {
       flex-shrink: 0;
       margin-left: auto;
     }
+    /* Horloge + date collées ensemble (petit gap) plutôt qu'espacées comme
+       le reste de la colonne — elles se lisent comme une seule unité. */
+    .clock-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
     .clock {
-      font-size: clamp(1.4rem, 3cqw, 1.9rem);
+      font-size: clamp(1.6rem, 3.4cqw, 2.15rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
+      line-height: 1;
     }
     .date-line {
       color: var(--_secondary-color);
@@ -615,7 +637,7 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
       min-width: 0;
     }
@@ -653,7 +675,7 @@ class EchoWeatherCard extends LitElement {
       gap: 2px;
       flex: 1;
       min-width: 0;
-      padding: 5px 4px;
+      padding: 4px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
     }
@@ -696,7 +718,7 @@ class EchoWeatherCard extends LitElement {
       gap: 7px;
       flex: 1;
       min-width: 0;
-      padding: 6px 10px;
+      padding: 5px 10px;
       border-radius: 12px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
