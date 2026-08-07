@@ -158,6 +158,7 @@ class EchoWeatherCard extends LitElement {
     const humidity = stateObj.attributes.humidity;
     if (this._config.show_humidity && humidity != null) {
       tiles.push({
+        type: "humidity",
         icon: "mdi:water-percent",
         label: "Humidité",
         value: `${Math.round(humidity)}%`,
@@ -168,6 +169,7 @@ class EchoWeatherCard extends LitElement {
       this._config.uv_entity && this._hass.states[this._config.uv_entity];
     if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
       tiles.push({
+        type: "uv",
         icon: "mdi:weather-sunny-alert",
         label: "UV",
         value: uvObj.state,
@@ -179,6 +181,7 @@ class EchoWeatherCard extends LitElement {
       this._hass.states[this._config.air_quality_entity];
     if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
       tiles.push({
+        type: "air",
         icon: "mdi:air-filter",
         label: "Air",
         value: aqiObj.state,
@@ -191,7 +194,7 @@ class EchoWeatherCard extends LitElement {
       <div class="env-strip">
         ${tiles.map(
           (tile) => html`
-            <div class="env-tile">
+            <div class="env-tile env-${tile.type}">
               <ha-icon class="env-icon" icon=${tile.icon}></ha-icon>
               <div class="env-copy">
                 <span class="env-label">${tile.label}</span>
@@ -306,7 +309,7 @@ class EchoWeatherCard extends LitElement {
         var(--secondary-text-color, #b0b0b0)
       );
       --_divider-color: var(--echo-weather-divider-color, rgba(127, 127, 127, 0.2));
-      --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.09));
+      --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.13));
       font-family: var(--echo-weather-font-family, inherit);
       color: var(--_text-color);
     }
@@ -374,42 +377,53 @@ class EchoWeatherCard extends LitElement {
     .env-strip {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       flex-shrink: 0;
       margin-left: auto;
     }
     .env-tile {
-      display: grid;
-      grid-template-columns: auto 1fr;
+      display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 116px;
-      padding: 6px 10px;
-      border-radius: 12px;
+      min-width: 132px;
+      padding: 7px 12px;
+      border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
     }
+    /* Une couleur d'accent par indicateur : rompt le tout-gris et rend
+       chaque puce identifiable d'un coup d'œil, sans logique de seuil
+       (bon/mauvais) qui serait too much pour la v1. Tuiles en une seule
+       ligne (icône + libellé + valeur) pour rester compactes en hauteur
+       tout en agrandissant la police. */
     .env-icon {
-      --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
-      color: var(--_secondary-color);
+      --mdc-icon-size: clamp(18px, 2.6cqw, 22px);
+      flex-shrink: 0;
+    }
+    .env-humidity .env-icon {
+      color: var(--echo-weather-humidity-color, #4fc3f7);
+    }
+    .env-uv .env-icon {
+      color: var(--echo-weather-uv-color, #ffb74d);
+    }
+    .env-air .env-icon {
+      color: var(--echo-weather-air-color, #81c784);
     }
     .env-copy {
       display: flex;
-      flex-direction: column;
-      line-height: 1.15;
+      align-items: baseline;
+      gap: 6px;
       min-width: 0;
     }
     .env-label {
-      font-size: clamp(0.68rem, 1.1cqw, 0.78rem);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .env-value {
-      font-size: clamp(0.95rem, 1.6cqw, 1.1rem);
+      font-size: clamp(1.1rem, 2.1cqw, 1.35rem);
       font-weight: 800;
       white-space: nowrap;
     }

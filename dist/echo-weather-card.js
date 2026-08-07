@@ -48,7 +48,7 @@ const xt = (r) => new ft(typeof r == "string" ? r : r + "", void 0, G), Et = (r,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Ct, defineProperty: zt, getOwnPropertyDescriptor: Ot, getOwnPropertyNames: Pt, getOwnPropertySymbols: Ut, getPrototypeOf: Tt } = Object, y = globalThis, Q = y.trustedTypes, kt = Q ? Q.emptyScript : "", D = y.reactiveElementPolyfillSupport, S = (r, t) => r, V = { toAttribute(r, t) {
+const { is: Ct, defineProperty: zt, getOwnPropertyDescriptor: Ot, getOwnPropertyNames: Pt, getOwnPropertySymbols: Ut, getPrototypeOf: Tt } = Object, y = globalThis, Q = y.trustedTypes, kt = Q ? Q.emptyScript : "", q = y.reactiveElementPolyfillSupport, S = (r, t) => r, V = { toAttribute(r, t) {
   switch (t) {
     case Boolean:
       r = r ? kt : null;
@@ -288,14 +288,14 @@ let w = class extends HTMLElement {
   }
 };
 var dt;
-w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[S("elementProperties")] = /* @__PURE__ */ new Map(), w[S("finalized")] = /* @__PURE__ */ new Map(), D == null || D({ ReactiveElement: w }), ((dt = y.reactiveElementVersions) != null ? dt : y.reactiveElementVersions = []).push("2.1.2");
+w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[S("elementProperties")] = /* @__PURE__ */ new Map(), w[S("finalized")] = /* @__PURE__ */ new Map(), q == null || q({ ReactiveElement: w }), ((dt = y.reactiveElementVersions) != null ? dt : y.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const C = globalThis, tt = (r) => r, H = C.trustedTypes, et = H ? H.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, yt = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, $t = "?" + m, Rt = `<${$t}>`, b = document, O = () => b.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ht = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", q = `[ 	
-\f\r]`, E = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, it = /-->/g, st = />/g, $ = RegExp(`>|${q}(?:([^\\s"'>=/]+)(${q}*=${q}*(?:[^ 	
+const C = globalThis, tt = (r) => r, H = C.trustedTypes, et = H ? H.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, yt = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, $t = "?" + m, Rt = `<${$t}>`, b = document, O = () => b.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ht = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", D = `[ 	
+\f\r]`, E = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, it = /-->/g, st = />/g, $ = RegExp(`>|${D}(?:([^\\s"'>=/]+)(${D}*=${D}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), rt = /'/g, nt = /"/g, gt = /^(?:script|style|textarea|title)$/i, Mt = (r) => (t, ...e) => ({ _$litType$: r, strings: t, values: e }), p = Mt(1), A = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), ot = /* @__PURE__ */ new WeakMap(), g = b.createTreeWalker(b, 129);
 function vt(r, t) {
   if (!J(r) || !r.hasOwnProperty("raw")) throw Error("invalid template strings array");
@@ -327,7 +327,7 @@ class U {
       if (s.nodeType === 1) {
         if (s.hasAttributes()) for (const u of s.getAttributeNames()) if (u.endsWith(yt)) {
           const _ = h[o++], f = s.getAttribute(u).split(m), k = /([.?@])?(.*)/.exec(_);
-          a.push({ type: 1, index: n, name: k[2], strings: f, ctor: k[1] === "." ? qt : k[1] === "?" ? Lt : k[1] === "@" ? jt : M }), s.removeAttribute(u);
+          a.push({ type: 1, index: n, name: k[2], strings: f, ctor: k[1] === "." ? Dt : k[1] === "?" ? Lt : k[1] === "@" ? jt : M }), s.removeAttribute(u);
         } else u.startsWith(m) && (a.push({ type: 6, index: n }), s.removeAttribute(u));
         if (gt.test(s.tagName)) {
           const u = s.textContent.split(m), _ = u.length - 1;
@@ -357,7 +357,7 @@ function x(r, t, e = r, i) {
   const n = P(t) ? void 0 : t._$litDirective$;
   return (s == null ? void 0 : s.constructor) !== n && ((l = s == null ? void 0 : s._$AO) == null || l.call(s, !1), n === void 0 ? s = void 0 : (s = new n(r), s._$AT(r, e, i)), i !== void 0 ? ((a = e._$Co) != null ? a : e._$Co = [])[i] = s : e._$Cl = s), s !== void 0 && (t = x(r, s._$AS(r, t.values), s, i)), t;
 }
-class Dt {
+class qt {
   constructor(t, e) {
     this._$AV = [], this._$AN = void 0, this._$AD = t, this._$AM = e;
   }
@@ -423,7 +423,7 @@ class T {
     const { values: e, _$litType$: i } = t, s = typeof i == "number" ? this._$AC(t) : (i.el === void 0 && (i.el = U.createElement(vt(i.h, i.h[0]), this.options)), i);
     if (((n = this._$AH) == null ? void 0 : n._$AD) === s) this._$AH.p(e);
     else {
-      const o = new Dt(s, this), l = o.u(this.options);
+      const o = new qt(s, this), l = o.u(this.options);
       o.p(e), this.T(l), this._$AH = o;
     }
   }
@@ -475,7 +475,7 @@ class M {
     t === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, t != null ? t : "");
   }
 }
-class qt extends M {
+class Dt extends M {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -773,18 +773,21 @@ class W extends z {
   _renderEnvStrip(t) {
     const e = [], i = t.attributes.humidity;
     this._config.show_humidity && i != null && e.push({
+      type: "humidity",
       icon: "mdi:water-percent",
       label: "Humidité",
       value: `${Math.round(i)}%`
     });
     const s = this._config.uv_entity && this._hass.states[this._config.uv_entity];
     s && !["unknown", "unavailable"].includes(s.state) && e.push({
+      type: "uv",
       icon: "mdi:weather-sunny-alert",
       label: "UV",
       value: s.state
     });
     const n = this._config.air_quality_entity && this._hass.states[this._config.air_quality_entity];
     return n && !["unknown", "unavailable"].includes(n.state) && e.push({
+      type: "air",
       icon: "mdi:air-filter",
       label: "Air",
       value: n.state
@@ -792,7 +795,7 @@ class W extends z {
       <div class="env-strip">
         ${e.map(
       (o) => p`
-            <div class="env-tile">
+            <div class="env-tile env-${o.type}">
               <ha-icon class="env-icon" icon=${o.icon}></ha-icon>
               <div class="env-copy">
                 <span class="env-label">${o.label}</span>
@@ -890,7 +893,7 @@ N(W, "properties", {
         var(--secondary-text-color, #b0b0b0)
       );
       --_divider-color: var(--echo-weather-divider-color, rgba(127, 127, 127, 0.2));
-      --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.09));
+      --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.13));
       font-family: var(--echo-weather-font-family, inherit);
       color: var(--_text-color);
     }
@@ -958,42 +961,53 @@ N(W, "properties", {
     .env-strip {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       flex-shrink: 0;
       margin-left: auto;
     }
     .env-tile {
-      display: grid;
-      grid-template-columns: auto 1fr;
+      display: flex;
       align-items: center;
       gap: 8px;
-      min-width: 116px;
-      padding: 6px 10px;
-      border-radius: 12px;
+      min-width: 132px;
+      padding: 7px 12px;
+      border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
     }
+    /* Une couleur d'accent par indicateur : rompt le tout-gris et rend
+       chaque puce identifiable d'un coup d'œil, sans logique de seuil
+       (bon/mauvais) qui serait too much pour la v1. Tuiles en une seule
+       ligne (icône + libellé + valeur) pour rester compactes en hauteur
+       tout en agrandissant la police. */
     .env-icon {
-      --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
-      color: var(--_secondary-color);
+      --mdc-icon-size: clamp(18px, 2.6cqw, 22px);
+      flex-shrink: 0;
+    }
+    .env-humidity .env-icon {
+      color: var(--echo-weather-humidity-color, #4fc3f7);
+    }
+    .env-uv .env-icon {
+      color: var(--echo-weather-uv-color, #ffb74d);
+    }
+    .env-air .env-icon {
+      color: var(--echo-weather-air-color, #81c784);
     }
     .env-copy {
       display: flex;
-      flex-direction: column;
-      line-height: 1.15;
+      align-items: baseline;
+      gap: 6px;
       min-width: 0;
     }
     .env-label {
-      font-size: clamp(0.68rem, 1.1cqw, 0.78rem);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .env-value {
-      font-size: clamp(0.95rem, 1.6cqw, 1.1rem);
+      font-size: clamp(1.1rem, 2.1cqw, 1.35rem);
       font-weight: 800;
       white-space: nowrap;
     }
