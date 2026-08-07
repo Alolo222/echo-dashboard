@@ -576,7 +576,13 @@ class EchoWeatherCard extends LitElement {
     /* --- Météo actuelle : ~1/3 supérieur --- */
     .current {
       display: flex;
-      align-items: center;
+      /* flex-start plutôt que center : .current grandit via flex-grow
+         pour occuper l'espace vertical disponible, et un centrage aurait
+         réparti cet espace en trop au-dessus ET en dessous de l'icône —
+         créant un bandeau vide visible en haut de la carte. Ancré en
+         haut, l'espace en trop finit en bas (près de la bordure), sans
+         rien au-dessus. */
+      align-items: flex-start;
       gap: var(--_gap);
       flex: 1 1 33%;
       padding-bottom: var(--_row-gap);
