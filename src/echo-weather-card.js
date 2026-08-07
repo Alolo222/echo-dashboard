@@ -154,12 +154,15 @@ class EchoWeatherCard extends LitElement {
     if (this._config.show_feels_like && feelsLike != null) {
       metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
     }
-    if (this._config.show_humidity && humidity != null) {
-      metaParts.push(`Humidité ${Math.round(humidity)}%`);
-    }
     if (this._config.show_last_updated && lastUpdated) {
       metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
     }
+
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    const showUv =
+      uvObj && !["unknown", "unavailable"].includes(uvObj.state);
+    const showHumidityLine = this._config.show_humidity && humidity != null;
 
     const showSide = this._config.show_clock || this._config.show_date;
 
@@ -172,7 +175,18 @@ class EchoWeatherCard extends LitElement {
         <div class="current-info">
           <div class="current-top-row">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
-            ${this._renderIndicators()}
+            ${showUv || showHumidityLine
+              ? html`
+                  <div class="uv-group">
+                    ${showUv ? this._renderIndicators(uvObj) : nothing}
+                    ${showHumidityLine
+                      ? html`<div class="humidity-line">
+                          Humidité ${Math.round(humidity)}%
+                        </div>`
+                      : nothing}
+                  </div>
+                `
+              : nothing}
           </div>
           <div class="current-condition">${conditionLabel}</div>
           ${metaParts.length
@@ -208,14 +222,9 @@ class EchoWeatherCard extends LitElement {
   // l'air (mise de côté pour le moment : son échelle dépend entièrement
   // de l'entité choisie par l'utilisateur, pas de seuils génériques
   // fiables sans plus d'info — cf. air_quality_entity, toujours en
-  // config mais non affiché ici pour l'instant).
-  _renderIndicators() {
-    const uvObj =
-      this._config.uv_entity && this._hass.states[this._config.uv_entity];
-    if (!uvObj || ["unknown", "unavailable"].includes(uvObj.state)) {
-      return nothing;
-    }
-
+  // config mais non affiché ici pour l'instant). L'appelant a déjà
+  // vérifié que uvObj est utilisable (évite de refaire le lookup ici).
+  _renderIndicators(uvObj) {
     const category = uvCategory(uvObj.state);
     return html`
       <div class="indicator-box indicator-uv">
@@ -517,6 +526,19 @@ class EchoWeatherCard extends LitElement {
     }
     .indicator-category {
       font-size: clamp(0.8rem, 1.3cqw, 0.95rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
+      white-space: nowrap;
+    }
+    /* Regroupe la tuile UV et l'humidité juste en dessous — l'humidité
+       reste du texte simple, sans fond ni bordure (pas un badge). */
+    .uv-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .humidity-line {
+      font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
