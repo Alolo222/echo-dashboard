@@ -25,14 +25,14 @@ let we = class {
     return this.cssText;
   }
 };
-const Ue = (s) => new we(typeof s == "string" ? s : s + "", void 0, Q), Re = (s, ...e) => {
+const Ue = (s) => new we(typeof s == "string" ? s : s + "", void 0, Q), qe = (s, ...e) => {
   const t = s.length === 1 ? s[0] : e.reduce((i, n, r) => i + ((o) => {
     if (o._$cssResult$ === !0) return o.cssText;
     if (typeof o == "number") return o;
     throw Error("Value passed to 'css' function must be a 'css' function result: " + o + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
   })(n) + s[r + 1], s[0]);
   return new we(t, s, Q);
-}, qe = (s, e) => {
+}, Re = (s, e) => {
   if (X) s.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
     const i = document.createElement("style"), n = H.litNonce;
@@ -167,7 +167,7 @@ let A = class extends HTMLElement {
   createRenderRoot() {
     var t;
     const e = (t = this.shadowRoot) != null ? t : this.attachShadow(this.constructor.shadowRootOptions);
-    return qe(e, this.constructor.elementStyles), e;
+    return Re(e, this.constructor.elementStyles), e;
   }
   connectedCallback() {
     var e, t;
@@ -375,7 +375,7 @@ class je {
     for (; a !== void 0; ) {
       if (o === a.index) {
         let d;
-        a.type === 2 ? d = new R(r, r.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(r, a.name, a.strings, this, e) : a.type === 6 && (d = new Ze(r, this, e)), this._$AV.push(d), a = i[++l];
+        a.type === 2 ? d = new q(r, r.nextSibling, this, e) : a.type === 1 ? d = new a.ctor(r, a.name, a.strings, this, e) : a.type === 6 && (d = new Ze(r, this, e)), this._$AV.push(d), a = i[++l];
       }
       o !== (a == null ? void 0 : a.index) && (r = b.nextNode(), o++);
     }
@@ -386,7 +386,7 @@ class je {
     for (const i of this._$AV) i !== void 0 && (i.strings !== void 0 ? (i._$AI(e, i, t), t += i.strings.length - 2) : i._$AI(e[t])), t++;
   }
 }
-class R {
+class q {
   get _$AU() {
     var e, t;
     return (t = (e = this._$AM) == null ? void 0 : e._$AU) != null ? t : this._$Cv;
@@ -435,7 +435,7 @@ class R {
     ee(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, n = 0;
-    for (const r of e) n === t.length ? t.push(i = new R(this.O(z()), this.O(z()), this, this.options)) : i = t[n], i._$AI(r), n++;
+    for (const r of e) n === t.length ? t.push(i = new q(this.O(z()), this.O(z()), this, this.options)) : i = t[n], i._$AI(r), n++;
     n < t.length && (this._$AR(i && i._$AB.nextSibling, n), t.length = n);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -519,14 +519,14 @@ class Ze {
 }
 const G = M.litHtmlPolyfillSupport;
 var ye;
-G == null || G(U, R), ((ye = M.litHtmlVersions) != null ? ye : M.litHtmlVersions = []).push("3.3.3");
+G == null || G(U, q), ((ye = M.litHtmlVersions) != null ? ye : M.litHtmlVersions = []).push("3.3.3");
 const Ke = (s, e, t) => {
   var r, o;
   const i = (r = t == null ? void 0 : t.renderBefore) != null ? r : e;
   let n = i._$litPart$;
   if (n === void 0) {
     const l = (o = t == null ? void 0 : t.renderBefore) != null ? o : null;
-    i._$litPart$ = n = new R(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = n = new q(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
   }
   return n._$AI(s), n;
 };
@@ -1178,8 +1178,8 @@ class K extends P {
   _renderCurrent(e, t, i) {
     const n = V(e.state, this._isNight()), r = W(n, this._config.icons), o = Y(this._hass, e.state), l = e.attributes.temperature, a = e.attributes.temperature_unit || "°C", h = e.attributes.apparent_temperature, d = e.attributes.humidity, u = e.last_updated ? new Date(e.last_updated) : null, m = [];
     this._config.show_feels_like && h != null && m.push(`Ressenti ${Math.round(h)}°`), this._config.show_last_updated && u && m.push(`Maj à ${k(u, t, i)}`);
-    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], v = _ && !["unknown", "unavailable"].includes(_.state), te = this._config.show_humidity && d != null, Pe = this._config.show_clock || this._config.show_date, L = /* @__PURE__ */ new Date(), ie = this._config.show_date ? ht(L) : null, B = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], q = B && !["unknown", "unavailable"].includes(B.state) ? ut(B.state) : null, N = [];
-    return q && N.push(q.label), ie && N.push(ie), p`
+    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], v = _ && !["unknown", "unavailable"].includes(_.state), te = this._config.show_humidity && d != null, Pe = this._config.show_clock || this._config.show_date, L = /* @__PURE__ */ new Date(), ie = this._config.show_date ? ht(L) : null, B = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], R = B && !["unknown", "unavailable"].includes(B.state) ? ut(B.state) : null, N = [];
+    return R && N.push(R.label), ie && N.push(ie), p`
       <div class="current">
         <img class="current-icon" src=${r} alt=${o} />
         <div class="current-info">
@@ -1213,9 +1213,9 @@ class K extends P {
                         ${st(L, t)}
                       </div>` : c}
                   ${N.length ? p`<div class="moon-line">
-                        ${q ? p`<ha-icon
+                        ${R ? p`<ha-icon
                               class="moon-icon"
-                              icon=${q.icon}
+                              icon=${R.icon}
                             ></ha-icon>` : c}
                         <span>${N.join(" · ")}</span>
                       </div>` : c}
@@ -1355,7 +1355,7 @@ I(K, "properties", {
   _config: { state: !0 },
   _hourly: { state: !0 },
   _daily: { state: !0 }
-}), I(K, "styles", Re`
+}), I(K, "styles", qe`
     /* container-type permet des tailles fluides (clamp + cqw) qui suivent
        la taille réelle du composant plutôt que le viewport — utile dans un
        conteneur View Assist dont la taille n'est pas celle de l'écran. */
@@ -1457,7 +1457,11 @@ I(K, "properties", {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      flex: 1 1 auto;
+      /* Pas de flex-grow : ne prend que sa largeur naturelle (le texte
+         temp/condition/météo), sinon la boîte s'étire et pousse le
+         groupe UV/humidité loin à droite au lieu de rester juste à
+         côté de la température. */
+      flex: 0 1 auto;
     }
     .current-condition {
       color: var(--_secondary-color);

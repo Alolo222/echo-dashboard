@@ -513,7 +513,11 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       min-width: 0;
-      flex: 1 1 auto;
+      /* Pas de flex-grow : ne prend que sa largeur naturelle (le texte
+         temp/condition/météo), sinon la boîte s'étire et pousse le
+         groupe UV/humidité loin à droite au lieu de rester juste à
+         côté de la température. */
+      flex: 0 1 auto;
     }
     .current-condition {
       color: var(--_secondary-color);
