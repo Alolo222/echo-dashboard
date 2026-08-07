@@ -2,6 +2,7 @@ import { LitElement, html, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import {
+  formatDate,
   formatHour,
   formatTime,
   formatWeekday,
@@ -9,6 +10,7 @@ import {
   uvCategory,
 } from "./format.js";
 import { subscribeForecasts } from "./forecast.js";
+import { saintOfDay } from "./saints.js";
 
 class EchoWeatherCard extends LitElement {
   static properties = {
@@ -141,8 +143,8 @@ class EchoWeatherCard extends LitElement {
     const url = iconUrl(slug, this._config.icons);
     const conditionLabel = localizeCondition(this._hass, stateObj.state);
     const temp = stateObj.attributes.temperature;
+    const tempUnit = stateObj.attributes.temperature_unit || "°C";
     const feelsLike = stateObj.attributes.apparent_temperature;
-    const dewPoint = stateObj.attributes.dew_point;
     const humidity = stateObj.attributes.humidity;
 
     const lastUpdated = stateObj.last_updated
@@ -152,24 +154,24 @@ class EchoWeatherCard extends LitElement {
     if (this._config.show_feels_like && feelsLike != null) {
       metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
     }
-    if (this._config.show_dew_point && dewPoint != null) {
-      metaParts.push(`Point de rosée ${Math.round(dewPoint)}°`);
-    }
     if (this._config.show_last_updated && lastUpdated) {
       metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
     }
 
-    const showSide = this._config.show_clock || (this._config.show_humidity && humidity != null);
+    const showSide = this._config.show_clock || this._config.show_date || (this._config.show_humidity && humidity != null);
+
+    const now = new Date();
+    const saint = this._config.show_date ? saintOfDay(now) : null;
 
     return html`
       <div class="current">
         <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
-          <div class="current-temp">${Math.round(temp)}°</div>
-          <div class="current-condition-row">
-            <div class="current-condition">${conditionLabel}</div>
+          <div class="current-top-row">
+            <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
             ${this._renderIndicators()}
           </div>
+          <div class="current-condition">${conditionLabel}</div>
           ${metaParts.length
             ? html`<div class="current-meta">${metaParts.join(" · ")}</div>`
             : nothing}
@@ -179,7 +181,14 @@ class EchoWeatherCard extends LitElement {
               <div class="current-side">
                 ${this._config.show_clock
                   ? html`<div class="clock">
-                      ${formatTime(new Date(), locale, timeFormat)}
+                      ${formatTime(now, locale, timeFormat)}
+                    </div>`
+                  : nothing}
+                ${this._config.show_date
+                  ? html`<div class="date-line">
+                      ${formatDate(now, locale)}${saint
+                        ? ` · ${saint}`
+                        : ""}
                     </div>`
                   : nothing}
                 ${this._config.show_humidity && humidity != null
@@ -200,13 +209,14 @@ class EchoWeatherCard extends LitElement {
     `;
   }
 
-  // Indice UV + qualité de l'air, côte à côte sous la condition — deux
-  // tuiles explicitement étiquetées plutôt que des chiffres nus. L'UV a une
-  // échelle universelle (OMS) donc on peut afficher une catégorie
-  // qualitative (Faible/Modéré/...) ; la qualité de l'air dépend de
-  // l'entité choisie par l'utilisateur (AQI US, indice ATMO, concentration
-  // brute...) donc on se contente de bien la libeller avec son unité,
-  // sans inventer une catégorie sur une échelle qu'on ne connaît pas.
+  // Indice UV + qualité de l'air, côte à côte à droite de la température —
+  // deux tuiles explicitement étiquetées plutôt que des chiffres nus.
+  // L'UV a une échelle universelle (OMS) donc on peut afficher une
+  // catégorie qualitative (Faible/Modéré/...) ; la qualité de l'air
+  // dépend de l'entité choisie par l'utilisateur (AQI US, indice ATMO,
+  // concentration brute...) donc on se contente de bien la libeller avec
+  // son unité, sans inventer une catégorie sur une échelle qu'on ne
+  // connaît pas.
   _renderIndicators() {
     const boxes = [];
 
@@ -265,6 +275,17 @@ class EchoWeatherCard extends LitElement {
         icon: "mdi:weather-windy",
         label: "Vent",
         value: `${Math.round(windSpeed)} ${unit}`.trim(),
+      });
+    }
+
+    const dewPoint = stateObj.attributes.dew_point;
+    if (this._config.show_dew_point && dewPoint != null) {
+      const unit = stateObj.attributes.temperature_unit || "°C";
+      tiles.push({
+        type: "dew-point",
+        icon: "mdi:thermometer-water",
+        label: "Point de rosée",
+        value: `${Math.round(dewPoint)}${unit}`,
       });
     }
 
@@ -463,39 +484,40 @@ class EchoWeatherCard extends LitElement {
       line-height: 1;
       letter-spacing: -0.01em;
     }
-    /* Condition + indicateurs (UV/air) sur une même ligne : évite
-       d'ajouter une ligne complète sous la condition rien que pour ces
-       deux tuiles, il y a largement la largeur pour les caser à côté. */
-    .current-condition-row {
+    /* Température + indicateurs (UV/air) sur la même ligne, avec un
+       espace généreux entre les deux — assez pour que les tuiles
+       respirent et puissent être un peu plus grandes qu'un simple badge
+       inline collé au texte. */
+    .current-top-row {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 2px;
+      gap: 28px;
     }
     .current-condition {
       color: var(--_secondary-color);
       font-size: clamp(1rem, 1.8cqw, 1.25rem);
       font-weight: 500;
+      margin-top: 4px;
     }
     /* Indice UV / qualité de l'air : petites tuiles étiquetées (label +
        valeur + catégorie ou unité) plutôt que des badges inline nus —
        inspiré des tuiles AIR QUALITY/POLLEN de RadarWise. */
     .indicators-row {
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
     .indicator-box {
       display: flex;
       flex-direction: column;
-      gap: 1px;
-      padding: 3px 9px;
-      border-radius: 12px;
+      gap: 2px;
+      padding: 5px 12px;
+      border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
     }
     .indicator-label {
-      font-size: clamp(0.68rem, 1.1cqw, 0.78rem);
+      font-size: clamp(0.75rem, 1.2cqw, 0.85rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -503,10 +525,10 @@ class EchoWeatherCard extends LitElement {
     .indicator-row {
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 7px;
     }
     .indicator-value {
-      font-size: clamp(1rem, 1.8cqw, 1.2rem);
+      font-size: clamp(1.2rem, 2.2cqw, 1.45rem);
       font-weight: 800;
     }
     .indicator-uv .indicator-value {
@@ -516,7 +538,7 @@ class EchoWeatherCard extends LitElement {
       color: var(--echo-weather-air-color, #81c784);
     }
     .indicator-category {
-      font-size: clamp(0.72rem, 1.2cqw, 0.85rem);
+      font-size: clamp(0.8rem, 1.3cqw, 0.95rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -545,6 +567,12 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(1.4rem, 3cqw, 1.9rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
+    }
+    .date-line {
+      color: var(--_secondary-color);
+      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-weight: 500;
+      text-align: right;
     }
     .humidity-badge {
       display: flex;
@@ -670,6 +698,9 @@ class EchoWeatherCard extends LitElement {
     }
     .band-wind .band-icon {
       color: var(--echo-weather-wind-color, #90a4ae);
+    }
+    .band-dew-point .band-icon {
+      color: var(--echo-weather-dew-point-color, #4fc3f7);
     }
     .band-sunrise .band-icon {
       color: var(--echo-weather-sunrise-color, #ffb74d);

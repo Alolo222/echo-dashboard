@@ -24,6 +24,15 @@ export function formatWeekday(date, locale) {
   return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(date);
 }
 
+export function formatDate(date, locale) {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(date);
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
 /**
  * Traduit une condition météo HA (ex: "partlycloudy") via les traductions
  * du frontend Home Assistant, avec repli sur la valeur brute si absente.
