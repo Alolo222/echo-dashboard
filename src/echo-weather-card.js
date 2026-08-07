@@ -145,6 +145,7 @@ class EchoWeatherCard extends LitElement {
     const temp = stateObj.attributes.temperature;
     const tempUnit = stateObj.attributes.temperature_unit || "°C";
     const feelsLike = stateObj.attributes.apparent_temperature;
+    const humidity = stateObj.attributes.humidity;
 
     const lastUpdated = stateObj.last_updated
       ? new Date(stateObj.last_updated)
@@ -152,6 +153,9 @@ class EchoWeatherCard extends LitElement {
     const metaParts = [];
     if (this._config.show_feels_like && feelsLike != null) {
       metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
+    }
+    if (this._config.show_humidity && humidity != null) {
+      metaParts.push(`Humidité ${Math.round(humidity)}%`);
     }
     if (this._config.show_last_updated && lastUpdated) {
       metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
@@ -168,7 +172,7 @@ class EchoWeatherCard extends LitElement {
         <div class="current-info">
           <div class="current-top-row">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
-            ${this._renderIndicators(stateObj)}
+            ${this._renderIndicators()}
           </div>
           <div class="current-condition">${conditionLabel}</div>
           ${metaParts.length
@@ -197,75 +201,31 @@ class EchoWeatherCard extends LitElement {
     `;
   }
 
-  // Humidité + indice UV + qualité de l'air, côte à côte à droite de la
-  // température — des puces sur une seule ligne (icône [+ libellé] +
-  // valeur + catégorie/unité) plutôt que des tuiles à deux lignes.
-  // L'humidité se suffit d'une icône (goutte + "%" est déjà explicite),
-  // mais UV et qualité de l'air gardent un libellé texte à côté de
-  // l'icône : sans lui, un simple "3" ou "22" ne veut rien dire au
-  // premier coup d'œil, l'icône seule ne suffit pas à lever l'ambiguïté.
-  // L'UV a une échelle universelle (OMS) donc on peut afficher une
-  // catégorie qualitative (Faible/Modéré/...) ; la qualité de l'air
-  // dépend de l'entité choisie par l'utilisateur (AQI US, indice ATMO,
-  // concentration brute...) donc on se contente de son unité native,
-  // sans inventer une catégorie sur une échelle qu'on ne connaît pas.
-  // L'humidité vit ici plutôt que dans la colonne horloge/date : elle y
-  // encombrait cette zone sans rapport avec l'heure.
-  _renderIndicators(stateObj) {
-    const chips = [];
-
-    const humidity = stateObj.attributes.humidity;
-    if (this._config.show_humidity && humidity != null) {
-      chips.push({
-        type: "humidity",
-        icon: "mdi:water-percent",
-        value: `${Math.round(humidity)}%`,
-      });
-    }
-
+  // Indice UV, à droite de la température — tuile à deux lignes (libellé
+  // au-dessus, valeur + catégorie qualitative en dessous). L'UV a une
+  // échelle universelle (OMS) donc la catégorie (Faible/Modéré/Élevé/...)
+  // est fiable à afficher automatiquement, contrairement à la qualité de
+  // l'air (mise de côté pour le moment : son échelle dépend entièrement
+  // de l'entité choisie par l'utilisateur, pas de seuils génériques
+  // fiables sans plus d'info — cf. air_quality_entity, toujours en
+  // config mais non affiché ici pour l'instant).
+  _renderIndicators() {
     const uvObj =
       this._config.uv_entity && this._hass.states[this._config.uv_entity];
-    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
-      chips.push({
-        type: "uv",
-        icon: "mdi:weather-sunny-alert",
-        label: "UV",
-        value: uvObj.state,
-        tag: uvCategory(uvObj.state),
-      });
+    if (!uvObj || ["unknown", "unavailable"].includes(uvObj.state)) {
+      return nothing;
     }
 
-    const aqiObj =
-      this._config.air_quality_entity &&
-      this._hass.states[this._config.air_quality_entity];
-    if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
-      chips.push({
-        type: "air",
-        icon: "mdi:air-filter",
-        label: "Air",
-        value: aqiObj.state,
-        tag: aqiObj.attributes.unit_of_measurement || null,
-      });
-    }
-
-    if (!chips.length) return nothing;
-
+    const category = uvCategory(uvObj.state);
     return html`
-      <div class="indicators-row">
-        ${chips.map(
-          (chip) => html`
-            <div class="indicator-box indicator-${chip.type}">
-              <ha-icon class="indicator-icon" icon=${chip.icon}></ha-icon>
-              ${chip.label
-                ? html`<span class="indicator-label">${chip.label}</span>`
-                : nothing}
-              <span class="indicator-value">${chip.value}</span>
-              ${chip.tag
-                ? html`<span class="indicator-category">${chip.tag}</span>`
-                : nothing}
-            </div>
-          `
-        )}
+      <div class="indicator-box indicator-uv">
+        <div class="indicator-label">Indice UV</div>
+        <div class="indicator-row">
+          <span class="indicator-value">${uvObj.state}</span>
+          ${category
+            ? html`<span class="indicator-category">${category}</span>`
+            : nothing}
+        </div>
       </div>
     `;
   }
@@ -511,10 +471,8 @@ class EchoWeatherCard extends LitElement {
       line-height: 1;
       letter-spacing: -0.01em;
     }
-    /* Température + indicateurs (UV/air) sur la même ligne, avec un
-       espace généreux entre les deux — assez pour que les tuiles
-       respirent et puissent être un peu plus grandes qu'un simple badge
-       inline collé au texte. */
+    /* Température + indice UV sur la même ligne, avec un espace généreux
+       entre les deux. */
     .current-top-row {
       display: flex;
       align-items: center;
@@ -527,47 +485,35 @@ class EchoWeatherCard extends LitElement {
       font-weight: 500;
       margin-top: 4px;
     }
-    /* Humidité / UV / qualité de l'air : puces sur une seule ligne (icône +
-       valeur + catégorie ou unité) — plus compact qu'une tuile à deux
-       lignes, et cohérent avec le style du bandeau bas. */
-    .indicators-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    /* Indice UV : tuile à deux lignes (libellé au-dessus, valeur +
+       catégorie en dessous) — la version d'origine, jugée plus lisible
+       qu'une puce sur une seule ligne. */
     .indicator-box {
       display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 14px;
+      flex-direction: column;
+      gap: 2px;
+      padding: 4px 12px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-    }
-    .indicator-icon {
-      --mdc-icon-size: clamp(20px, 3cqw, 25px);
-      flex-shrink: 0;
-    }
-    .indicator-humidity .indicator-icon {
-      color: var(--echo-weather-humidity-color, #4fc3f7);
-    }
-    .indicator-uv .indicator-icon {
-      color: var(--echo-weather-uv-color, #ffb74d);
-    }
-    .indicator-air .indicator-icon {
-      color: var(--echo-weather-air-color, #81c784);
     }
     .indicator-label {
-      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-size: clamp(0.75rem, 1.2cqw, 0.85rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
+    .indicator-row {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }
     .indicator-value {
-      font-size: clamp(1.15rem, 2.1cqw, 1.4rem);
+      font-size: clamp(1.2rem, 2.2cqw, 1.45rem);
       font-weight: 800;
-      white-space: nowrap;
+    }
+    .indicator-uv .indicator-value {
+      color: var(--echo-weather-uv-color, #ffb74d);
     }
     .indicator-category {
       font-size: clamp(0.8rem, 1.3cqw, 0.95rem);
