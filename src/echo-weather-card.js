@@ -311,7 +311,10 @@ class EchoWeatherCard extends LitElement {
         type: "dew-point",
         icon: "mdi:thermometer-water",
         label: "Point de rosée",
-        value: `${Math.round(dewPoint)}${unit}`,
+        // Arrondi à la décimale près (contrairement au reste des tuiles,
+        // arrondies à l'entier) : la valeur bouge peu, la décimale aide à
+        // voir qu'elle évolue.
+        value: `${dewPoint.toFixed(1)}${unit}`,
       });
     }
 

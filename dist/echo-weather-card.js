@@ -1,6 +1,6 @@
 var ze = Object.defineProperty;
 var Te = (s, e, t) => e in s ? ze(s, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : s[e] = t;
-var I = (s, e, t) => Te(s, typeof e != "symbol" ? e + "" : e, t);
+var F = (s, e, t) => Te(s, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -48,7 +48,7 @@ const Ue = (s) => new $e(typeof s == "string" ? s : s + "", void 0, Q), Ne = (s,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Re, defineProperty: ke, getOwnPropertyDescriptor: He, getOwnPropertyNames: Oe, getOwnPropertySymbols: De, getPrototypeOf: Le } = Object, g = globalThis, re = g.trustedTypes, Be = re ? re.emptyScript : "", F = g.reactiveElementPolyfillSupport, C = (s, e) => s, Z = { toAttribute(s, e) {
+const { is: Re, defineProperty: ke, getOwnPropertyDescriptor: He, getOwnPropertyNames: Oe, getOwnPropertySymbols: De, getPrototypeOf: Le } = Object, g = globalThis, re = g.trustedTypes, Be = re ? re.emptyScript : "", I = g.reactiveElementPolyfillSupport, C = (s, e) => s, Z = { toAttribute(s, e) {
   switch (e) {
     case Boolean:
       s = s ? Be : null;
@@ -288,13 +288,13 @@ let A = class extends HTMLElement {
   }
 };
 var ye;
-A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProperties")] = /* @__PURE__ */ new Map(), A[C("finalized")] = /* @__PURE__ */ new Map(), F == null || F({ ReactiveElement: A }), ((ye = g.reactiveElementVersions) != null ? ye : g.reactiveElementVersions = []).push("2.1.2");
+A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProperties")] = /* @__PURE__ */ new Map(), A[C("finalized")] = /* @__PURE__ */ new Map(), I == null || I({ ReactiveElement: A }), ((ye = g.reactiveElementVersions) != null ? ye : g.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const M = globalThis, ae = (s) => s, O = M.trustedTypes, le = O ? O.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, xe = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, Ee = "?" + f, Ie = `<${Ee}>`, $ = document, z = () => $.createComment(""), T = (s) => s === null || typeof s != "object" && typeof s != "function", ee = Array.isArray, Fe = (s) => ee(s) || typeof (s == null ? void 0 : s[Symbol.iterator]) == "function", J = `[ 	
+const M = globalThis, ae = (s) => s, O = M.trustedTypes, le = O ? O.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, xe = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, Ee = "?" + f, Fe = `<${Ee}>`, $ = document, z = () => $.createComment(""), T = (s) => s === null || typeof s != "object" && typeof s != "function", ee = Array.isArray, Ie = (s) => ee(s) || typeof (s == null ? void 0 : s[Symbol.iterator]) == "function", J = `[ 	
 \f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ce = /-->/g, he = />/g, v = RegExp(`>|${J}(?:([^\\s"'>=/]+)(${J}*=${J}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), de = /'/g, ue = /"/g, Se = /^(?:script|style|textarea|title)$/i, Je = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), p = Je(1), x = Symbol.for("lit-noChange"), h = Symbol.for("lit-nothing"), pe = /* @__PURE__ */ new WeakMap(), b = $.createTreeWalker($, 129);
 function Ce(s, e) {
@@ -309,7 +309,7 @@ const Ge = (s, e) => {
     let c, d, u = -1, m = 0;
     for (; m < a.length && (o.lastIndex = m, d = o.exec(a), d !== null); ) m = o.lastIndex, o === S ? d[1] === "!--" ? o = ce : d[1] !== void 0 ? o = he : d[2] !== void 0 ? (Se.test(d[2]) && (n = RegExp("</" + d[2], "g")), o = v) : d[3] !== void 0 && (o = v) : o === v ? d[0] === ">" ? (o = n != null ? n : S, u = -1) : d[1] === void 0 ? u = -2 : (u = o.lastIndex - d[2].length, c = d[1], o = d[3] === void 0 ? v : d[3] === '"' ? ue : de) : o === ue || o === de ? o = v : o === ce || o === he ? o = S : (o = v, n = void 0);
     const _ = o === v && s[l + 1].startsWith("/>") ? " " : "";
-    r += o === S ? a + Ie : u >= 0 ? (i.push(c), a.slice(0, u) + xe + a.slice(u) + f + _) : a + f + (u === -2 ? l : _);
+    r += o === S ? a + Fe : u >= 0 ? (i.push(c), a.slice(0, u) + xe + a.slice(u) + f + _) : a + f + (u === -2 ? l : _);
   }
   return [Ce(s, r + (s[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), i];
 };
@@ -407,7 +407,7 @@ class N {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = E(this, e, t), T(e) ? e === h || e == null || e === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : e !== this._$AH && e !== x && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Fe(e) ? this.k(e) : this._(e);
+    e = E(this, e, t), T(e) ? e === h || e == null || e === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : e !== this._$AH && e !== x && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ie(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -1270,7 +1270,10 @@ class K extends P {
         type: "dew-point",
         icon: "mdi:thermometer-water",
         label: "Point de rosée",
-        value: `${Math.round(l)}${c}`
+        // Arrondi à la décimale près (contrairement au reste des tuiles,
+        // arrondies à l'entier) : la valeur bouge peu, la décimale aide à
+        // voir qu'elle évolue.
+        value: `${l.toFixed(1)}${c}`
       });
     }
     const a = this._hass.states[this._config.sun_entity || "sun.sun"];
@@ -1352,11 +1355,11 @@ class K extends P {
     ` : h;
   }
 }
-I(K, "properties", {
+F(K, "properties", {
   _config: { state: !0 },
   _hourly: { state: !0 },
   _daily: { state: !0 }
-}), I(K, "styles", Ne`
+}), F(K, "styles", Ne`
     /* container-type permet des tailles fluides (clamp + cqw) qui suivent
        la taille réelle du composant plutôt que le viewport — utile dans un
        conteneur View Assist dont la taille n'est pas celle de l'écran. */
