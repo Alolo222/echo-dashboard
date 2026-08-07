@@ -26,6 +26,7 @@ export const DEFAULT_CONFIG = {
   show_feels_like: true,
   show_precipitation_probability: true,
   show_humidity: true,
+  show_dew_point: true,
   show_clock: true,
   show_last_updated: true,
   show_wind: true,

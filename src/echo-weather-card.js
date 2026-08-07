@@ -142,6 +142,7 @@ class EchoWeatherCard extends LitElement {
     const conditionLabel = localizeCondition(this._hass, stateObj.state);
     const temp = stateObj.attributes.temperature;
     const feelsLike = stateObj.attributes.apparent_temperature;
+    const dewPoint = stateObj.attributes.dew_point;
     const humidity = stateObj.attributes.humidity;
 
     const lastUpdated = stateObj.last_updated
@@ -150,6 +151,9 @@ class EchoWeatherCard extends LitElement {
     const metaParts = [];
     if (this._config.show_feels_like && feelsLike != null) {
       metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
+    }
+    if (this._config.show_dew_point && dewPoint != null) {
+      metaParts.push(`Point de rosée ${Math.round(dewPoint)}°`);
     }
     if (this._config.show_last_updated && lastUpdated) {
       metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
@@ -162,8 +166,10 @@ class EchoWeatherCard extends LitElement {
         <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
           <div class="current-temp">${Math.round(temp)}°</div>
-          <div class="current-condition">${conditionLabel}</div>
-          ${this._renderIndicators()}
+          <div class="current-condition-row">
+            <div class="current-condition">${conditionLabel}</div>
+            ${this._renderIndicators()}
+          </div>
           ${metaParts.length
             ? html`<div class="current-meta">${metaParts.join(" · ")}</div>`
             : nothing}
@@ -457,11 +463,20 @@ class EchoWeatherCard extends LitElement {
       line-height: 1;
       letter-spacing: -0.01em;
     }
+    /* Condition + indicateurs (UV/air) sur une même ligne : évite
+       d'ajouter une ligne complète sous la condition rien que pour ces
+       deux tuiles, il y a largement la largeur pour les caser à côté. */
+    .current-condition-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
     .current-condition {
       color: var(--_secondary-color);
       font-size: clamp(1rem, 1.8cqw, 1.25rem);
       font-weight: 500;
-      margin-top: 2px;
     }
     /* Indice UV / qualité de l'air : petites tuiles étiquetées (label +
        valeur + catégorie ou unité) plutôt que des badges inline nus —
@@ -469,7 +484,6 @@ class EchoWeatherCard extends LitElement {
     .indicators-row {
       display: flex;
       gap: 8px;
-      margin-top: 4px;
     }
     .indicator-box {
       display: flex;
@@ -523,30 +537,30 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 8px;
+      gap: 10px;
       flex-shrink: 0;
       margin-left: auto;
     }
     .clock {
-      font-size: clamp(1.05rem, 2cqw, 1.35rem);
+      font-size: clamp(1.4rem, 3cqw, 1.9rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
     }
     .humidity-badge {
       display: flex;
       align-items: center;
-      gap: 7px;
-      padding: 6px 12px;
-      border-radius: 14px;
+      gap: 8px;
+      padding: 8px 15px;
+      border-radius: 16px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
+      font-size: clamp(1.15rem, 2.3cqw, 1.5rem);
       font-weight: 700;
       white-space: nowrap;
     }
     .humidity-icon {
-      --mdc-icon-size: clamp(18px, 2.6cqw, 22px);
+      --mdc-icon-size: clamp(22px, 3.4cqw, 28px);
       color: var(--echo-weather-humidity-color, #4fc3f7);
       flex-shrink: 0;
     }
