@@ -1179,16 +1179,19 @@ class V extends P {
     `;
   }
   // Humidité + indice UV + qualité de l'air, côte à côte à droite de la
-  // température — des puces sur une seule ligne (icône + valeur +
-  // catégorie/unité) plutôt que des tuiles à deux lignes, plus compactes
-  // et cohérentes avec le style du bandeau bas. L'UV a une échelle
-  // universelle (OMS) donc on peut afficher une catégorie qualitative
-  // (Faible/Modéré/...) ; la qualité de l'air dépend de l'entité choisie
-  // par l'utilisateur (AQI US, indice ATMO, concentration brute...) donc
-  // on se contente de son unité native, sans inventer une catégorie sur
-  // une échelle qu'on ne connaît pas. L'humidité vit ici plutôt que dans
-  // la colonne horloge/date : elle y encombrait cette zone sans rapport
-  // avec l'heure.
+  // température — des puces sur une seule ligne (icône [+ libellé] +
+  // valeur + catégorie/unité) plutôt que des tuiles à deux lignes.
+  // L'humidité se suffit d'une icône (goutte + "%" est déjà explicite),
+  // mais UV et qualité de l'air gardent un libellé texte à côté de
+  // l'icône : sans lui, un simple "3" ou "22" ne veut rien dire au
+  // premier coup d'œil, l'icône seule ne suffit pas à lever l'ambiguïté.
+  // L'UV a une échelle universelle (OMS) donc on peut afficher une
+  // catégorie qualitative (Faible/Modéré/...) ; la qualité de l'air
+  // dépend de l'entité choisie par l'utilisateur (AQI US, indice ATMO,
+  // concentration brute...) donc on se contente de son unité native,
+  // sans inventer une catégorie sur une échelle qu'on ne connaît pas.
+  // L'humidité vit ici plutôt que dans la colonne horloge/date : elle y
+  // encombrait cette zone sans rapport avec l'heure.
   _renderIndicators(e) {
     const t = [], i = e.attributes.humidity;
     this._config.show_humidity && i != null && t.push({
@@ -1200,6 +1203,7 @@ class V extends P {
     s && !["unknown", "unavailable"].includes(s.state) && t.push({
       type: "uv",
       icon: "mdi:weather-sunny-alert",
+      label: "UV",
       value: s.state,
       tag: Xe(s.state)
     });
@@ -1207,6 +1211,7 @@ class V extends P {
     return n && !["unknown", "unavailable"].includes(n.state) && t.push({
       type: "air",
       icon: "mdi:air-filter",
+      label: "Air",
       value: n.state,
       tag: n.attributes.unit_of_measurement || null
     }), t.length ? p`
@@ -1215,6 +1220,7 @@ class V extends P {
       (o) => p`
             <div class="indicator-box indicator-${o.type}">
               <ha-icon class="indicator-icon" icon=${o.icon}></ha-icon>
+              ${o.label ? p`<span class="indicator-label">${o.label}</span>` : h}
               <span class="indicator-value">${o.value}</span>
               ${o.tag ? p`<span class="indicator-category">${o.tag}</span>` : h}
             </div>
@@ -1476,6 +1482,12 @@ q(V, "properties", {
     }
     .indicator-air .indicator-icon {
       color: var(--echo-weather-air-color, #81c784);
+    }
+    .indicator-label {
+      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
+      white-space: nowrap;
     }
     .indicator-value {
       font-size: clamp(1.15rem, 2.1cqw, 1.4rem);

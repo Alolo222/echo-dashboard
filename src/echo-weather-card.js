@@ -198,16 +198,19 @@ class EchoWeatherCard extends LitElement {
   }
 
   // Humidité + indice UV + qualité de l'air, côte à côte à droite de la
-  // température — des puces sur une seule ligne (icône + valeur +
-  // catégorie/unité) plutôt que des tuiles à deux lignes, plus compactes
-  // et cohérentes avec le style du bandeau bas. L'UV a une échelle
-  // universelle (OMS) donc on peut afficher une catégorie qualitative
-  // (Faible/Modéré/...) ; la qualité de l'air dépend de l'entité choisie
-  // par l'utilisateur (AQI US, indice ATMO, concentration brute...) donc
-  // on se contente de son unité native, sans inventer une catégorie sur
-  // une échelle qu'on ne connaît pas. L'humidité vit ici plutôt que dans
-  // la colonne horloge/date : elle y encombrait cette zone sans rapport
-  // avec l'heure.
+  // température — des puces sur une seule ligne (icône [+ libellé] +
+  // valeur + catégorie/unité) plutôt que des tuiles à deux lignes.
+  // L'humidité se suffit d'une icône (goutte + "%" est déjà explicite),
+  // mais UV et qualité de l'air gardent un libellé texte à côté de
+  // l'icône : sans lui, un simple "3" ou "22" ne veut rien dire au
+  // premier coup d'œil, l'icône seule ne suffit pas à lever l'ambiguïté.
+  // L'UV a une échelle universelle (OMS) donc on peut afficher une
+  // catégorie qualitative (Faible/Modéré/...) ; la qualité de l'air
+  // dépend de l'entité choisie par l'utilisateur (AQI US, indice ATMO,
+  // concentration brute...) donc on se contente de son unité native,
+  // sans inventer une catégorie sur une échelle qu'on ne connaît pas.
+  // L'humidité vit ici plutôt que dans la colonne horloge/date : elle y
+  // encombrait cette zone sans rapport avec l'heure.
   _renderIndicators(stateObj) {
     const chips = [];
 
@@ -226,6 +229,7 @@ class EchoWeatherCard extends LitElement {
       chips.push({
         type: "uv",
         icon: "mdi:weather-sunny-alert",
+        label: "UV",
         value: uvObj.state,
         tag: uvCategory(uvObj.state),
       });
@@ -238,6 +242,7 @@ class EchoWeatherCard extends LitElement {
       chips.push({
         type: "air",
         icon: "mdi:air-filter",
+        label: "Air",
         value: aqiObj.state,
         tag: aqiObj.attributes.unit_of_measurement || null,
       });
@@ -251,6 +256,9 @@ class EchoWeatherCard extends LitElement {
           (chip) => html`
             <div class="indicator-box indicator-${chip.type}">
               <ha-icon class="indicator-icon" icon=${chip.icon}></ha-icon>
+              ${chip.label
+                ? html`<span class="indicator-label">${chip.label}</span>`
+                : nothing}
               <span class="indicator-value">${chip.value}</span>
               ${chip.tag
                 ? html`<span class="indicator-category">${chip.tag}</span>`
@@ -549,6 +557,12 @@ class EchoWeatherCard extends LitElement {
     }
     .indicator-air .indicator-icon {
       color: var(--echo-weather-air-color, #81c784);
+    }
+    .indicator-label {
+      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
+      white-space: nowrap;
     }
     .indicator-value {
       font-size: clamp(1.15rem, 2.1cqw, 1.4rem);
