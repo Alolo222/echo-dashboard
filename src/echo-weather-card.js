@@ -100,11 +100,23 @@ class EchoWeatherCard extends LitElement {
 
   _isNight(date) {
     if (!date) {
-      return this._hass.states["sun.sun"]?.state === "below_horizon";
+      const sunObj = this._hass.states[this._config.sun_entity || "sun.sun"];
+      return sunObj?.state === "below_horizon";
     }
     // Pas de lever/coucher précis par prévision : heuristique horaire simple.
     const hour = date.getHours();
     return hour < 7 || hour >= 21;
+  }
+
+  // Mode clair/sombre automatique d'après le soleil (View Assist n'a pas
+  // de bascule jour/nuit native pour ses cartes) — theme_mode: "auto" par
+  // défaut, "light"/"dark" pour forcer un mode fixe indépendamment de
+  // l'heure. Appliqué comme classe hôte pour piloter le fond et les
+  // couleurs via CSS (cf. static styles, tokens --_mode-*).
+  _isLightMode() {
+    if (this._config.theme_mode === "light") return true;
+    if (this._config.theme_mode === "dark") return false;
+    return !this._isNight();
   }
 
   render() {
@@ -117,13 +129,20 @@ class EchoWeatherCard extends LitElement {
       </div>`;
     }
 
+    this.classList.toggle("light", this._isLightMode());
+
     const locale =
       this._config.language || this._hass.locale?.language || "en";
     const timeFormat =
       this._config.time_format || this._hass.locale?.time_format || "24";
 
+    const cardStyle =
+      this._config.background != null
+        ? `background:${this._config.background}`
+        : "";
+
     return html`
-      <div class="card" style="background:${this._config.background}">
+      <div class="card" style=${cardStyle}>
         ${this._config.title
           ? html`<div class="title">${this._config.title}</div>`
           : nothing}
@@ -466,27 +485,70 @@ class EchoWeatherCard extends LitElement {
         --echo-weather-daily-temp-size,
         clamp(1.05rem, 2.1cqw, 1.3rem)
       );
-      --_text-color: var(
-        --echo-weather-text-color,
-        var(--primary-text-color, #fff)
+      /* Jeu de couleurs sombre (par défaut) — repris/écrasé par
+         :host(.light) ci-dessous quand le mode clair est actif (soleil
+         levé, ou theme_mode forcé). Inspiré de RadarWise : dégradé doux
+         plutôt qu'un fond plat, tuiles avec un léger relief (liseré haut
+         + ombre portée) plutôt qu'un simple aplat. */
+      --_mode-bg: radial-gradient(
+        130% 140% at 18% -10%,
+        #1c2c40 0%,
+        #101a26 45%,
+        #05080c 100%
       );
+      --_mode-text: #ffffff;
+      --_mode-secondary: #a9b4bf;
+      --_mode-divider: rgba(255, 255, 255, 0.14);
+      --_mode-tile-bg: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.12),
+        rgba(255, 255, 255, 0.04)
+      );
+      --_mode-tile-border: rgba(255, 255, 255, 0.14);
+      --_mode-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 3px 10px rgba(0, 0, 0, 0.35);
+      --_text-color: var(--echo-weather-text-color, var(--_mode-text));
       --_secondary-color: var(
         --echo-weather-secondary-color,
-        var(--secondary-text-color, #b0b0b0)
+        var(--_mode-secondary)
       );
-      --_divider-color: var(--echo-weather-divider-color, rgba(127, 127, 127, 0.2));
-      --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.13));
+      --_divider-color: var(--echo-weather-divider-color, var(--_mode-divider));
+      --_tile-background: var(--echo-weather-tile-background, var(--_mode-tile-bg));
+      --_tile-border: var(--echo-weather-tile-border, var(--_mode-tile-border));
+      --_tile-shadow: var(--echo-weather-tile-shadow, var(--_mode-tile-shadow));
       /* --primary-font-family est la variable de thème HA standard (ce que
          change un thème/View Assist quand on choisit une police) : on la
          lit en repli avant d'abandonner à inherit, sinon un changement de
          police fait via le thème plutôt que via notre propre variable
-         n'atteint jamais la carte (même logique déjà appliquée à
-         --_text-color juste au-dessus, avec --primary-text-color). */
+         n'atteint jamais la carte. */
       font-family: var(
         --echo-weather-font-family,
         var(--primary-font-family, inherit)
       );
       color: var(--_text-color);
+    }
+
+    /* Mode clair : appliqué par render() (classe hôte) d'après le soleil,
+       ou forcé via theme_mode. Écrase juste les tokens --_mode-*, tout le
+       reste de la feuille de style s'adapte automatiquement à travers eux. */
+    :host(.light) {
+      --_mode-bg: radial-gradient(
+        130% 140% at 18% -10%,
+        #eef7fc 0%,
+        #d7e9f4 45%,
+        #bcdaeb 100%
+      );
+      --_mode-text: #16232e;
+      --_mode-secondary: #57697a;
+      --_mode-divider: rgba(22, 35, 46, 0.14);
+      --_mode-tile-bg: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.8),
+        rgba(255, 255, 255, 0.5)
+      );
+      --_mode-tile-border: rgba(22, 35, 46, 0.12);
+      --_mode-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 3px 10px rgba(22, 35, 46, 0.1);
     }
 
     .card {
@@ -496,6 +558,8 @@ class EchoWeatherCard extends LitElement {
       box-sizing: border-box;
       padding: var(--_row-gap) var(--_gap);
       gap: var(--_row-gap);
+      background: var(--_mode-bg);
+      border-radius: var(--echo-weather-radius, 22px);
     }
 
     .error {
@@ -555,7 +619,8 @@ class EchoWeatherCard extends LitElement {
       padding: 4px 12px;
       border-radius: 14px;
       background: var(--_tile-background);
-      border: 1px solid var(--_divider-color);
+      border: 1px solid var(--_tile-border);
+      box-shadow: var(--_tile-shadow);
     }
     .indicator-label {
       font-size: clamp(0.75rem, 1.2cqw, 0.85rem);
@@ -722,6 +787,8 @@ class EchoWeatherCard extends LitElement {
       padding: 4px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
+      border: 1px solid var(--_tile-border);
+      box-shadow: var(--_tile-shadow);
     }
     .daily-day {
       color: var(--_secondary-color);
@@ -765,7 +832,8 @@ class EchoWeatherCard extends LitElement {
       padding: 5px 10px;
       border-radius: 12px;
       background: var(--_tile-background);
-      border: 1px solid var(--_divider-color);
+      border: 1px solid var(--_tile-border);
+      box-shadow: var(--_tile-shadow);
     }
     .band-icon {
       --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
@@ -793,6 +861,18 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
       font-weight: 700;
       white-space: nowrap;
+    }
+
+    /* Les icônes Meteocons "fill" ont des traits clairs pensés pour un
+       fond sombre : en mode clair elles deviennent quasi invisibles sans
+       aide. drop-shadow() (contrairement à box-shadow) suit la silhouette
+       réelle de l'icône (alpha), donc ça ajoute un halo sombre autour des
+       traits clairs sans plaque/cercle disgracieux derrière. */
+    :host(.light) .current-icon,
+    :host(.light) .hourly-icon,
+    :host(.light) .daily-icon {
+      filter: drop-shadow(0 0 2px rgba(10, 20, 30, 0.45))
+        drop-shadow(0 0 5px rgba(10, 20, 30, 0.25));
     }
 
     /* --- Breakpoint portrait/étroit (posé via ResizeObserver) --- */

@@ -39,5 +39,8 @@ export const DEFAULT_CONFIG = {
   uv_entity: null,
   air_quality_entity: null,
   title: null,
-  background: "transparent",
+  background: null,
+  // "auto" (par défaut) : fond + couleurs clair le jour, sombre la nuit,
+  // d'après le soleil (sun_entity). "light"/"dark" forcent un mode fixe.
+  theme_mode: "auto",
 };
