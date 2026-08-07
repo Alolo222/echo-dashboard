@@ -1,0 +1,373 @@
+import { LitElement, html, css, nothing } from "lit";
+import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
+import { conditionToIconSlug, iconUrl } from "./icons.js";
+import { formatHour, formatWeekday, localizeCondition } from "./format.js";
+import { subscribeForecasts } from "./forecast.js";
+
+class EchoWeatherCard extends LitElement {
+  static properties = {
+    _config: { state: true },
+    _hourly: { state: true },
+    _daily: { state: true },
+  };
+
+  setConfig(config) {
+    if (!config?.entity) {
+      throw new Error("echo-weather-card: 'entity' est requis");
+    }
+    this._config = {
+      ...DEFAULT_CONFIG,
+      ...config,
+      icons: { ...DEFAULT_CONFIG.icons, ...(config.icons || {}) },
+    };
+  }
+
+  static getStubConfig(hass) {
+    const weatherEntity = Object.keys(hass.states).find((id) =>
+      id.startsWith("weather.")
+    );
+    return { entity: weatherEntity || "weather.home" };
+  }
+
+  getCardSize() {
+    return 4;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._resizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width || 0;
+      this.classList.toggle("portrait", width > 0 && width < 480);
+    });
+    this._resizeObserver.observe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._resizeObserver?.disconnect();
+    this._unsubscribeForecasts?.();
+    this._unsubscribeForecasts = undefined;
+    this._subscribedEntity = undefined;
+  }
+
+  set hass(hass) {
+    const previousStateObj = this._hass?.states[this._config?.entity];
+    this._hass = hass;
+    if (!this._config) return;
+
+    const stateObj = hass.states[this._config.entity];
+    if (stateObj && this._subscribedEntity !== this._config.entity) {
+      this._subscribeToForecasts();
+    }
+    if (previousStateObj !== stateObj) {
+      this.requestUpdate();
+    }
+  }
+
+  get hass() {
+    return this._hass;
+  }
+
+  _subscribeToForecasts() {
+    this._unsubscribeForecasts?.();
+    this._subscribedEntity = this._config.entity;
+    this._hourly = undefined;
+    this._daily = undefined;
+    this._unsubscribeForecasts = subscribeForecasts(
+      this._hass,
+      this._config.entity,
+      (type, forecast) => {
+        if (type === "hourly") this._hourly = forecast;
+        if (type === "daily") this._daily = forecast;
+      }
+    );
+  }
+
+  _isNight(date) {
+    if (!date) {
+      return this._hass.states["sun.sun"]?.state === "below_horizon";
+    }
+    // Pas de lever/coucher précis par prévision : heuristique horaire simple.
+    const hour = date.getHours();
+    return hour < 7 || hour >= 21;
+  }
+
+  render() {
+    if (!this._config || !this._hass) return nothing;
+
+    const stateObj = this._hass.states[this._config.entity];
+    if (!stateObj) {
+      return html`<div class="error">
+        Entité ${this._config.entity} introuvable
+      </div>`;
+    }
+
+    const locale =
+      this._config.language || this._hass.locale?.language || "en";
+    const timeFormat =
+      this._config.time_format || this._hass.locale?.time_format || "24";
+
+    return html`
+      <div class="card" style="background:${this._config.background}">
+        ${this._config.title
+          ? html`<div class="title">${this._config.title}</div>`
+          : nothing}
+        ${this._config.show_current
+          ? this._renderCurrent(stateObj)
+          : nothing}
+        ${this._config.show_hourly
+          ? this._renderHourly(locale, timeFormat)
+          : nothing}
+        ${this._config.show_daily ? this._renderDaily(locale) : nothing}
+      </div>
+    `;
+  }
+
+  _renderCurrent(stateObj) {
+    const slug = conditionToIconSlug(stateObj.state, this._isNight());
+    const url = iconUrl(slug, this._config.icons);
+    const conditionLabel = localizeCondition(this._hass, stateObj.state);
+    const temp = stateObj.attributes.temperature;
+    const feelsLike = stateObj.attributes.apparent_temperature;
+
+    return html`
+      <div class="current">
+        <img class="current-icon" src=${url} alt=${conditionLabel} />
+        <div class="current-info">
+          <div class="current-temp">${Math.round(temp)}°</div>
+          <div class="current-condition">${conditionLabel}</div>
+          ${this._config.show_feels_like && feelsLike != null
+            ? html`<div class="current-feels-like">
+                Ressenti ${Math.round(feelsLike)}°
+              </div>`
+            : nothing}
+        </div>
+      </div>
+    `;
+  }
+
+  _renderHourly(locale, timeFormat) {
+    const now = Date.now();
+    const items = (this._hourly || [])
+      .filter((f) => new Date(f.datetime).getTime() >= now)
+      .slice(0, this._config.hourly_count);
+
+    if (!items.length) return nothing;
+
+    return html`
+      <div class="hourly">
+        ${items.map((forecast) => {
+          const date = new Date(forecast.datetime);
+          const slug = conditionToIconSlug(
+            forecast.condition,
+            this._isNight(date)
+          );
+          const url = iconUrl(slug, this._config.icons);
+          const label = localizeCondition(this._hass, forecast.condition);
+          const pop = forecast.precipitation_probability;
+
+          return html`
+            <div class="hourly-item">
+              <div class="hourly-time">
+                ${formatHour(date, locale, timeFormat)}
+              </div>
+              <img class="hourly-icon" src=${url} alt=${label} />
+              <div class="hourly-temp">
+                ${Math.round(forecast.temperature)}°
+              </div>
+              ${this._config.show_precipitation_probability && pop > 0
+                ? html`<div class="hourly-pop">${pop}%</div>`
+                : nothing}
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  _renderDaily(locale) {
+    const items = (this._daily || []).slice(0, this._config.daily_count);
+    if (!items.length) return nothing;
+
+    return html`
+      <div class="daily">
+        ${items.map((forecast) => {
+          const date = new Date(forecast.datetime);
+          const slug = conditionToIconSlug(forecast.condition, false);
+          const url = iconUrl(slug, this._config.icons);
+          const label = localizeCondition(this._hass, forecast.condition);
+
+          return html`
+            <div class="daily-item">
+              <div class="daily-day">${formatWeekday(date, locale)}</div>
+              <img class="daily-icon" src=${url} alt=${label} />
+              <div class="daily-temps">
+                <span class="daily-max"
+                  >${Math.round(forecast.temperature)}°</span
+                >
+                <span class="daily-min"
+                  >${Math.round(forecast.templow)}°</span
+                >
+              </div>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  static styles = css`
+    :host {
+      display: block;
+      height: 100%;
+      box-sizing: border-box;
+      --_gap: var(--echo-weather-gap, 12px);
+      --_icon-size: var(--echo-weather-icon-size, 64px);
+      --_current-temp-size: var(--echo-weather-current-temp-size, 3rem);
+      --_hourly-temp-size: var(--echo-weather-hourly-temp-size, 1.1rem);
+      --_daily-temp-size: var(--echo-weather-daily-temp-size, 1rem);
+      --_text-color: var(
+        --echo-weather-text-color,
+        var(--primary-text-color, #fff)
+      );
+      --_secondary-color: var(
+        --echo-weather-secondary-color,
+        var(--secondary-text-color, #b0b0b0)
+      );
+      font-family: var(--echo-weather-font-family, inherit);
+      color: var(--_text-color);
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+      padding: var(--_gap);
+      gap: var(--_gap);
+    }
+
+    .error {
+      color: var(--error-color, #f44);
+      padding: var(--_gap);
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--_secondary-color);
+    }
+
+    /* --- Météo actuelle : ~1/3 supérieur --- */
+    .current {
+      display: flex;
+      align-items: center;
+      gap: var(--_gap);
+      flex: 1 1 33%;
+    }
+    .current-icon {
+      width: var(--_icon-size);
+      height: var(--_icon-size);
+      flex-shrink: 0;
+    }
+    .current-temp {
+      font-size: var(--_current-temp-size);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .current-condition {
+      color: var(--_secondary-color);
+    }
+    .current-feels-like {
+      color: var(--_secondary-color);
+      font-size: 0.85em;
+    }
+
+    /* --- Prévisions horaires : contenu principal --- */
+    .hourly {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--_gap);
+      flex: 1 1 auto;
+    }
+    .hourly-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .hourly-time {
+      color: var(--_secondary-color);
+      font-size: 0.85em;
+    }
+    .hourly-icon {
+      width: calc(var(--_icon-size) * 0.5);
+      height: calc(var(--_icon-size) * 0.5);
+    }
+    .hourly-temp {
+      font-size: var(--_hourly-temp-size);
+      font-weight: 600;
+    }
+    .hourly-pop {
+      color: var(--_secondary-color);
+      font-size: 0.75em;
+    }
+
+    /* --- Prévisions journalières : bande compacte en bas --- */
+    .daily {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--_gap);
+      flex: 0 0 auto;
+    }
+    .daily-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      min-width: 0;
+    }
+    .daily-day {
+      color: var(--_secondary-color);
+      font-size: 0.85em;
+      text-transform: capitalize;
+    }
+    .daily-icon {
+      width: calc(var(--_icon-size) * 0.4);
+      height: calc(var(--_icon-size) * 0.4);
+    }
+    .daily-temps {
+      font-size: var(--_daily-temp-size);
+    }
+    .daily-max {
+      font-weight: 600;
+    }
+    .daily-min {
+      color: var(--_secondary-color);
+      margin-left: 4px;
+    }
+
+    /* --- Breakpoint portrait/étroit (posé via ResizeObserver) --- */
+    :host(.portrait) .hourly,
+    :host(.portrait) .daily {
+      flex-wrap: wrap;
+    }
+    :host(.portrait) .hourly-item,
+    :host(.portrait) .daily-item {
+      flex: 1 1 30%;
+    }
+  `;
+}
+
+customElements.define(CARD_TAG, EchoWeatherCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: CARD_TAG,
+  name: "Echo Weather Card",
+  description:
+    "Carte météo compacte pour smart displays (Echo Show 5, View Assist).",
+});
