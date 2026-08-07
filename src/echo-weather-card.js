@@ -150,26 +150,39 @@ class EchoWeatherCard extends LitElement {
   // Petits indicateurs additionnels (humidité, UV, qualité de l'air) casés
   // dans l'espace libre à droite de la météo actuelle. Chacun n'apparaît
   // que si la donnée existe : pas de case à cocher dédiée, l'entité (ou
-  // l'attribut natif pour l'humidité) fait office de toggle.
+  // l'attribut natif pour l'humidité) fait office de toggle. `ha-icon` est
+  // déjà défini par le frontend Home Assistant : aucune icône à bundler.
   _renderEnvStrip(stateObj) {
     const tiles = [];
 
     const humidity = stateObj.attributes.humidity;
     if (this._config.show_humidity && humidity != null) {
-      tiles.push(["Humidité", `${Math.round(humidity)}%`]);
+      tiles.push({
+        icon: "mdi:water-percent",
+        label: "Humidité",
+        value: `${Math.round(humidity)}%`,
+      });
     }
 
     const uvObj =
       this._config.uv_entity && this._hass.states[this._config.uv_entity];
     if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
-      tiles.push(["UV", uvObj.state]);
+      tiles.push({
+        icon: "mdi:weather-sunny-alert",
+        label: "UV",
+        value: uvObj.state,
+      });
     }
 
     const aqiObj =
       this._config.air_quality_entity &&
       this._hass.states[this._config.air_quality_entity];
     if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
-      tiles.push(["Air", aqiObj.state]);
+      tiles.push({
+        icon: "mdi:air-filter",
+        label: "Air",
+        value: aqiObj.state,
+      });
     }
 
     if (!tiles.length) return nothing;
@@ -177,10 +190,13 @@ class EchoWeatherCard extends LitElement {
     return html`
       <div class="env-strip">
         ${tiles.map(
-          ([label, value]) => html`
+          (tile) => html`
             <div class="env-tile">
-              <span class="env-label">${label}</span>
-              <span class="env-value">${value}</span>
+              <ha-icon class="env-icon" icon=${tile.icon}></ha-icon>
+              <div class="env-copy">
+                <span class="env-label">${tile.label}</span>
+                <span class="env-value">${tile.value}</span>
+              </div>
             </div>
           `
         )}
@@ -351,30 +367,51 @@ class EchoWeatherCard extends LitElement {
       min-width: 0;
     }
 
-    /* --- Indicateurs additionnels (humidité/UV/air), espace libre à droite --- */
+    /* --- Indicateurs additionnels (humidité/UV/air), espace libre à droite.
+       Chip icône + libellé/valeur inspiré des "env-tile" de RadarWise, sans
+       le flou (backdrop-filter) : juste fond translucide + liseré haut, bon
+       marché en rendu sur un SoC modeste. --- */
     .env-strip {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
       margin-left: auto;
     }
     .env-tile {
-      display: flex;
-      align-items: baseline;
-      justify-content: flex-end;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      min-width: 116px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: var(--_tile-background);
+      border: 1px solid var(--_divider-color);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
-    .env-label {
-      font-size: clamp(0.75rem, 1.3cqw, 0.9rem);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+    .env-icon {
+      --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
       color: var(--_secondary-color);
     }
-    .env-value {
-      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
+    .env-copy {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+      min-width: 0;
+    }
+    .env-label {
+      font-size: clamp(0.68rem, 1.1cqw, 0.78rem);
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--_secondary-color);
+      white-space: nowrap;
+    }
+    .env-value {
+      font-size: clamp(0.95rem, 1.6cqw, 1.1rem);
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     /* --- Prévisions horaires : contenu principal --- */
