@@ -7,7 +7,9 @@ Carte météo Home Assistant compacte, pensée pour les petits smart displays
 
 > Rendu généré via un navigateur headless en 960x480 avec des données de
 > test, pas une capture sur l'Echo Show 5 lui-même — utile pour vérifier la
-> mise en page en attendant une vraie capture sur l'appareil.
+> mise en page en attendant une vraie capture sur l'appareil. Police
+> Nunito appliquée via `--echo-weather-font-family` (non incluse par la
+> carte, voir plus bas) — c'est la police de référence pour ce projet.
 
 Statut : en développement (MVP).
 
