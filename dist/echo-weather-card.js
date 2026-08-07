@@ -48,7 +48,7 @@ const Se = (r) => new ge(typeof r == "string" ? r : r + "", void 0, Y), Ce = (r,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Pe, defineProperty: Te, getOwnPropertyDescriptor: ze, getOwnPropertyNames: Re, getOwnPropertySymbols: Ue, getPrototypeOf: Ne } = Object, y = globalThis, ee = y.trustedTypes, ke = ee ? ee.emptyScript : "", L = y.reactiveElementPolyfillSupport, C = (r, e) => r, V = { toAttribute(r, e) {
+const { is: Pe, defineProperty: Te, getOwnPropertyDescriptor: ze, getOwnPropertyNames: Re, getOwnPropertySymbols: Ue, getPrototypeOf: Ne } = Object, v = globalThis, ee = v.trustedTypes, ke = ee ? ee.emptyScript : "", q = v.reactiveElementPolyfillSupport, C = (r, e) => r, V = { toAttribute(r, e) {
   switch (e) {
     case Boolean:
       r = r ? ke : null;
@@ -76,9 +76,9 @@ const { is: Pe, defineProperty: Te, getOwnPropertyDescriptor: ze, getOwnProperty
       }
   }
   return t;
-} }, ye = (r, e) => !Pe(r, e), te = { attribute: !0, type: String, converter: V, reflect: !1, useDefault: !1, hasChanged: ye };
+} }, ve = (r, e) => !Pe(r, e), te = { attribute: !0, type: String, converter: V, reflect: !1, useDefault: !1, hasChanged: ve };
 var he, ue;
-(he = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (ue = y.litPropertyMetadata) != null || (y.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
+(he = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (ue = v.litPropertyMetadata) != null || (v.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let A = class extends HTMLElement {
   static addInitializer(e) {
     var t;
@@ -210,7 +210,7 @@ let A = class extends HTMLElement {
     var o, l;
     if (e !== void 0) {
       const a = this.constructor;
-      if (s === !1 && (n = this[e]), i != null || (i = a.getPropertyOptions(e)), !(((o = i.hasChanged) != null ? o : ye)(n, t) || i.useDefault && i.reflect && n === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(a._$Eu(e, i)))) return;
+      if (s === !1 && (n = this[e]), i != null || (i = a.getPropertyOptions(e)), !(((o = i.hasChanged) != null ? o : ve)(n, t) || i.useDefault && i.reflect && n === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(a._$Eu(e, i)))) return;
       this.C(e, t, i);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
@@ -288,28 +288,28 @@ let A = class extends HTMLElement {
   }
 };
 var pe;
-A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProperties")] = /* @__PURE__ */ new Map(), A[C("finalized")] = /* @__PURE__ */ new Map(), L == null || L({ ReactiveElement: A }), ((pe = y.reactiveElementVersions) != null ? pe : y.reactiveElementVersions = []).push("2.1.2");
+A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProperties")] = /* @__PURE__ */ new Map(), A[C("finalized")] = /* @__PURE__ */ new Map(), q == null || q({ ReactiveElement: A }), ((pe = v.reactiveElementVersions) != null ? pe : v.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const M = globalThis, ie = (r) => r, O = M.trustedTypes, se = O ? O.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, ve = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, $e = "?" + g, Oe = `<${$e}>`, w = document, T = () => w.createComment(""), z = (r) => r === null || typeof r != "object" && typeof r != "function", Z = Array.isArray, De = (r) => Z(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", q = `[ 	
-\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, re = /-->/g, ne = />/g, v = RegExp(`>|${q}(?:([^\\s"'>=/]+)(${q}*=${q}*(?:[^ 	
+const M = globalThis, ie = (r) => r, O = M.trustedTypes, se = O ? O.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, ye = "$lit$", g = `lit$${Math.random().toFixed(9).slice(2)}$`, $e = "?" + g, Oe = `<${$e}>`, w = document, T = () => w.createComment(""), z = (r) => r === null || typeof r != "object" && typeof r != "function", Z = Array.isArray, De = (r) => Z(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", L = `[ 	
+\f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, re = /-->/g, ne = />/g, y = RegExp(`>|${L}(?:([^\\s"'>=/]+)(${L}*=${L}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), oe = /'/g, ae = /"/g, be = /^(?:script|style|textarea|title)$/i, He = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), p = He(1), x = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), le = /* @__PURE__ */ new WeakMap(), $ = w.createTreeWalker(w, 129);
 function we(r, e) {
   if (!Z(r) || !r.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return se !== void 0 ? se.createHTML(e) : e;
 }
-const Le = (r, e) => {
+const qe = (r, e) => {
   const t = r.length - 1, i = [];
   let s, n = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", o = S;
   for (let l = 0; l < t; l++) {
     const a = r[l];
     let c, h, u = -1, _ = 0;
-    for (; _ < a.length && (o.lastIndex = _, h = o.exec(a), h !== null); ) _ = o.lastIndex, o === S ? h[1] === "!--" ? o = re : h[1] !== void 0 ? o = ne : h[2] !== void 0 ? (be.test(h[2]) && (s = RegExp("</" + h[2], "g")), o = v) : h[3] !== void 0 && (o = v) : o === v ? h[0] === ">" ? (o = s != null ? s : S, u = -1) : h[1] === void 0 ? u = -2 : (u = o.lastIndex - h[2].length, c = h[1], o = h[3] === void 0 ? v : h[3] === '"' ? ae : oe) : o === ae || o === oe ? o = v : o === re || o === ne ? o = S : (o = v, s = void 0);
-    const m = o === v && r[l + 1].startsWith("/>") ? " " : "";
-    n += o === S ? a + Oe : u >= 0 ? (i.push(c), a.slice(0, u) + ve + a.slice(u) + g + m) : a + g + (u === -2 ? l : m);
+    for (; _ < a.length && (o.lastIndex = _, h = o.exec(a), h !== null); ) _ = o.lastIndex, o === S ? h[1] === "!--" ? o = re : h[1] !== void 0 ? o = ne : h[2] !== void 0 ? (be.test(h[2]) && (s = RegExp("</" + h[2], "g")), o = y) : h[3] !== void 0 && (o = y) : o === y ? h[0] === ">" ? (o = s != null ? s : S, u = -1) : h[1] === void 0 ? u = -2 : (u = o.lastIndex - h[2].length, c = h[1], o = h[3] === void 0 ? y : h[3] === '"' ? ae : oe) : o === ae || o === oe ? o = y : o === re || o === ne ? o = S : (o = y, s = void 0);
+    const m = o === y && r[l + 1].startsWith("/>") ? " " : "";
+    n += o === S ? a + Oe : u >= 0 ? (i.push(c), a.slice(0, u) + ye + a.slice(u) + g + m) : a + g + (u === -2 ? l : m);
   }
   return [we(r, n + (r[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), i];
 };
@@ -318,14 +318,14 @@ class R {
     let s;
     this.parts = [];
     let n = 0, o = 0;
-    const l = e.length - 1, a = this.parts, [c, h] = Le(e, t);
+    const l = e.length - 1, a = this.parts, [c, h] = qe(e, t);
     if (this.el = R.createElement(c, i), $.currentNode = this.el.content, t === 2 || t === 3) {
       const u = this.el.content.firstChild;
       u.replaceWith(...u.childNodes);
     }
     for (; (s = $.nextNode()) !== null && a.length < l; ) {
       if (s.nodeType === 1) {
-        if (s.hasAttributes()) for (const u of s.getAttributeNames()) if (u.endsWith(ve)) {
+        if (s.hasAttributes()) for (const u of s.getAttributeNames()) if (u.endsWith(ye)) {
           const _ = h[o++], m = s.getAttribute(u).split(g), f = /([.?@])?(.*)/.exec(_);
           a.push({ type: 1, index: n, name: f[2], strings: m, ctor: f[1] === "." ? Be : f[1] === "?" ? Ie : f[1] === "@" ? Fe : D }), s.removeAttribute(u);
         } else u.startsWith(g) && (a.push({ type: 6, index: n }), s.removeAttribute(u));
@@ -357,7 +357,7 @@ function E(r, e, t = r, i) {
   const n = z(e) ? void 0 : e._$litDirective$;
   return (s == null ? void 0 : s.constructor) !== n && ((l = s == null ? void 0 : s._$AO) == null || l.call(s, !1), n === void 0 ? s = void 0 : (s = new n(r), s._$AT(r, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = s : t._$Cl = s), s !== void 0 && (e = E(r, s._$AS(r, e.values), s, i)), e;
 }
-class qe {
+class Le {
   constructor(e, t) {
     this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
   }
@@ -423,7 +423,7 @@ class U {
     const { values: t, _$litType$: i } = e, s = typeof i == "number" ? this._$AC(e) : (i.el === void 0 && (i.el = R.createElement(we(i.h, i.h[0]), this.options)), i);
     if (((n = this._$AH) == null ? void 0 : n._$AD) === s) this._$AH.p(t);
     else {
-      const o = new qe(s, this), l = o.u(this.options);
+      const o = new Le(s, this), l = o.u(this.options);
       o.p(t), this.T(l), this._$AH = o;
     }
   }
@@ -1345,8 +1345,8 @@ H(j, "properties", {
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
-      --_row-gap: var(--echo-weather-row-gap, 8px);
-      --_icon-size: var(--echo-weather-icon-size, clamp(70px, 9.5cqw, 92px));
+      --_row-gap: var(--echo-weather-row-gap, 6px);
+      --_icon-size: var(--echo-weather-icon-size, clamp(64px, 8.5cqw, 84px));
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
         clamp(2.75rem, 7cqw, 4.25rem)
@@ -1369,7 +1369,16 @@ H(j, "properties", {
       );
       --_divider-color: var(--echo-weather-divider-color, rgba(127, 127, 127, 0.2));
       --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.13));
-      font-family: var(--echo-weather-font-family, inherit);
+      /* --primary-font-family est la variable de thème HA standard (ce que
+         change un thème/View Assist quand on choisit une police) : on la
+         lit en repli avant d'abandonner à inherit, sinon un changement de
+         police fait via le thème plutôt que via notre propre variable
+         n'atteint jamais la carte (même logique déjà appliquée à
+         --_text-color juste au-dessus, avec --primary-text-color). */
+      font-family: var(
+        --echo-weather-font-family,
+        var(--primary-font-family, inherit)
+      );
       color: var(--_text-color);
     }
 
@@ -1440,7 +1449,7 @@ H(j, "properties", {
       display: flex;
       flex-direction: column;
       gap: 2px;
-      padding: 5px 12px;
+      padding: 4px 12px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
@@ -1570,10 +1579,10 @@ H(j, "properties", {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       flex: 1;
       min-width: 0;
-      padding: 6px 4px;
+      padding: 5px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
     }
@@ -1616,7 +1625,7 @@ H(j, "properties", {
       gap: 7px;
       flex: 1;
       min-width: 0;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 12px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);

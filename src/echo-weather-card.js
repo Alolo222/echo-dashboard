@@ -416,8 +416,8 @@ class EchoWeatherCard extends LitElement {
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
-      --_row-gap: var(--echo-weather-row-gap, 8px);
-      --_icon-size: var(--echo-weather-icon-size, clamp(70px, 9.5cqw, 92px));
+      --_row-gap: var(--echo-weather-row-gap, 6px);
+      --_icon-size: var(--echo-weather-icon-size, clamp(64px, 8.5cqw, 84px));
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
         clamp(2.75rem, 7cqw, 4.25rem)
@@ -440,7 +440,16 @@ class EchoWeatherCard extends LitElement {
       );
       --_divider-color: var(--echo-weather-divider-color, rgba(127, 127, 127, 0.2));
       --_tile-background: var(--echo-weather-tile-background, rgba(127, 127, 127, 0.13));
-      font-family: var(--echo-weather-font-family, inherit);
+      /* --primary-font-family est la variable de thème HA standard (ce que
+         change un thème/View Assist quand on choisit une police) : on la
+         lit en repli avant d'abandonner à inherit, sinon un changement de
+         police fait via le thème plutôt que via notre propre variable
+         n'atteint jamais la carte (même logique déjà appliquée à
+         --_text-color juste au-dessus, avec --primary-text-color). */
+      font-family: var(
+        --echo-weather-font-family,
+        var(--primary-font-family, inherit)
+      );
       color: var(--_text-color);
     }
 
@@ -511,7 +520,7 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 2px;
-      padding: 5px 12px;
+      padding: 4px 12px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
@@ -641,10 +650,10 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       flex: 1;
       min-width: 0;
-      padding: 6px 4px;
+      padding: 5px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
     }
@@ -687,7 +696,7 @@ class EchoWeatherCard extends LitElement {
       gap: 7px;
       flex: 1;
       min-width: 0;
-      padding: 7px 10px;
+      padding: 6px 10px;
       border-radius: 12px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
