@@ -1,7 +1,12 @@
 import { LitElement, html, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
-import { formatHour, formatWeekday, localizeCondition } from "./format.js";
+import {
+  formatHour,
+  formatTime,
+  formatWeekday,
+  localizeCondition,
+} from "./format.js";
 import { subscribeForecasts } from "./forecast.js";
 
 class EchoWeatherCard extends LitElement {
@@ -40,11 +45,17 @@ class EchoWeatherCard extends LitElement {
       this.classList.toggle("portrait", width > 0 && width < 480);
     });
     this._resizeObserver.observe(this);
+    // Horloge : un simple tick à la minute, pas une boucle d'animation —
+    // ne redéclenche un rendu que si l'horloge est effectivement affichée.
+    this._clockTimer = setInterval(() => {
+      if (this._config?.show_clock) this.requestUpdate();
+    }, 30000);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this._resizeObserver?.disconnect();
+    clearInterval(this._clockTimer);
     this._unsubscribeForecasts?.();
     this._unsubscribeForecasts = undefined;
     this._subscribedEntity = undefined;
@@ -113,93 +124,149 @@ class EchoWeatherCard extends LitElement {
           ? html`<div class="title">${this._config.title}</div>`
           : nothing}
         ${this._config.show_current
-          ? this._renderCurrent(stateObj)
+          ? this._renderCurrent(stateObj, locale, timeFormat)
           : nothing}
         ${this._config.show_hourly
           ? this._renderHourly(locale, timeFormat)
           : nothing}
         ${this._config.show_daily ? this._renderDaily(locale) : nothing}
+        ${this._renderBottomBand(stateObj, locale, timeFormat)}
       </div>
     `;
   }
 
-  _renderCurrent(stateObj) {
+  _renderCurrent(stateObj, locale, timeFormat) {
     const slug = conditionToIconSlug(stateObj.state, this._isNight());
     const url = iconUrl(slug, this._config.icons);
     const conditionLabel = localizeCondition(this._hass, stateObj.state);
     const temp = stateObj.attributes.temperature;
     const feelsLike = stateObj.attributes.apparent_temperature;
+    const humidity = stateObj.attributes.humidity;
+
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    const uvValue =
+      uvObj && !["unknown", "unavailable"].includes(uvObj.state)
+        ? uvObj.state
+        : null;
+
+    const lastUpdated = stateObj.last_updated
+      ? new Date(stateObj.last_updated)
+      : null;
+    const metaParts = [];
+    if (this._config.show_feels_like && feelsLike != null) {
+      metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
+    }
+    if (this._config.show_last_updated && lastUpdated) {
+      metaParts.push(`Maj à ${formatTime(lastUpdated, locale, timeFormat)}`);
+    }
+
+    const showSide = this._config.show_clock || (this._config.show_humidity && humidity != null);
 
     return html`
       <div class="current">
         <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
           <div class="current-temp">${Math.round(temp)}°</div>
-          <div class="current-condition">${conditionLabel}</div>
-          ${this._config.show_feels_like && feelsLike != null
-            ? html`<div class="current-feels-like">
-                Ressenti ${Math.round(feelsLike)}°
-              </div>`
+          <div class="current-condition">
+            ${conditionLabel}
+            ${uvValue != null
+              ? html`<span class="uv-badge">UV ${uvValue}</span>`
+              : nothing}
+          </div>
+          ${metaParts.length
+            ? html`<div class="current-meta">${metaParts.join(" · ")}</div>`
             : nothing}
         </div>
-        ${this._renderEnvStrip(stateObj)}
+        ${showSide
+          ? html`
+              <div class="current-side">
+                ${this._config.show_clock
+                  ? html`<div class="clock">
+                      ${formatTime(new Date(), locale, timeFormat)}
+                    </div>`
+                  : nothing}
+                ${this._config.show_humidity && humidity != null
+                  ? html`
+                      <div class="humidity-badge">
+                        <ha-icon
+                          class="humidity-icon"
+                          icon=${"mdi:water-percent"}
+                        ></ha-icon>
+                        <span>${Math.round(humidity)}%</span>
+                      </div>
+                    `
+                  : nothing}
+              </div>
+            `
+          : nothing}
       </div>
     `;
   }
 
-  // Petits indicateurs additionnels (humidité, UV, qualité de l'air) casés
-  // dans l'espace libre à droite de la météo actuelle. Chacun n'apparaît
-  // que si la donnée existe : pas de case à cocher dédiée, l'entité (ou
-  // l'attribut natif pour l'humidité) fait office de toggle. `ha-icon` est
-  // déjà défini par le frontend Home Assistant : aucune icône à bundler.
-  _renderEnvStrip(stateObj) {
+  // Bandeau bas : vent, lever/coucher de soleil, qualité de l'air. Chaque
+  // tuile n'apparaît que si la donnée existe (attribut natif de l'entité
+  // météo pour le vent, `sun.sun` pour lever/coucher, entité dédiée pour
+  // la qualité de l'air) — pas de case à cocher requise pour un usage de
+  // base. `ha-icon` est déjà défini par le frontend HA : rien à bundler.
+  _renderBottomBand(stateObj, locale, timeFormat) {
     const tiles = [];
 
-    const humidity = stateObj.attributes.humidity;
-    if (this._config.show_humidity && humidity != null) {
+    const windSpeed = stateObj.attributes.wind_speed;
+    if (this._config.show_wind && windSpeed != null) {
+      const unit = stateObj.attributes.wind_speed_unit || "";
       tiles.push({
-        type: "humidity",
-        icon: "mdi:water-percent",
-        label: "Humidité",
-        value: `${Math.round(humidity)}%`,
+        type: "wind",
+        icon: "mdi:weather-windy",
+        value: `${Math.round(windSpeed)} ${unit}`.trim(),
       });
     }
 
-    const uvObj =
-      this._config.uv_entity && this._hass.states[this._config.uv_entity];
-    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
-      tiles.push({
-        type: "uv",
-        icon: "mdi:weather-sunny-alert",
-        label: "UV",
-        value: uvObj.state,
-      });
+    const sunObj = this._hass.states[this._config.sun_entity || "sun.sun"];
+    if (this._config.show_sun && sunObj) {
+      const rising = sunObj.attributes.next_rising
+        ? new Date(sunObj.attributes.next_rising)
+        : null;
+      const setting = sunObj.attributes.next_setting
+        ? new Date(sunObj.attributes.next_setting)
+        : null;
+      if (rising) {
+        tiles.push({
+          type: "sunrise",
+          icon: "mdi:weather-sunset-up",
+          value: formatTime(rising, locale, timeFormat),
+        });
+      }
+      if (setting) {
+        tiles.push({
+          type: "sunset",
+          icon: "mdi:weather-sunset-down",
+          value: formatTime(setting, locale, timeFormat),
+        });
+      }
     }
 
     const aqiObj =
       this._config.air_quality_entity &&
       this._hass.states[this._config.air_quality_entity];
     if (aqiObj && !["unknown", "unavailable"].includes(aqiObj.state)) {
+      const unit = aqiObj.attributes.unit_of_measurement || "";
       tiles.push({
         type: "air",
         icon: "mdi:air-filter",
-        label: "Air",
-        value: aqiObj.state,
+        value: `${aqiObj.state} ${unit}`.trim(),
       });
     }
 
     if (!tiles.length) return nothing;
 
     return html`
-      <div class="env-strip">
+      <div class="bottom-band">
         ${tiles.map(
           (tile) => html`
-            <div class="env-tile env-${tile.type}">
-              <ha-icon class="env-icon" icon=${tile.icon}></ha-icon>
-              <div class="env-copy">
-                <span class="env-label">${tile.label}</span>
-                <span class="env-value">${tile.value}</span>
-              </div>
+            <div class="band-tile band-${tile.type}">
+              <ha-icon class="band-icon" icon=${tile.icon}></ha-icon>
+              <span class="band-value">${tile.value}</span>
             </div>
           `
         )}
@@ -287,6 +354,11 @@ class EchoWeatherCard extends LitElement {
       box-sizing: border-box;
       container-type: inline-size;
       --_gap: var(--echo-weather-gap, 14px);
+      /* Espacement vertical entre sections, distinct de --_gap (horizontal,
+         entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
+         horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
+         moins d'air entre eux était nécessaire pour que tout rentre. */
+      --_row-gap: var(--echo-weather-row-gap, 10px);
       --_icon-size: var(--echo-weather-icon-size, clamp(76px, 11cqw, 108px));
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
@@ -319,8 +391,8 @@ class EchoWeatherCard extends LitElement {
       flex-direction: column;
       height: 100%;
       box-sizing: border-box;
-      padding: var(--_gap);
-      gap: var(--_gap);
+      padding: var(--_row-gap) var(--_gap);
+      gap: var(--_row-gap);
     }
 
     .error {
@@ -340,7 +412,7 @@ class EchoWeatherCard extends LitElement {
       align-items: center;
       gap: var(--_gap);
       flex: 1 1 33%;
-      padding-bottom: var(--_gap);
+      padding-bottom: var(--_row-gap);
       border-bottom: 1px solid var(--_divider-color);
     }
     .current-icon {
@@ -359,8 +431,26 @@ class EchoWeatherCard extends LitElement {
       font-size: clamp(1rem, 1.8cqw, 1.25rem);
       font-weight: 500;
       margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .current-feels-like {
+    /* Badge UV : collé à la condition plutôt qu'isolé dans une tuile à
+       part, comme sur RadarWise — précis et compact, sans bouffer de
+       hauteur dans un bloc déjà serré. */
+    .uv-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: clamp(0.72rem, 1.2cqw, 0.85rem);
+      font-weight: 700;
+      color: var(--echo-weather-uv-color, #ffb74d);
+      background: var(--_tile-background);
+      border: 1px solid var(--_divider-color);
+      border-radius: 999px;
+      padding: 2px 9px;
+      line-height: 1.5;
+    }
+    .current-meta {
       color: var(--_secondary-color);
       font-size: clamp(0.85rem, 1.4cqw, 1rem);
       margin-top: 2px;
@@ -370,62 +460,38 @@ class EchoWeatherCard extends LitElement {
       min-width: 0;
     }
 
-    /* --- Indicateurs additionnels (humidité/UV/air), espace libre à droite.
-       Chip icône + libellé/valeur inspiré des "env-tile" de RadarWise, sans
-       le flou (backdrop-filter) : juste fond translucide + liseré haut, bon
-       marché en rendu sur un SoC modeste. --- */
-    .env-strip {
+    /* --- Colonne de droite : horloge + humidité, dans l'espace resté
+       libre à côté de la météo actuelle. --- */
+    .current-side {
       display: flex;
       flex-direction: column;
+      align-items: flex-end;
       gap: 8px;
       flex-shrink: 0;
       margin-left: auto;
     }
-    .env-tile {
+    .clock {
+      font-size: clamp(1.05rem, 2cqw, 1.35rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .humidity-badge {
       display: flex;
       align-items: center;
-      gap: 8px;
-      min-width: 132px;
-      padding: 7px 12px;
+      gap: 7px;
+      padding: 6px 12px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_divider-color);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
+      font-weight: 700;
+      white-space: nowrap;
     }
-    /* Une couleur d'accent par indicateur : rompt le tout-gris et rend
-       chaque puce identifiable d'un coup d'œil, sans logique de seuil
-       (bon/mauvais) qui serait too much pour la v1. Tuiles en une seule
-       ligne (icône + libellé + valeur) pour rester compactes en hauteur
-       tout en agrandissant la police. */
-    .env-icon {
+    .humidity-icon {
       --mdc-icon-size: clamp(18px, 2.6cqw, 22px);
-      flex-shrink: 0;
-    }
-    .env-humidity .env-icon {
       color: var(--echo-weather-humidity-color, #4fc3f7);
-    }
-    .env-uv .env-icon {
-      color: var(--echo-weather-uv-color, #ffb74d);
-    }
-    .env-air .env-icon {
-      color: var(--echo-weather-air-color, #81c784);
-    }
-    .env-copy {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      min-width: 0;
-    }
-    .env-label {
-      font-size: clamp(0.78rem, 1.3cqw, 0.92rem);
-      font-weight: 600;
-      color: var(--_secondary-color);
-      white-space: nowrap;
-    }
-    .env-value {
-      font-size: clamp(1.1rem, 2.1cqw, 1.35rem);
-      font-weight: 800;
-      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* --- Prévisions horaires : contenu principal --- */
@@ -434,7 +500,7 @@ class EchoWeatherCard extends LitElement {
       justify-content: space-between;
       gap: var(--_gap);
       flex: 1 1 auto;
-      padding-bottom: var(--_gap);
+      padding-bottom: var(--_row-gap);
       border-bottom: 1px solid var(--_divider-color);
     }
     .hourly-item {
@@ -504,6 +570,51 @@ class EchoWeatherCard extends LitElement {
       margin-left: 5px;
     }
 
+    /* --- Bandeau bas : vent / lever-coucher / qualité de l'air, une seule
+       ligne pleine largeur — pendant compact des tuiles HUMIDITY/WIND/
+       SUNRISE/SUNSET de RadarWise. --- */
+    .bottom-band {
+      display: flex;
+      justify-content: center;
+      gap: var(--_gap);
+      flex: 0 0 auto;
+      padding-top: var(--_row-gap);
+      border-top: 1px solid var(--_divider-color);
+    }
+    .band-tile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      flex: 1;
+      min-width: 0;
+      padding: 7px 10px;
+      border-radius: 12px;
+      background: var(--_tile-background);
+      border: 1px solid var(--_divider-color);
+    }
+    .band-icon {
+      --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
+      flex-shrink: 0;
+    }
+    .band-wind .band-icon {
+      color: var(--echo-weather-wind-color, #90a4ae);
+    }
+    .band-sunrise .band-icon {
+      color: var(--echo-weather-sunrise-color, #ffb74d);
+    }
+    .band-sunset .band-icon {
+      color: var(--echo-weather-sunset-color, #ff8a65);
+    }
+    .band-air .band-icon {
+      color: var(--echo-weather-air-color, #81c784);
+    }
+    .band-value {
+      font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
     /* --- Breakpoint portrait/étroit (posé via ResizeObserver) --- */
     :host(.portrait) .current,
     :host(.portrait) .hourly,
@@ -514,11 +625,15 @@ class EchoWeatherCard extends LitElement {
     :host(.portrait) .daily-item {
       flex: 1 1 30%;
     }
-    :host(.portrait) .env-strip {
+    :host(.portrait) .current-side {
       flex-direction: row;
-      margin-left: 0;
-      width: 100%;
-      gap: 14px;
+      align-items: center;
+    }
+    :host(.portrait) .bottom-band {
+      flex-wrap: wrap;
+    }
+    :host(.portrait) .band-tile {
+      flex: 1 1 40%;
     }
   `;
 }

@@ -11,6 +11,15 @@ export function formatHour(date, locale, timeFormat) {
   return formatted.replace(/\s/g, "");
 }
 
+export function formatTime(date, locale, timeFormat) {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: timeFormat === "12",
+  }).format(date);
+  return formatted.replace(/\s/g, "");
+}
+
 export function formatWeekday(date, locale) {
   return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(date);
 }
