@@ -171,16 +171,16 @@ class EchoWeatherCard extends LitElement {
         ${this._config.show_daily ? this._renderDaily(locale) : nothing}
         ${this._renderBottomBand(stateObj, locale, timeFormat)}
       </div>
-      ${this._renderDayDetail(stateObj, locale)}
+      ${this._renderDayDetail(stateObj, locale, false)}
     `;
   }
 
   // --- Mise en page "round" (petit écran circulaire, ex: Echo Spot 1ère
   // gen 2017, 480x480) : pas la place pour empiler actuelle/horaire/
   // quotidienne/bandeau comme en mode large. À la place, un écran d'accueil
-  // minimal (horloge + météo actuelle + deux tuiles "Aujourd'hui"/
-  // "Semaine") où chaque élément est une porte d'entrée vers plus de détail
-  // au tap (ha-dialog), plutôt que d'essayer de tout montrer à la fois. ---
+  // dense (horloge + météo actuelle + indicateurs compacts + deux tuiles
+  // "Aujourd'hui"/"Semaine" avec aperçu) où chaque élément est aussi une
+  // porte d'entrée vers plus de détail au tap (ha-dialog). ---
   _renderRound(stateObj, locale, timeFormat) {
     const slug = conditionToIconSlug(stateObj.state, this._isNight());
     const url = iconUrl(slug, this._config.icons);
@@ -203,6 +203,20 @@ class EchoWeatherCard extends LitElement {
     const openDaily = () => {
       this._roundDialog = "daily";
     };
+
+    // Aperçus compacts sur les tuiles "Aujourd'hui"/"Semaine" — juste du
+    // texte (pas d'icône supplémentaire à charger), pour donner un avant-
+    // goût sans obliger à taper pour tout voir.
+    const nextHour = (this._hourly || []).find(
+      (f) => new Date(f.datetime).getTime() >= Date.now()
+    );
+    const todayPreview = nextHour
+      ? `${formatHour(new Date(nextHour.datetime), locale, timeFormat)} · ${Math.round(nextHour.temperature)}°`
+      : null;
+    const firstDay = (this._daily || [])[0];
+    const weekPreview = firstDay
+      ? `↑${Math.round(firstDay.temperature)}° ↓${Math.round(firstDay.templow)}°`
+      : null;
 
     return html`
       <div class="card round" style=${cardStyle}>
@@ -237,11 +251,13 @@ class EchoWeatherCard extends LitElement {
               </div>
             `
           : nothing}
+        ${this._renderRoundIndicators(stateObj, openCurrent)}
         <div class="round-launchers">
           ${this._config.show_hourly
             ? this._renderRoundLauncher(
                 "mdi:clock-outline",
                 "Aujourd'hui",
+                todayPreview,
                 openHourly
               )
             : nothing}
@@ -249,17 +265,93 @@ class EchoWeatherCard extends LitElement {
             ? this._renderRoundLauncher(
                 "mdi:calendar-week",
                 "Semaine",
+                weekPreview,
                 openDaily
               )
             : nothing}
         </div>
       </div>
       ${this._renderRoundDialog(stateObj, locale, timeFormat)}
-      ${this._renderDayDetail(stateObj, locale)}
+      ${this._renderDayDetail(stateObj, locale, true)}
     `;
   }
 
-  _renderRoundLauncher(icon, label, onOpen) {
+  // Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
+  // rosée, humidité) sous la condition — juste icône + valeur, sans
+  // libellé, pour tenir sur une seule ligne (ou deux si ça déborde).
+  // Tape dessus ouvre le même détail complet que la météo actuelle.
+  _renderRoundIndicators(stateObj, onOpen) {
+    const chips = [];
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
+      chips.push({ icon: "mdi:weather-sunny-alert", value: uvObj.state });
+    }
+    const airQualityObj =
+      this._config.air_quality_entity &&
+      this._hass.states[this._config.air_quality_entity];
+    if (
+      airQualityObj &&
+      !["unknown", "unavailable"].includes(airQualityObj.state)
+    ) {
+      chips.push({ icon: "mdi:air-filter", value: airQualityObj.state });
+    }
+    const humidity = stateObj.attributes.humidity;
+    if (this._config.show_humidity && humidity != null) {
+      chips.push({
+        icon: "mdi:water-percent",
+        value: `${Math.round(humidity)}%`,
+      });
+    }
+    const windSpeed = stateObj.attributes.wind_speed;
+    if (this._config.show_wind && windSpeed != null) {
+      chips.push({
+        icon: "mdi:weather-windy",
+        value: `${Math.round(windSpeed)}`,
+      });
+    }
+    const dewPointObj =
+      this._config.dew_point_entity &&
+      this._hass.states[this._config.dew_point_entity];
+    const dewPoint = dewPointObj
+      ? Number(dewPointObj.state)
+      : stateObj.attributes.dew_point;
+    if (
+      this._config.show_dew_point &&
+      dewPoint != null &&
+      Number.isFinite(dewPoint)
+    ) {
+      chips.push({
+        icon: "mdi:thermometer-water",
+        value: `${Math.round(dewPoint)}°`,
+      });
+    }
+
+    if (!chips.length) return nothing;
+
+    return html`
+      <div
+        class="round-indicators"
+        role="button"
+        tabindex="0"
+        @click=${onOpen}
+        @keydown=${(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen();
+          }
+        }}
+      >
+        ${chips.map(
+          (c) => html`<span class="round-chip">
+            <ha-icon icon=${c.icon}></ha-icon>${c.value}
+          </span>`
+        )}
+      </div>
+    `;
+  }
+
+  _renderRoundLauncher(icon, label, preview, onOpen) {
     return html`
       <div
         class="round-launcher"
@@ -273,9 +365,14 @@ class EchoWeatherCard extends LitElement {
           }
         }}
       >
-        <ha-icon icon=${icon}></ha-icon>
-        <span>${label}</span>
-        <ha-icon class="round-chevron" icon=${"mdi:chevron-right"}></ha-icon>
+        <div class="round-launcher-top">
+          <ha-icon icon=${icon}></ha-icon>
+          <span>${label}</span>
+          <ha-icon class="round-chevron" icon=${"mdi:chevron-right"}></ha-icon>
+        </div>
+        ${preview
+          ? html`<div class="round-launcher-preview">${preview}</div>`
+          : nothing}
       </div>
     `;
   }
@@ -293,21 +390,41 @@ class EchoWeatherCard extends LitElement {
     return nothing;
   }
 
-  _renderDialogHeader(title, close) {
+  // isRound : sur écran circulaire, le bouton fermer est centré en bas
+  // plutôt qu'en haut à droite — ce coin-là est le plus susceptible d'être
+  // sous le boîtier physique (cf. _renderRound, .round-dialog en CSS).
+  _renderDialogHeader(title, close, isRound) {
     return html`
       <div class="detail-header">
         <div class="detail-date">${title}</div>
-        <ha-icon
-          class="detail-close"
-          icon=${"mdi:close"}
-          role="button"
-          tabindex="0"
-          @click=${close}
-          @keydown=${(e) => {
-            if (e.key === "Enter" || e.key === " ") close();
-          }}
-        ></ha-icon>
+        ${isRound
+          ? nothing
+          : html`<ha-icon
+              class="detail-close"
+              icon=${"mdi:close"}
+              role="button"
+              tabindex="0"
+              @click=${close}
+              @keydown=${(e) => {
+                if (e.key === "Enter" || e.key === " ") close();
+              }}
+            ></ha-icon>`}
       </div>
+    `;
+  }
+
+  _renderRoundBackButton(close) {
+    return html`
+      <ha-icon
+        class="round-back"
+        icon=${"mdi:arrow-left"}
+        role="button"
+        tabindex="0"
+        @click=${close}
+        @keydown=${(e) => {
+          if (e.key === "Enter" || e.key === " ") close();
+        }}
+      ></ha-icon>
     `;
   }
 
@@ -435,22 +552,25 @@ class EchoWeatherCard extends LitElement {
     }
 
     return html`
-      <ha-dialog open hideActions @closed=${close}>
-        <div class="detail detail-list">
-          ${this._renderDialogHeader("Météo actuelle", close)}
-          ${rows.length
-            ? html`<div class="detail-rows">
-                ${rows.map(
-                  (r) => html`<div class="detail-row">
-                    <ha-icon icon=${r.icon}></ha-icon>
-                    <span class="detail-row-label">${r.label}</span>
-                    <span class="detail-row-value">${r.value}</span>
-                  </div>`
-                )}
-              </div>`
-            : html`<div class="detail-row-empty">
-                Aucune information supplémentaire configurée.
-              </div>`}
+      <ha-dialog class="round-dialog" open hideActions @closed=${close}>
+        <div class="round-dialog-wrap">
+          <div class="detail detail-list round-detail">
+            ${this._renderDialogHeader("Météo actuelle", close, true)}
+            ${rows.length
+              ? html`<div class="detail-rows">
+                  ${rows.map(
+                    (r) => html`<div class="detail-row">
+                      <ha-icon icon=${r.icon}></ha-icon>
+                      <span class="detail-row-label">${r.label}</span>
+                      <span class="detail-row-value">${r.value}</span>
+                    </div>`
+                  )}
+                </div>`
+              : html`<div class="detail-row-empty">
+                  Aucune information supplémentaire configurée.
+                </div>`}
+          </div>
+          ${this._renderRoundBackButton(close)}
         </div>
       </ha-dialog>
     `;
@@ -469,47 +589,50 @@ class EchoWeatherCard extends LitElement {
       .slice(0, this._config.hourly_count);
 
     return html`
-      <ha-dialog open hideActions @closed=${close}>
-        <div class="detail detail-list">
-          ${this._renderDialogHeader("Aujourd'hui", close)}
-          ${items.length
-            ? html`<div class="hourly-list">
-                ${items.map((forecast) => {
-                  const date = new Date(forecast.datetime);
-                  const slug = conditionToIconSlug(
-                    forecast.condition,
-                    this._isNight(date)
-                  );
-                  const url = iconUrl(slug, this._config.icons);
-                  const label = localizeCondition(
-                    this._hass,
-                    forecast.condition
-                  );
-                  const pop = forecast.precipitation_probability;
-                  return html`<div class="hourly-list-item">
-                    <span class="hourly-list-time"
-                      >${formatHour(date, locale, timeFormat)}</span
-                    >
-                    <img
-                      class="hourly-list-icon"
-                      src=${this._staticIcon(url)}
-                      alt=${label}
-                    />
-                    <span class="hourly-list-temp"
-                      >${Math.round(forecast.temperature)}°</span
-                    >
-                    <span class="hourly-list-pop"
-                      >${this._config.show_precipitation_probability &&
-                      pop > 0
-                        ? `${pop}%`
-                        : ""}</span
-                    >
-                  </div>`;
-                })}
-              </div>`
-            : html`<div class="detail-row-empty">
-                Pas de prévision disponible.
-              </div>`}
+      <ha-dialog class="round-dialog" open hideActions @closed=${close}>
+        <div class="round-dialog-wrap">
+          <div class="detail detail-list round-detail">
+            ${this._renderDialogHeader("Aujourd'hui", close, true)}
+            ${items.length
+              ? html`<div class="hourly-list">
+                  ${items.map((forecast) => {
+                    const date = new Date(forecast.datetime);
+                    const slug = conditionToIconSlug(
+                      forecast.condition,
+                      this._isNight(date)
+                    );
+                    const url = iconUrl(slug, this._config.icons);
+                    const label = localizeCondition(
+                      this._hass,
+                      forecast.condition
+                    );
+                    const pop = forecast.precipitation_probability;
+                    return html`<div class="hourly-list-item">
+                      <span class="hourly-list-time"
+                        >${formatHour(date, locale, timeFormat)}</span
+                      >
+                      <img
+                        class="hourly-list-icon"
+                        src=${this._staticIcon(url)}
+                        alt=${label}
+                      />
+                      <span class="hourly-list-temp"
+                        >${Math.round(forecast.temperature)}°</span
+                      >
+                      <span class="hourly-list-pop"
+                        >${this._config.show_precipitation_probability &&
+                        pop > 0
+                          ? `${pop}%`
+                          : ""}</span
+                      >
+                    </div>`;
+                  })}
+                </div>`
+              : html`<div class="detail-row-empty">
+                  Pas de prévision disponible.
+                </div>`}
+          </div>
+          ${this._renderRoundBackButton(close)}
         </div>
       </ha-dialog>
     `;
@@ -526,61 +649,67 @@ class EchoWeatherCard extends LitElement {
     const items = (this._daily || []).slice(0, this._config.daily_count);
 
     return html`
-      <ha-dialog open hideActions @closed=${close}>
-        <div class="detail detail-list">
-          ${this._renderDialogHeader("Cette semaine", close)}
-          ${items.length
-            ? html`<div class="daily-list">
-                ${items.map((forecast) => {
-                  const date = new Date(forecast.datetime);
-                  const slug = conditionToIconSlug(forecast.condition, false);
-                  const url = iconUrl(slug, this._config.icons);
-                  const label = localizeCondition(
-                    this._hass,
-                    forecast.condition
-                  );
-                  const openDay = () => {
-                    this._roundDialog = null;
-                    this._detailForecast = forecast;
-                  };
-                  return html`<div
-                    class="daily-list-item"
-                    role="button"
-                    tabindex="0"
-                    @click=${openDay}
-                    @keydown=${(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        openDay();
-                      }
-                    }}
-                  >
-                    <span class="daily-list-day"
-                      >${formatWeekday(date, locale)}</span
+      <ha-dialog class="round-dialog" open hideActions @closed=${close}>
+        <div class="round-dialog-wrap">
+          <div class="detail detail-list round-detail">
+            ${this._renderDialogHeader("Cette semaine", close, true)}
+            ${items.length
+              ? html`<div class="daily-list">
+                  ${items.map((forecast) => {
+                    const date = new Date(forecast.datetime);
+                    const slug = conditionToIconSlug(
+                      forecast.condition,
+                      false
+                    );
+                    const url = iconUrl(slug, this._config.icons);
+                    const label = localizeCondition(
+                      this._hass,
+                      forecast.condition
+                    );
+                    const openDay = () => {
+                      this._roundDialog = null;
+                      this._detailForecast = forecast;
+                    };
+                    return html`<div
+                      class="daily-list-item"
+                      role="button"
+                      tabindex="0"
+                      @click=${openDay}
+                      @keydown=${(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openDay();
+                        }
+                      }}
                     >
-                    <img
-                      class="daily-list-icon"
-                      src=${this._staticIcon(url)}
-                      alt=${label}
-                    />
-                    <span class="daily-list-temps">
-                      <span class="daily-max"
-                        >${Math.round(forecast.temperature)}°</span
+                      <span class="daily-list-day"
+                        >${formatWeekday(date, locale)}</span
                       >
-                      <span class="daily-min"
-                        >${Math.round(forecast.templow)}°</span
-                      >
-                    </span>
-                    <ha-icon
-                      class="round-chevron"
-                      icon=${"mdi:chevron-right"}
-                    ></ha-icon>
-                  </div>`;
-                })}
-              </div>`
-            : html`<div class="detail-row-empty">
-                Pas de prévision disponible.
-              </div>`}
+                      <img
+                        class="daily-list-icon"
+                        src=${this._staticIcon(url)}
+                        alt=${label}
+                      />
+                      <span class="daily-list-temps">
+                        <span class="daily-max"
+                          >${Math.round(forecast.temperature)}°</span
+                        >
+                        <span class="daily-min"
+                          >${Math.round(forecast.templow)}°</span
+                        >
+                      </span>
+                      <ha-icon
+                        class="round-chevron"
+                        icon=${"mdi:chevron-right"}
+                      ></ha-icon>
+                    </div>`;
+                  })}
+                </div>`
+              : html`<div class="detail-row-empty">
+                  Pas de prévision disponible.
+                </div>`}
+          </div>
+          ${this._renderRoundBackButton(close)}
         </div>
       </ha-dialog>
     `;
@@ -933,7 +1062,7 @@ class EchoWeatherCard extends LitElement {
   // champs au-delà de température/condition varient selon l'intégration
   // météo ; chaque ligne n'apparaît que si la donnée existe sur la
   // prévision.
-  _renderDayDetail(stateObj, locale) {
+  _renderDayDetail(stateObj, locale, isRound) {
     const forecast = this._detailForecast;
     if (!forecast) return nothing;
 
@@ -984,32 +1113,45 @@ class EchoWeatherCard extends LitElement {
       });
     }
 
-    return html`
-      <ha-dialog open hideActions @closed=${close}>
-        <div class="detail">
-          ${this._renderDialogHeader(formatDate(date, locale), close)}
-          <img class="detail-icon" src=${url} alt=${label} />
-          <div class="detail-condition">${label}</div>
-          <div class="detail-temps">
-            <span class="detail-max"
-              >${Math.round(forecast.temperature)}${tempUnit}</span
-            >
-            <span class="detail-min"
-              >${Math.round(forecast.templow)}${tempUnit}</span
-            >
-          </div>
-          ${rows.length
-            ? html`<div class="detail-rows">
-                ${rows.map(
-                  (r) => html`<div class="detail-row">
-                    <ha-icon icon=${r.icon}></ha-icon>
-                    <span class="detail-row-label">${r.label}</span>
-                    <span class="detail-row-value">${r.value}</span>
-                  </div>`
-                )}
-              </div>`
-            : nothing}
+    const body = html`
+      <div class="detail ${isRound ? "detail-list round-detail" : ""}">
+        ${this._renderDialogHeader(formatDate(date, locale), close, isRound)}
+        <img class="detail-icon" src=${url} alt=${label} />
+        <div class="detail-condition">${label}</div>
+        <div class="detail-temps">
+          <span class="detail-max"
+            >${Math.round(forecast.temperature)}${tempUnit}</span
+          >
+          <span class="detail-min"
+            >${Math.round(forecast.templow)}${tempUnit}</span
+          >
         </div>
+        ${rows.length
+          ? html`<div class="detail-rows">
+              ${rows.map(
+                (r) => html`<div class="detail-row">
+                  <ha-icon icon=${r.icon}></ha-icon>
+                  <span class="detail-row-label">${r.label}</span>
+                  <span class="detail-row-value">${r.value}</span>
+                </div>`
+              )}
+            </div>`
+          : nothing}
+      </div>
+    `;
+
+    return html`
+      <ha-dialog
+        class=${isRound ? "round-dialog" : ""}
+        open
+        hideActions
+        @closed=${close}
+      >
+        ${isRound
+          ? html`<div class="round-dialog-wrap">
+              ${body} ${this._renderRoundBackButton(close)}
+            </div>`
+          : body}
       </ha-dialog>
     `;
   }
@@ -1668,7 +1810,7 @@ class EchoWeatherCard extends LitElement {
       text-align: center;
     }
     .round-clock {
-      font-size: clamp(1.4rem, 13cqw, 2rem);
+      font-size: clamp(1.1rem, 10cqw, 1.5rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -1678,44 +1820,83 @@ class EchoWeatherCard extends LitElement {
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      margin: 4px 0;
+      margin: 2px 0;
     }
     .round-icon {
-      width: clamp(56px, 26cqw, 84px);
-      height: clamp(56px, 26cqw, 84px);
+      width: clamp(42px, 19cqw, 62px);
+      height: clamp(42px, 19cqw, 62px);
     }
     .round-temp {
-      font-size: clamp(1.6rem, 15cqw, 2.4rem);
+      font-size: clamp(1.25rem, 11.5cqw, 1.8rem);
       font-weight: 800;
       line-height: 1;
       margin-top: 2px;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.7rem, 6cqw, 0.85rem);
-      margin-top: 2px;
+      font-size: clamp(0.62rem, 5.2cqw, 0.75rem);
+      margin-top: 1px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* Ligne compacte d'indicateurs (UV, qualité de l'air, humidité, vent,
+       point de rosée) — juste icône + valeur, pas de libellé, pour tenir
+       sur une seule ligne dans le peu d'espace restant. */
+    .round-indicators {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 7px;
+      margin-top: 3px;
+      cursor: pointer;
+    }
+    .round-indicators:focus-visible {
+      outline: 2px solid var(--_text-color);
+      outline-offset: 2px;
+    }
+    .round-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: clamp(0.56rem, 4.6cqw, 0.66rem);
+      font-weight: 700;
+      color: var(--_secondary-color);
+      white-space: nowrap;
+    }
+    .round-chip ha-icon {
+      --mdc-icon-size: clamp(10px, 4cqw, 12px);
+      flex-shrink: 0;
+    }
     .round-launchers {
       display: flex;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 5px;
+      margin-top: 5px;
     }
     .round-launcher {
       display: flex;
-      align-items: center;
-      gap: 3px;
-      padding: 5px 8px;
-      border-radius: 999px;
+      flex-direction: column;
+      gap: 1px;
+      padding: 4px 7px;
+      border-radius: 12px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
-      font-size: clamp(0.62rem, 5.2cqw, 0.72rem);
-      font-weight: 600;
       cursor: pointer;
+    }
+    .round-launcher-top {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: clamp(0.58rem, 4.8cqw, 0.68rem);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .round-launcher-preview {
+      font-size: clamp(0.52rem, 4.2cqw, 0.6rem);
+      font-weight: 600;
+      color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-launcher:focus-visible,
@@ -1723,7 +1904,7 @@ class EchoWeatherCard extends LitElement {
       outline: 2px solid var(--_text-color);
       outline-offset: 2px;
     }
-    .round-launcher ha-icon {
+    .round-launcher-top ha-icon {
       --mdc-icon-size: clamp(12px, 4.5cqw, 14px);
       flex-shrink: 0;
     }
@@ -1735,6 +1916,50 @@ class EchoWeatherCard extends LitElement {
     :host(.light) .round-icon {
       filter: drop-shadow(0 0 2px rgba(10, 20, 30, 0.45))
         drop-shadow(0 0 5px rgba(10, 20, 30, 0.25));
+    }
+
+    /* --- Dialogues en mode round : boîte volontairement petite pour que
+       même ses coins (pas juste son contenu) restent dans le cercle visible
+       — le bouton fermer d'origine (haut-droite, cf. .detail-close) était
+       justement dans la zone la plus susceptible d'être sous le boîtier
+       physique. Remplacé par un bouton retour, centré, dans le flux normal
+       (toujours après le contenu défilable — jamais de chevauchement
+       possible, contrairement à un positionnement absolu calé au pixel). */
+    ha-dialog.round-dialog {
+      --mdc-dialog-min-width: 230px;
+      --mdc-dialog-max-width: 230px;
+    }
+    .round-dialog-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .detail-list.round-detail {
+      max-height: 280px;
+      text-align: center;
+    }
+    .round-detail .detail-header {
+      justify-content: center;
+    }
+    .round-back {
+      width: 34px;
+      height: 34px;
+      --mdc-icon-size: 18px;
+      border-radius: 50%;
+      background: var(--_tile-background);
+      border: 1px solid var(--_tile-border);
+      box-shadow: var(--_tile-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--_text-color);
+      flex-shrink: 0;
+    }
+    .round-back:focus-visible {
+      outline: 2px solid var(--_text-color);
+      outline-offset: 2px;
     }
   `;
 }

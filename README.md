@@ -143,15 +143,25 @@ layout: round
 ```
 
 Écran d'accueil : horloge, icône + température + condition (météo
-actuelle), et deux tuiles "Aujourd'hui" / "Semaine".
+actuelle), une ligne compacte d'indicateurs (UV, qualité de l'air,
+humidité, vent, point de rosée — ceux configurés/disponibles), et deux
+tuiles "Aujourd'hui" / "Semaine" avec un aperçu texte (prochaine heure,
+min/max du jour).
 
-- **Tap sur la météo actuelle** → détail complet (ressenti, humidité,
-  UV, qualité de l'air, vent, point de rosée, lever/coucher, dernière
-  mise à jour) — tout ce qui n'a pas la place sur l'écran principal.
+- **Tap sur la météo actuelle ou la ligne d'indicateurs** → détail complet
+  (ressenti, humidité, UV, qualité de l'air, vent, point de rosée,
+  lever/coucher, dernière mise à jour).
 - **Tap sur "Aujourd'hui"** → liste des prochaines heures.
 - **Tap sur "Semaine"** → liste des prochains jours, chacun cliquable à
   son tour vers son détail complet (même fenêtre que le tap sur un jour
   en mise en page large).
+
+Les fenêtres de détail ont leur propre mise en page en mode round : boîte
+volontairement petite pour tenir entièrement dans la zone circulaire
+visible (contrairement à une fenêtre large classique, ses coins compteraient
+aussi), et un bouton retour rond centré sous le contenu plutôt qu'un ✕ en
+haut à droite — ce coin-là serait le premier à passer sous le boîtier
+physique.
 
 Les options `show_*` habituelles s'appliquent aussi en mode round (ex:
 `show_daily: false` retire la tuile "Semaine"). La carte se clippe
