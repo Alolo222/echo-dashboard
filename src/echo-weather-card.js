@@ -212,7 +212,9 @@ class EchoWeatherCard extends LitElement {
 
     return html`
       <div class="current">
-        <img class="current-icon" src=${url} alt=${conditionLabel} />
+        <div class="current-icon-wrap">
+          <img class="current-icon" src=${url} alt=${conditionLabel} />
+        </div>
         <div class="current-info">
           <div class="current-main">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
@@ -616,10 +618,34 @@ class EchoWeatherCard extends LitElement {
       padding-bottom: var(--_row-gap);
       border-bottom: 1px solid var(--_divider-color);
     }
-    .current-icon {
+    .current-icon-wrap {
+      position: relative;
       width: var(--_current-icon-size);
       height: var(--_current-icon-size);
       flex-shrink: 0;
+    }
+    .current-icon {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Halo de lisibilité en mode clair pour l'icône actuelle : un dégradé
+       radial statique derrière l'icône plutôt qu'un filter drop-shadow
+       (cf. commentaire plus bas sur .hourly-icon/.daily-icon) — un fond
+       qui ne change jamais est peint une seule fois par le compositeur,
+       sans recalcul à chaque frame de l'icône animée par-dessus. */
+    :host(.light) .current-icon-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 4%;
+      border-radius: 50%;
+      background: radial-gradient(
+        closest-side,
+        rgba(10, 20, 30, 0.32) 0%,
+        rgba(10, 20, 30, 0.16) 55%,
+        rgba(10, 20, 30, 0) 78%
+      );
     }
     .current-temp {
       font-size: var(--_current-temp-size);
@@ -901,8 +927,14 @@ class EchoWeatherCard extends LitElement {
        fond sombre : en mode clair elles deviennent quasi invisibles sans
        aide. drop-shadow() (contrairement à box-shadow) suit la silhouette
        réelle de l'icône (alpha), donc ça ajoute un halo sombre autour des
-       traits clairs sans plaque/cercle disgracieux derrière. */
-    :host(.light) .current-icon,
+       traits clairs sans plaque/cercle disgracieux derrière.
+       Volontairement PAS appliqué à .current-icon : c'est la seule icône
+       encore animée (SMIL), et un drop-shadow sur un contenu qui change à
+       chaque frame doit être recalculé à chaque frame (contrairement à un
+       contenu statique, mis en cache après le premier paint) — sur le GPU
+       modeste de l'Echo Show 5, ça suffisait à plafonner l'animation à
+       ~10fps. Les icônes horaires/quotidiennes sont figées (cf. icons.js)
+       donc le filtre n'y coûte plus qu'un calcul unique. */
     :host(.light) .hourly-icon,
     :host(.light) .daily-icon {
       filter: drop-shadow(0 0 2px rgba(10, 20, 30, 0.45))
