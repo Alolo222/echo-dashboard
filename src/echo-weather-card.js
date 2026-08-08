@@ -1950,6 +1950,13 @@ class EchoWeatherCard extends LitElement {
       width: clamp(90px, 39cqw, 126px);
       height: clamp(90px, 39cqw, 126px);
       flex-shrink: 0;
+      /* Comme .current-icon en mise en page large : c'est la seule icône
+         encore animée (SMIL) ici aussi, et elle porte le même filter
+         drop-shadow en mode clair (cf. plus bas) — sans sa propre couche
+         de composition GPU, cette combinaison avait causé un plafond de
+         FPS en mise en page large, et pourrait expliquer des artefacts de
+         rendu sur du matériel/pilote GPU capricieux. */
+      will-change: transform;
     }
     .round-temp {
       font-size: clamp(2.6rem, 24cqw, 3.7rem);
