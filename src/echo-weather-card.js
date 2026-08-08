@@ -1776,8 +1776,8 @@ class EchoWeatherCard extends LitElement {
 
     /* --- Détail d'un jour de prévision (ha-dialog) --- */
     ha-dialog {
-      --mdc-dialog-min-width: min(90vw, 380px);
-      --mdc-dialog-max-width: min(90vw, 380px);
+      --mdc-dialog-min-width: min(90vw, 460px);
+      --mdc-dialog-max-width: min(90vw, 460px);
       /* Deux variables plutôt qu'une : les versions récentes de Home
          Assistant ont migré ha-dialog vers un composant interne
          (wa-dialog, "WebAwesome") qui lit --ha-dialog-surface-background
@@ -1823,6 +1823,45 @@ class EchoWeatherCard extends LitElement {
       gap: 4px;
       min-width: 240px;
       padding: 4px 4px 8px;
+    }
+    /* Détail d'un jour en mise en page large (jamais .detail-list — round
+       ajoute toujours cette classe, cf. _renderDayDetail) : beaucoup plus
+       de place disponible que sur un écran rond, autant en profiter — la
+       boîte du dialogue elle-même (ha-dialog, cf. plus haut) est aussi
+       plus large désormais. */
+    .detail:not(.detail-list) {
+      min-width: 340px;
+      gap: 6px;
+      padding: 8px 8px 14px;
+    }
+    .detail:not(.detail-list) .detail-icon {
+      width: 128px;
+      height: 128px;
+    }
+    .detail:not(.detail-list) .detail-date {
+      font-size: 1.5rem;
+    }
+    .detail:not(.detail-list) .detail-condition {
+      font-size: 1.25rem;
+    }
+    .detail:not(.detail-list) .detail-temps {
+      font-size: 2.3rem;
+    }
+    .detail:not(.detail-list) .detail-rows {
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .detail:not(.detail-list) .detail-row {
+      padding: 11px 16px;
+    }
+    .detail:not(.detail-list) .detail-row ha-icon {
+      --mdc-icon-size: 21px;
+    }
+    .detail:not(.detail-list) .detail-row-label {
+      font-size: 1.05rem;
+    }
+    .detail:not(.detail-list) .detail-row-value {
+      font-size: 1.1rem;
     }
     .detail-header {
       display: flex;
@@ -1898,7 +1937,7 @@ class EchoWeatherCard extends LitElement {
       text-align: center;
     }
     .detail-list {
-      max-height: 70vh;
+      max-height: 80vh;
       overflow-y: auto;
     }
     .hourly-list,
@@ -2182,8 +2221,12 @@ class EchoWeatherCard extends LitElement {
        (toujours après le contenu défilable — jamais de chevauchement
        possible, contrairement à un positionnement absolu calé au pixel). */
     ha-dialog.round-dialog {
-      --mdc-dialog-min-width: 230px;
-      --mdc-dialog-max-width: 230px;
+      /* 240x350 : diagonale/2 ≈ 212px, encore sous les ~220px de rayon sûr
+         retenus pour la zone circulaire visible (cf. .card.round) — plus
+         de place qu'avant (230x280), pensé pour que 5 jours tiennent sans
+         défiler (cf. .detail-list.round-detail). */
+      --mdc-dialog-min-width: 240px;
+      --mdc-dialog-max-width: 240px;
     }
     .round-dialog-wrap {
       display: flex;
@@ -2192,7 +2235,7 @@ class EchoWeatherCard extends LitElement {
       gap: 8px;
     }
     .detail-list.round-detail {
-      max-height: 280px;
+      max-height: 350px;
       text-align: center;
     }
     .round-detail .detail-header {

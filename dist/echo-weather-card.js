@@ -1,6 +1,6 @@
 var Be = Object.defineProperty;
-var Fe = (r, e, t) => e in r ? Be(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var ee = (r, e, t) => Fe(r, typeof e != "symbol" ? e + "" : e, t);
+var je = (r, e, t) => e in r ? Be(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var ee = (r, e, t) => je(r, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -25,7 +25,7 @@ let Re = class {
     return this.cssText;
   }
 };
-const je = (r) => new Re(typeof r == "string" ? r : r + "", void 0, ce), Ve = (r, ...e) => {
+const Fe = (r) => new Re(typeof r == "string" ? r : r + "", void 0, ce), Ve = (r, ...e) => {
   const t = r.length === 1 ? r[0] : e.reduce((i, n, a) => i + ((s) => {
     if (s._$cssResult$ === !0) return s.cssText;
     if (typeof s == "number") return s;
@@ -41,7 +41,7 @@ const je = (r) => new Re(typeof r == "string" ? r : r + "", void 0, ce), Ve = (r
 }, he = le ? (r) => r : (r) => r instanceof CSSStyleSheet ? ((e) => {
   let t = "";
   for (const i of e.cssRules) t += i.cssText;
-  return je(t);
+  return Fe(t);
 })(r) : r;
 /**
  * @license
@@ -287,16 +287,16 @@ let U = class extends HTMLElement {
   firstUpdated(e) {
   }
 };
-var De;
-U.elementStyles = [], U.shadowRootOptions = { mode: "open" }, U[O("elementProperties")] = /* @__PURE__ */ new Map(), U[O("finalized")] = /* @__PURE__ */ new Map(), te == null || te({ ReactiveElement: U }), ((De = A.reactiveElementVersions) != null ? De : A.reactiveElementVersions = []).push("2.1.2");
+var ze;
+U.elementStyles = [], U.shadowRootOptions = { mode: "open" }, U[O("elementProperties")] = /* @__PURE__ */ new Map(), U[O("finalized")] = /* @__PURE__ */ new Map(), te == null || te({ ReactiveElement: U }), ((ze = A.reactiveElementVersions) != null ? ze : A.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const B = globalThis, fe = (r) => r, Z = B.trustedTypes, _e = Z ? Z.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, Le = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, Ne = "?" + x, et = `<${Ne}>`, z = document, j = () => z.createComment(""), V = (r) => r === null || typeof r != "object" && typeof r != "function", de = Array.isArray, tt = (r) => de(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", ie = `[ 	
+const B = globalThis, fe = (r) => r, Z = B.trustedTypes, _e = Z ? Z.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, Le = "$lit$", $ = `lit$${Math.random().toFixed(9).slice(2)}$`, Ne = "?" + $, et = `<${Ne}>`, D = document, F = () => D.createComment(""), V = (r) => r === null || typeof r != "object" && typeof r != "function", de = Array.isArray, tt = (r) => de(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", ie = `[ 	
 \f\r]`, I = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ge = /-->/g, ve = />/g, k = RegExp(`>|${ie}(?:([^\\s"'>=/]+)(${ie}*=${ie}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), be = /'/g, we = /"/g, He = /^(?:script|style|textarea|title)$/i, it = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), d = it(1), R = Symbol.for("lit-noChange"), u = Symbol.for("lit-nothing"), ye = /* @__PURE__ */ new WeakMap(), M = z.createTreeWalker(z, 129);
+\f\r"'\`<>=]|("|')|))|$)`, "g"), be = /'/g, we = /"/g, He = /^(?:script|style|textarea|title)$/i, it = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), d = it(1), R = Symbol.for("lit-noChange"), u = Symbol.for("lit-nothing"), ye = /* @__PURE__ */ new WeakMap(), M = D.createTreeWalker(D, 129);
 function Ie(r, e) {
   if (!de(r) || !r.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return _e !== void 0 ? _e.createHTML(e) : e;
@@ -309,7 +309,7 @@ const nt = (r, e) => {
     let c, h, p = -1, m = 0;
     for (; m < o.length && (s.lastIndex = m, h = s.exec(o), h !== null); ) m = s.lastIndex, s === I ? h[1] === "!--" ? s = ge : h[1] !== void 0 ? s = ve : h[2] !== void 0 ? (He.test(h[2]) && (n = RegExp("</" + h[2], "g")), s = k) : h[3] !== void 0 && (s = k) : s === k ? h[0] === ">" ? (s = n != null ? n : I, p = -1) : h[1] === void 0 ? p = -2 : (p = s.lastIndex - h[2].length, c = h[1], s = h[3] === void 0 ? k : h[3] === '"' ? we : be) : s === we || s === be ? s = k : s === ge || s === ve ? s = I : (s = k, n = void 0);
     const f = s === k && r[l + 1].startsWith("/>") ? " " : "";
-    a += s === I ? o + et : p >= 0 ? (i.push(c), o.slice(0, p) + Le + o.slice(p) + x + f) : o + x + (p === -2 ? l : f);
+    a += s === I ? o + et : p >= 0 ? (i.push(c), o.slice(0, p) + Le + o.slice(p) + $ + f) : o + $ + (p === -2 ? l : f);
   }
   return [Ie(r, a + (r[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), i];
 };
@@ -326,27 +326,27 @@ class G {
     for (; (n = M.nextNode()) !== null && o.length < l; ) {
       if (n.nodeType === 1) {
         if (n.hasAttributes()) for (const p of n.getAttributeNames()) if (p.endsWith(Le)) {
-          const m = h[s++], f = n.getAttribute(p).split(x), _ = /([.?@])?(.*)/.exec(m);
+          const m = h[s++], f = n.getAttribute(p).split($), _ = /([.?@])?(.*)/.exec(m);
           o.push({ type: 1, index: a, name: _[2], strings: f, ctor: _[1] === "." ? at : _[1] === "?" ? st : _[1] === "@" ? ot : K }), n.removeAttribute(p);
-        } else p.startsWith(x) && (o.push({ type: 6, index: a }), n.removeAttribute(p));
+        } else p.startsWith($) && (o.push({ type: 6, index: a }), n.removeAttribute(p));
         if (He.test(n.tagName)) {
-          const p = n.textContent.split(x), m = p.length - 1;
+          const p = n.textContent.split($), m = p.length - 1;
           if (m > 0) {
             n.textContent = Z ? Z.emptyScript : "";
-            for (let f = 0; f < m; f++) n.append(p[f], j()), M.nextNode(), o.push({ type: 2, index: ++a });
-            n.append(p[m], j());
+            for (let f = 0; f < m; f++) n.append(p[f], F()), M.nextNode(), o.push({ type: 2, index: ++a });
+            n.append(p[m], F());
           }
         }
       } else if (n.nodeType === 8) if (n.data === Ne) o.push({ type: 2, index: a });
       else {
         let p = -1;
-        for (; (p = n.data.indexOf(x, p + 1)) !== -1; ) o.push({ type: 7, index: a }), p += x.length - 1;
+        for (; (p = n.data.indexOf($, p + 1)) !== -1; ) o.push({ type: 7, index: a }), p += $.length - 1;
       }
       a++;
     }
   }
   static createElement(e, t) {
-    const i = z.createElement("template");
+    const i = D.createElement("template");
     return i.innerHTML = e, i;
   }
 }
@@ -369,7 +369,7 @@ class rt {
   }
   u(e) {
     var c;
-    const { el: { content: t }, parts: i } = this._$AD, n = ((c = e == null ? void 0 : e.creationScope) != null ? c : z).importNode(t, !0);
+    const { el: { content: t }, parts: i } = this._$AD, n = ((c = e == null ? void 0 : e.creationScope) != null ? c : D).importNode(t, !0);
     M.currentNode = n;
     let a = M.nextNode(), s = 0, l = 0, o = i[0];
     for (; o !== void 0; ) {
@@ -379,7 +379,7 @@ class rt {
       }
       s !== (o == null ? void 0 : o.index) && (a = M.nextNode(), s++);
     }
-    return M.currentNode = z, n;
+    return M.currentNode = D, n;
   }
   p(e) {
     let t = 0;
@@ -416,7 +416,7 @@ class J {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== u && V(this._$AH) ? this._$AA.nextSibling.data = e : this.T(z.createTextNode(e)), this._$AH = e;
+    this._$AH !== u && V(this._$AH) ? this._$AA.nextSibling.data = e : this.T(D.createTextNode(e)), this._$AH = e;
   }
   $(e) {
     var a;
@@ -435,7 +435,7 @@ class J {
     de(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, n = 0;
-    for (const a of e) n === t.length ? t.push(i = new J(this.O(j()), this.O(j()), this, this.options)) : i = t[n], i._$AI(a), n++;
+    for (const a of e) n === t.length ? t.push(i = new J(this.O(F()), this.O(F()), this, this.options)) : i = t[n], i._$AI(a), n++;
     n < t.length && (this._$AR(i && i._$AB.nextSibling, n), t.length = n);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -518,15 +518,15 @@ class lt {
   }
 }
 const ne = B.litHtmlPolyfillSupport;
-var ze;
-ne == null || ne(G, J), ((ze = B.litHtmlVersions) != null ? ze : B.litHtmlVersions = []).push("3.3.3");
+var De;
+ne == null || ne(G, J), ((De = B.litHtmlVersions) != null ? De : B.litHtmlVersions = []).push("3.3.3");
 const ct = (r, e, t) => {
   var a, s;
   const i = (a = t == null ? void 0 : t.renderBefore) != null ? a : e;
   let n = i._$litPart$;
   if (n === void 0) {
     const l = (s = t == null ? void 0 : t.renderBefore) != null ? s : null;
-    i._$litPart$ = n = new J(e.insertBefore(j(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = n = new J(e.insertBefore(F(), l), l, void 0, t != null ? t : {});
   }
   return n._$AI(r), n;
 };
@@ -535,8 +535,8 @@ const ct = (r, e, t) => {
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const D = globalThis;
-class F extends U {
+const z = globalThis;
+class j extends U {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -562,12 +562,12 @@ class F extends U {
   }
 }
 var Pe;
-F._$litElement$ = !0, F.finalized = !0, (Pe = D.litElementHydrateSupport) == null || Pe.call(D, { LitElement: F });
-const re = D.litElementPolyfillSupport;
-re == null || re({ LitElement: F });
+j._$litElement$ = !0, j.finalized = !0, (Pe = z.litElementHydrateSupport) == null || Pe.call(z, { LitElement: j });
+const re = z.litElementPolyfillSupport;
+re == null || re({ LitElement: j });
 var Ue;
-((Ue = D.litElementVersions) != null ? Ue : D.litElementVersions = []).push("4.2.2");
-const Oe = "echo-weather-card", dt = "https://cdn.jsdelivr.net/npm/@meteocons/svg/fill", ut = 1, ht = 2, $e = {
+((Ue = z.litElementVersions) != null ? Ue : z.litElementVersions = []).push("4.2.2");
+const Oe = "echo-weather-card", dt = "https://cdn.jsdelivr.net/npm/@meteocons/svg/fill", ut = 1, ht = 2, xe = {
   hourly_count: 6,
   daily_count: 4,
   language: null,
@@ -668,7 +668,7 @@ function y(r, e, t) {
     hour12: t === "12"
   }).format(r).replace(/\s/g, "");
 }
-function xe(r, e) {
+function $e(r, e) {
   return new Intl.DateTimeFormat(e, { weekday: "short" }).format(r);
 }
 function Ae(r, e) {
@@ -1142,14 +1142,14 @@ const yt = {
 function qe(r) {
   return yt[r] || null;
 }
-class oe extends F {
+class oe extends j {
   setConfig(e) {
     if (!(e != null && e.entity))
       throw new Error("echo-weather-card: 'entity' est requis");
     this._config = {
-      ...$e,
+      ...xe,
       ...e,
-      icons: { ...$e.icons, ...e.icons || {} }
+      icons: { ...xe.icons, ...e.icons || {} }
     };
   }
   static getStubConfig(e) {
@@ -1273,7 +1273,7 @@ class oe extends F {
       (H) => new Date(H.datetime).getTime() >= Date.now()
     ), W = b ? `${ae(new Date(b.datetime), t, i)} · ${Math.round(b.temperature)}°` : null, L = (this._daily || [])[0], N = L ? `↑${Math.round(L.temperature)}° ↓${Math.round(L.templow)}°` : null, S = [];
     this._config.show_feels_like && c != null && S.push(`Ressenti ${Math.round(c)}°`), this._config.show_humidity && h != null && S.push(`Humidité ${Math.round(h)}%`);
-    const P = this._config.show_date ? Ee(m) : null, $ = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], w = $ && !["unknown", "unavailable"].includes($.state) ? qe($.state) : null, Q = [];
+    const P = this._config.show_date ? Ee(m) : null, x = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], w = x && !["unknown", "unavailable"].includes(x.state) ? qe(x.state) : null, Q = [];
     return w && Q.push(w.label), P && Q.push(P), d`
       <div class="card round" style=${f}>
         ${this._config.show_clock ? d`<div class="round-clock">
@@ -1602,7 +1602,7 @@ class oe extends F {
       }}
                     >
                       <span class="daily-list-day"
-                        >${xe(a, e)}</span
+                        >${$e(a, e)}</span
                       >
                       <img
                         class="daily-list-icon"
@@ -1635,8 +1635,8 @@ class oe extends F {
   _renderCurrent(e, t, i) {
     const n = E(e.state, this._isNight()), a = q(n, this._config.icons), s = C(this._hass, e.state), l = e.attributes.temperature, o = e.attributes.temperature_unit || "°C", c = e.attributes.apparent_temperature, h = e.attributes.humidity, p = e.last_updated ? new Date(e.last_updated) : null, m = [];
     this._config.show_feels_like && c != null && m.push(`Ressenti ${Math.round(c)}°`), this._config.show_last_updated && p && m.push(`Maj à ${y(p, t, i)}`);
-    const f = this._config.uv_entity && this._hass.states[this._config.uv_entity], _ = f && !["unknown", "unavailable"].includes(f.state), g = this._config.air_quality_entity && this._hass.states[this._config.air_quality_entity], v = g && !["unknown", "unavailable"].includes(g.state), b = _ || v, W = this._config.show_humidity && h != null, L = this._config.show_clock || this._config.show_date, N = /* @__PURE__ */ new Date(), S = this._config.show_date ? Ee(N) : null, P = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], $ = P && !["unknown", "unavailable"].includes(P.state) ? qe(P.state) : null, w = [];
-    return $ && w.push($.label), S && w.push(S), d`
+    const f = this._config.uv_entity && this._hass.states[this._config.uv_entity], _ = f && !["unknown", "unavailable"].includes(f.state), g = this._config.air_quality_entity && this._hass.states[this._config.air_quality_entity], v = g && !["unknown", "unavailable"].includes(g.state), b = _ || v, W = this._config.show_humidity && h != null, L = this._config.show_clock || this._config.show_date, N = /* @__PURE__ */ new Date(), S = this._config.show_date ? Ee(N) : null, P = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], x = P && !["unknown", "unavailable"].includes(P.state) ? qe(P.state) : null, w = [];
+    return x && w.push(x.label), S && w.push(S), d`
       <div class="current">
         <img
           class="current-icon"
@@ -1677,9 +1677,9 @@ class oe extends F {
                         ${Ae(N, t)}
                       </div>` : u}
                   ${w.length ? d`<div class="moon-line">
-                        ${$ ? d`<ha-icon
+                        ${x ? d`<ha-icon
                               class="moon-icon"
-                              icon=${$.icon}
+                              icon=${x.icon}
                             ></ha-icon>` : u}
                         <span>${w.join(" · ")}</span>
                       </div>` : u}
@@ -1818,7 +1818,7 @@ class oe extends F {
         (o.key === "Enter" || o.key === " ") && (o.preventDefault(), this._detailForecast = i);
       }}
             >
-              <div class="daily-day">${xe(n, e)}</div>
+              <div class="daily-day">${$e(n, e)}</div>
               <img
                 class="daily-icon"
                 src=${this._staticIcon(s)}
@@ -2466,8 +2466,8 @@ ee(oe, "properties", {
 
     /* --- Détail d'un jour de prévision (ha-dialog) --- */
     ha-dialog {
-      --mdc-dialog-min-width: min(90vw, 380px);
-      --mdc-dialog-max-width: min(90vw, 380px);
+      --mdc-dialog-min-width: min(90vw, 460px);
+      --mdc-dialog-max-width: min(90vw, 460px);
       /* Deux variables plutôt qu'une : les versions récentes de Home
          Assistant ont migré ha-dialog vers un composant interne
          (wa-dialog, "WebAwesome") qui lit --ha-dialog-surface-background
@@ -2513,6 +2513,45 @@ ee(oe, "properties", {
       gap: 4px;
       min-width: 240px;
       padding: 4px 4px 8px;
+    }
+    /* Détail d'un jour en mise en page large (jamais .detail-list — round
+       ajoute toujours cette classe, cf. _renderDayDetail) : beaucoup plus
+       de place disponible que sur un écran rond, autant en profiter — la
+       boîte du dialogue elle-même (ha-dialog, cf. plus haut) est aussi
+       plus large désormais. */
+    .detail:not(.detail-list) {
+      min-width: 340px;
+      gap: 6px;
+      padding: 8px 8px 14px;
+    }
+    .detail:not(.detail-list) .detail-icon {
+      width: 128px;
+      height: 128px;
+    }
+    .detail:not(.detail-list) .detail-date {
+      font-size: 1.5rem;
+    }
+    .detail:not(.detail-list) .detail-condition {
+      font-size: 1.25rem;
+    }
+    .detail:not(.detail-list) .detail-temps {
+      font-size: 2.3rem;
+    }
+    .detail:not(.detail-list) .detail-rows {
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .detail:not(.detail-list) .detail-row {
+      padding: 11px 16px;
+    }
+    .detail:not(.detail-list) .detail-row ha-icon {
+      --mdc-icon-size: 21px;
+    }
+    .detail:not(.detail-list) .detail-row-label {
+      font-size: 1.05rem;
+    }
+    .detail:not(.detail-list) .detail-row-value {
+      font-size: 1.1rem;
     }
     .detail-header {
       display: flex;
@@ -2588,7 +2627,7 @@ ee(oe, "properties", {
       text-align: center;
     }
     .detail-list {
-      max-height: 70vh;
+      max-height: 80vh;
       overflow-y: auto;
     }
     .hourly-list,
@@ -2872,8 +2911,12 @@ ee(oe, "properties", {
        (toujours après le contenu défilable — jamais de chevauchement
        possible, contrairement à un positionnement absolu calé au pixel). */
     ha-dialog.round-dialog {
-      --mdc-dialog-min-width: 230px;
-      --mdc-dialog-max-width: 230px;
+      /* 240x350 : diagonale/2 ≈ 212px, encore sous les ~220px de rayon sûr
+         retenus pour la zone circulaire visible (cf. .card.round) — plus
+         de place qu'avant (230x280), pensé pour que 5 jours tiennent sans
+         défiler (cf. .detail-list.round-detail). */
+      --mdc-dialog-min-width: 240px;
+      --mdc-dialog-max-width: 240px;
     }
     .round-dialog-wrap {
       display: flex;
@@ -2882,7 +2925,7 @@ ee(oe, "properties", {
       gap: 8px;
     }
     .detail-list.round-detail {
-      max-height: 280px;
+      max-height: 350px;
       text-align: center;
     }
     .round-detail .detail-header {
