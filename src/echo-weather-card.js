@@ -187,6 +187,9 @@ class EchoWeatherCard extends LitElement {
     const conditionLabel = localizeCondition(this._hass, stateObj.state);
     const temp = stateObj.attributes.temperature;
     const tempUnit = stateObj.attributes.temperature_unit || "°C";
+    const lastUpdated = stateObj.last_updated
+      ? new Date(stateObj.last_updated)
+      : null;
     const now = new Date();
 
     const cardStyle =
@@ -246,8 +249,16 @@ class EchoWeatherCard extends LitElement {
                     : this._staticIcon(url)}
                   alt=${conditionLabel}
                 />
-                <div class="round-temp">${Math.round(temp)}${tempUnit}</div>
-                <div class="round-condition">${conditionLabel}</div>
+                <div class="round-current-info">
+                  <div class="round-temp">${Math.round(temp)}${tempUnit}</div>
+                  <div class="round-condition">${conditionLabel}</div>
+                  ${this._config.show_last_updated && lastUpdated
+                    ? html`<div class="round-updated">
+                        Maj à
+                        ${formatTime(lastUpdated, locale, timeFormat)}
+                      </div>`
+                    : nothing}
+                </div>
               </div>
             `
           : nothing}
@@ -1814,36 +1825,53 @@ class EchoWeatherCard extends LitElement {
       text-align: center;
     }
     .round-clock {
-      font-size: clamp(1.6rem, 15cqw, 2.3rem);
+      font-size: clamp(1.8rem, 17cqw, 2.6rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
+    /* Icône à gauche, infos (temp/condition/maj) à droite — comme le bloc
+       météo actuelle en mise en page large, pour profiter de la largeur
+       disponible plutôt que d'empiler verticalement. */
     .round-current {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
+      gap: 10px;
       cursor: pointer;
-      margin: 3px 0;
+      margin: 4px 0;
+    }
+    .round-current-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+      text-align: left;
     }
     .round-icon {
-      width: clamp(62px, 29cqw, 92px);
-      height: clamp(62px, 29cqw, 92px);
+      width: clamp(76px, 34cqw, 112px);
+      height: clamp(76px, 34cqw, 112px);
+      flex-shrink: 0;
     }
     .round-temp {
-      font-size: clamp(1.8rem, 17cqw, 2.6rem);
+      font-size: clamp(2.1rem, 20cqw, 3rem);
       font-weight: 800;
       line-height: 1;
-      margin-top: 2px;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.85rem, 7cqw, 1.05rem);
+      font-size: clamp(0.95rem, 8cqw, 1.15rem);
       font-weight: 500;
-      margin-top: 2px;
+      margin-top: 3px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .round-updated {
+      color: var(--_secondary-color);
+      font-size: clamp(0.62rem, 5cqw, 0.75rem);
+      margin-top: 3px;
       white-space: nowrap;
     }
     /* Ligne compacte d'indicateurs (UV, qualité de l'air, humidité, vent,
@@ -1865,26 +1893,26 @@ class EchoWeatherCard extends LitElement {
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
+      font-size: clamp(0.85rem, 7cqw, 1.02rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(14px, 5.5cqw, 17px);
+      --mdc-icon-size: clamp(16px, 6.2cqw, 19px);
       flex-shrink: 0;
     }
     .round-launchers {
       display: flex;
-      gap: 7px;
-      margin-top: 8px;
+      gap: 8px;
+      margin-top: 9px;
     }
     .round-launcher {
       display: flex;
       flex-direction: column;
       gap: 2px;
-      padding: 6px 10px;
-      border-radius: 14px;
+      padding: 7px 11px;
+      border-radius: 15px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
@@ -1894,12 +1922,12 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       align-items: center;
       gap: 4px;
-      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
+      font-size: clamp(0.85rem, 7cqw, 1.02rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.68rem, 5.5cqw, 0.8rem);
+      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1910,11 +1938,11 @@ class EchoWeatherCard extends LitElement {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(15px, 5.8cqw, 18px);
+      --mdc-icon-size: clamp(17px, 6.5cqw, 20px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(14px, 5.2cqw, 17px);
+      --mdc-icon-size: clamp(16px, 6cqw, 19px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }
