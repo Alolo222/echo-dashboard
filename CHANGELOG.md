@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.2
+
+- Portage fidèle des proportions du button-card d'origine, remplaçant
+  l'échelle "maison" introduite en 1.0.0/1.0.1 : grille à 3 bandes
+  (15vh/50vh/15vh) avec horloge à 55vh, date **et** bloc météo tous deux
+  à 15vh (même poids visuel, pas un sous-titre discret) — la 1.0.1
+  agrandissait déjà tout, mais avec des ratios propres à la carte plutôt
+  que ceux de l'original.
+- Bloc météo repositionné en haut de la colonne de gauche (comme
+  l'original, `grid-template-areas: "weather status"`), toujours
+  recentré en mode round pour rester hors des coins clippés par le
+  boîtier.
+- Captures docs/ régénérées.
+
 ## 1.0.1
 
 - Horloge, date et bloc météo nettement plus grands (horloge notamment,

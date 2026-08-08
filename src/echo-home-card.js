@@ -253,15 +253,22 @@ class EchoHomeCard extends LitElement {
       width: 100%;
       overflow: hidden;
       box-sizing: border-box;
-      --_clock-size: var(--echo-home-clock-size, clamp(6rem, 44vh, 16rem));
-      --_date-size: var(--echo-home-date-size, clamp(1.7rem, 11vh, 3.4rem));
+      /* Proportions reprises telles quelles du button-card d'origine
+         (View Assist, personnalisé par l'utilisateur) : horloge à 55vh
+         (volontairement plus grande que sa propre bande de grille,
+         cf. .card ci-dessous), date et température météo toutes deux à
+         15vh — même poids visuel, pas un sous-titre discret. Les
+         clamp() ne sont là qu'en garde-fou (écran extrême), pas pour
+         réduire la cible vh. */
+      --_clock-size: var(--echo-home-clock-size, clamp(6rem, 55vh, 20rem));
+      --_date-size: var(--echo-home-date-size, clamp(2rem, 15vh, 6rem));
       --_weather-icon-size: var(
         --echo-home-weather-icon-size,
-        clamp(56px, 16vh, 100px)
+        clamp(48px, 16vh, 130px)
       );
       --_weather-temp-size: var(
         --echo-home-weather-temp-size,
-        clamp(1.7rem, 9vh, 3rem)
+        clamp(1.8rem, 15vh, 5rem)
       );
       --_text-color: var(--echo-home-text-color, #ffffff);
       /* "red" tel quel par défaut (pas une teinte adoucie) : c'est
@@ -284,6 +291,15 @@ class EchoHomeCard extends LitElement {
       color: var(--_text-color);
     }
 
+    /* Grille à 3 bandes reprise du button-card d'origine
+       (grid-template-areas "title status" / "time time" / "date date",
+       lignes 15vh/50vh/15vh) : la météo occupe la colonne de gauche de
+       la première bande (la colonne de droite, "status", reste vide —
+       déjà inutilisée dans la version personnalisée d'origine), horloge
+       et date prennent toute la largeur en dessous. Les 3 lignes ne
+       totalisent que 80vh : le reste de la hauteur (20vh) reste
+       volontairement vide sous la date plutôt que d'être redistribué,
+       comme dans l'original (pas de align-content: stretch/center ici). */
     .card {
       position: relative;
       height: 100%;
@@ -295,18 +311,27 @@ class EchoHomeCard extends LitElement {
       background-color: #0a1424;
       background-size: cover;
       background-position: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(4px, 1.5vh, 12px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 15vh 50vh 15vh;
+      grid-template-areas:
+        "weather status"
+        "clock clock"
+        "date date";
     }
 
     /* Écran rond (Echo Spot) : la carte se clippe elle-même en cercle
        plutôt que de compter sur le boîtier physique — cf. gotchas
-       matériel. */
+       matériel. Une seule colonne : un bloc météo calé à gauche comme en
+       paysage tomberait sous le boîtier physique (coin clippé). */
     .card.round {
       border-radius: 50%;
+      grid-template-columns: 1fr;
+      grid-template-rows: 15% 55% 15%;
+      grid-template-areas:
+        "weather"
+        "clock"
+        "date";
     }
 
     /* Assombrit légèrement toute image de fond pour garder l'horloge
@@ -320,7 +345,9 @@ class EchoHomeCard extends LitElement {
     }
 
     .clock {
-      position: relative;
+      grid-area: clock;
+      justify-self: center;
+      align-self: center;
       z-index: 1;
       font-size: var(--_clock-size);
       font-weight: 700;
@@ -336,7 +363,9 @@ class EchoHomeCard extends LitElement {
     }
 
     .date {
-      position: relative;
+      grid-area: date;
+      justify-self: center;
+      align-self: center;
       z-index: 1;
       font-size: var(--_date-size);
       color: var(--_text-color);
@@ -344,23 +373,23 @@ class EchoHomeCard extends LitElement {
     }
 
     .weather {
-      position: absolute;
-      top: clamp(12px, 4vh, 28px);
-      left: clamp(12px, 3vw, 28px);
+      grid-area: weather;
+      justify-self: start;
+      align-self: center;
       z-index: 1;
       display: flex;
       align-items: center;
-      gap: clamp(4px, 1vw, 10px);
+      gap: clamp(6px, 1.2vw, 14px);
+      padding-left: clamp(12px, 5%, 32px);
     }
 
-    /* En mode round, un bloc météo calé en haut à gauche tomberait sous
-       le boîtier physique (coin clippé) — cf. gotchas écran rond. Centré
-       en haut à la place, avec assez de marge pour rester dans la zone
-       visible du cercle. */
+    /* En mode round, un bloc météo calé à gauche tomberait sous le
+       boîtier physique (coin clippé) — cf. gotchas écran rond. Centré
+       à la place, sans le padding-left qui n'a plus lieu d'être sur une
+       seule colonne. */
     .card.round .weather {
-      left: 50%;
-      top: clamp(28px, 15%, 56px);
-      transform: translateX(-50%);
+      justify-self: center;
+      padding-left: 0;
     }
 
     .weather.clickable {
@@ -390,17 +419,17 @@ class EchoHomeCard extends LitElement {
        round. Valeurs propres à ce layout (pas de variable CSS exposée),
        comme pour echo-weather-card. */
     .card.round .clock {
-      font-size: clamp(3.6rem, 34vmin, 8rem);
+      font-size: clamp(3.6rem, 48vmin, 11rem);
     }
     .card.round .date {
-      font-size: clamp(1.2rem, 8.5vmin, 2rem);
+      font-size: clamp(1.4rem, 12vmin, 3.2rem);
     }
     .card.round .weather-icon {
-      width: clamp(36px, 12vmin, 58px);
-      height: clamp(36px, 12vmin, 58px);
+      width: clamp(36px, 13vmin, 72px);
+      height: clamp(36px, 13vmin, 72px);
     }
     .card.round .weather-temp {
-      font-size: clamp(1.2rem, 8vmin, 1.9rem);
+      font-size: clamp(1.4rem, 12vmin, 2.8rem);
     }
   `;
 }

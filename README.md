@@ -35,7 +35,10 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
 
 ## Fonctionnalités
 
-- Horloge géante + date, lisibles de loin, sur fond plein écran.
+- Horloge géante + date, lisibles de loin, sur fond plein écran — mêmes
+  proportions que le button-card d'origine (horloge à 55vh, date et
+  bloc météo tous deux à 15vh, sur une grille à 3 bandes 15vh/50vh/15vh),
+  pas une échelle réinventée.
 - Fond dynamique : reprend l'attribut `background` (URL d'image) de
   l'entité satellite View Assist, avec un léger voile sombre pour garder
   le texte lisible dessus. Repli sur un dégradé sombre si aucune image
@@ -219,10 +222,10 @@ rien à régler. À poser sur le sélecteur `:host` de la carte (via
 | `--echo-home-night-color` | Couleur de l'horloge en mode nuit | `red` |
 | `--echo-home-night-opacity` | Opacité de l'horloge en mode nuit | `0.35` |
 | `--echo-home-shader-color` | Voile posé sur l'image de fond pour la lisibilité | `rgba(0, 0, 0, 0.15)` |
-| `--echo-home-clock-size` | Taille de l'horloge (mise en page large) | `clamp(6rem, 44vh, 16rem)` |
-| `--echo-home-date-size` | Taille de la date (mise en page large) | `clamp(1.7rem, 11vh, 3.4rem)` |
-| `--echo-home-weather-icon-size` | Taille de l'icône météo (mise en page large) | `clamp(56px, 16vh, 100px)` |
-| `--echo-home-weather-temp-size` | Taille de la température (mise en page large) | `clamp(1.7rem, 9vh, 3rem)` |
+| `--echo-home-clock-size` | Taille de l'horloge (mise en page large) | `clamp(6rem, 55vh, 20rem)` |
+| `--echo-home-date-size` | Taille de la date (mise en page large) | `clamp(2rem, 15vh, 6rem)` |
+| `--echo-home-weather-icon-size` | Taille de l'icône météo (mise en page large) | `clamp(48px, 16vh, 130px)` |
+| `--echo-home-weather-temp-size` | Taille de la température (mise en page large) | `clamp(1.8rem, 15vh, 5rem)` |
 
 Le mode round a ses propres tailles ajustées, non exposées en variables
 CSS (comme dans echo-weather-card).
