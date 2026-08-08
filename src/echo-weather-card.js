@@ -1262,6 +1262,13 @@ class EchoWeatherCard extends LitElement {
         #101a26 45%,
         #05080c 100%
       );
+      /* Couleur pleine (pas un dégradé) pour les endroits qui ont besoin
+         d'une vraie <color> CSS, ex: --mdc-theme-surface de ha-dialog —
+         lui passer --_mode-bg (un radial-gradient) y est invalide, la
+         déclaration est ignorée et le composant retombe sur son propre
+         thème par défaut (d'où un fond noir en mode clair, repéré via
+         test sur appareil réel). */
+      --_mode-surface: #101a26;
       --_mode-text: #ffffff;
       --_mode-secondary: #a9b4bf;
       --_mode-divider: rgba(255, 255, 255, 0.14);
@@ -1304,6 +1311,7 @@ class EchoWeatherCard extends LitElement {
         #d7e9f4 45%,
         #bcdaeb 100%
       );
+      --_mode-surface: #eef7fc;
       --_mode-text: #16232e;
       --_mode-secondary: #57697a;
       --_mode-divider: rgba(22, 35, 46, 0.14);
@@ -1703,15 +1711,25 @@ class EchoWeatherCard extends LitElement {
     ha-dialog {
       --mdc-dialog-min-width: min(90vw, 380px);
       --mdc-dialog-max-width: min(90vw, 380px);
-      --mdc-theme-surface: var(--_mode-bg, #101a26);
+      --mdc-theme-surface: var(--_mode-surface);
       --mdc-dialog-content-ink-color: var(--_text-color);
       --mdc-dialog-heading-ink-color: var(--_text-color);
       color: var(--_text-color);
       font-family: inherit;
     }
+    /* .detail peint son propre fond plutôt que de compter uniquement sur
+       --mdc-theme-surface ci-dessus : cette variable MDC recevait jusque
+       là --_mode-bg (un dégradé), une <color> CSS invalide pour la
+       déclaration qui la consomme — la règle était donc ignorée et le
+       dialogue retombait sur son thème interne par défaut (fond noir,
+       peu importe le mode clair/sombre de la carte). Peindre notre
+       propre fond ici garantit le bon rendu même si --mdc-theme-surface
+       n'est pas respectée par une version donnée de ha-dialog. */
     .detail {
       display: flex;
       flex-direction: column;
+      background: var(--_mode-surface);
+      border-radius: 16px;
       align-items: center;
       gap: 4px;
       min-width: 240px;
@@ -1909,7 +1927,7 @@ class EchoWeatherCard extends LitElement {
       justify-content: center;
       gap: 5px;
       color: var(--_secondary-color);
-      font-size: clamp(0.72rem, 6cqw, 0.9rem);
+      font-size: clamp(0.85rem, 7cqw, 1.02rem);
       font-weight: 500;
       margin-top: 1px;
       max-width: 100%;
@@ -1986,7 +2004,7 @@ class EchoWeatherCard extends LitElement {
        naturellement en bas d'écran. */
     .round-updated {
       color: var(--_secondary-color);
-      font-size: clamp(0.6rem, 4.8cqw, 0.72rem);
+      font-size: clamp(0.72rem, 5.8cqw, 0.85rem);
       margin-top: 3px;
       white-space: nowrap;
     }
