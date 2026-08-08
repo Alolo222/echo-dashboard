@@ -1750,7 +1750,16 @@ class EchoWeatherCard extends LitElement {
     ha-dialog {
       --mdc-dialog-min-width: min(90vw, 380px);
       --mdc-dialog-max-width: min(90vw, 380px);
+      /* Deux variables plutôt qu'une : les versions récentes de Home
+         Assistant ont migré ha-dialog vers un composant interne
+         (wa-dialog, "WebAwesome") qui lit --ha-dialog-surface-background
+         (repliée par défaut sur le thème global de HA, indépendamment du
+         mode clair/sombre choisi par NOTRE carte — d'où un fond figé
+         constaté sur un vrai appareil malgré --mdc-theme-surface, qui ne
+         s'applique qu'à l'ancienne implémentation MDC/mwc). On fixe les
+         deux pour être correct quelle que soit la version de HA. */
       --mdc-theme-surface: var(--_mode-surface);
+      --ha-dialog-surface-background: var(--_mode-surface);
       --mdc-dialog-content-ink-color: var(--_text-color);
       --mdc-dialog-heading-ink-color: var(--_text-color);
       color: var(--_text-color);
