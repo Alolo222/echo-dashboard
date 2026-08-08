@@ -1790,6 +1790,19 @@ class EchoWeatherCard extends LitElement {
       --ha-dialog-surface-background: var(--_mode-surface);
       --mdc-dialog-content-ink-color: var(--_text-color);
       --mdc-dialog-heading-ink-color: var(--_text-color);
+      /* La source réelle de ha-dialog fixe explicitement
+         color: var(--primary-text-color) sur sa propre surface interne —
+         une variable de thème globale HA, indépendante de notre carte, qui
+         gagne face à un simple héritage de "color" depuis l'hôte (une
+         valeur EXPLICITE dans le shadow DOM interne l'emporte toujours sur
+         une valeur héritée de l'extérieur). Sans la fixer nous-mêmes ici,
+         tout le texte du dialogue retombe sur le thème HA de l'utilisateur
+         plutôt que sur notre mode clair/sombre — repéré sur appareil réel
+         (texte entièrement gris, y compris les valeurs censées être en
+         texte "principal", pas seulement secondaire). --ha-dialog-header-
+         title-color pour le titre, qui a son propre repli dédié. */
+      --primary-text-color: var(--_text-color);
+      --ha-dialog-header-title-color: var(--_text-color);
       color: var(--_text-color);
       font-family: inherit;
     }
