@@ -1,6 +1,6 @@
-var He = Object.defineProperty;
-var Le = (r, e, t) => e in r ? He(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var Y = (r, e, t) => Le(r, typeof e != "symbol" ? e + "" : e, t);
+var Le = Object.defineProperty;
+var He = (r, e, t) => e in r ? Le(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var Y = (r, e, t) => He(r, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -294,7 +294,7 @@ D.elementStyles = [], D.shadowRootOptions = { mode: "open" }, D[R("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const T = globalThis, he = (r) => r, V = T.trustedTypes, pe = V ? V.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, ze = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, Pe = "?" + b, Ye = `<${Pe}>`, q = document, H = () => q.createComment(""), L = (r) => r === null || typeof r != "object" && typeof r != "function", oe = Array.isArray, Ze = (r) => oe(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", K = `[ 	
+const T = globalThis, he = (r) => r, V = T.trustedTypes, pe = V ? V.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, ze = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, Pe = "?" + b, Ye = `<${Pe}>`, q = document, L = () => q.createComment(""), H = (r) => r === null || typeof r != "object" && typeof r != "function", oe = Array.isArray, Ze = (r) => oe(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", K = `[ 	
 \f\r]`, U = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, me = /-->/g, _e = />/g, A = RegExp(`>|${K}(?:([^\\s"'>=/]+)(${K}*=${K}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), ge = /'/g, fe = /"/g, Ue = /^(?:script|style|textarea|title)$/i, Ke = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), u = Ke(1), z = Symbol.for("lit-noChange"), h = Symbol.for("lit-nothing"), ve = /* @__PURE__ */ new WeakMap(), C = q.createTreeWalker(q, 129);
 function Re(r, e) {
@@ -333,8 +333,8 @@ class I {
           const p = n.textContent.split(b), m = p.length - 1;
           if (m > 0) {
             n.textContent = V ? V.emptyScript : "";
-            for (let _ = 0; _ < m; _++) n.append(p[_], H()), C.nextNode(), a.push({ type: 2, index: ++s });
-            n.append(p[m], H());
+            for (let _ = 0; _ < m; _++) n.append(p[_], L()), C.nextNode(), a.push({ type: 2, index: ++s });
+            n.append(p[m], L());
           }
         }
       } else if (n.nodeType === 8) if (n.data === Pe) a.push({ type: 2, index: s });
@@ -354,7 +354,7 @@ function P(r, e, t = r, i) {
   var o, l, a;
   if (e === z) return e;
   let n = i !== void 0 ? (o = t._$Co) == null ? void 0 : o[i] : t._$Cl;
-  const s = L(e) ? void 0 : e._$litDirective$;
+  const s = H(e) ? void 0 : e._$litDirective$;
   return (n == null ? void 0 : n.constructor) !== s && ((l = n == null ? void 0 : n._$AO) == null || l.call(n, !1), s === void 0 ? n = void 0 : (n = new s(r), n._$AT(r, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = n : t._$Cl = n), n !== void 0 && (e = P(r, n._$AS(r, e.values), n, i)), e;
 }
 class et {
@@ -407,7 +407,7 @@ class B {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = P(this, e, t), L(e) ? e === h || e == null || e === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : e !== this._$AH && e !== z && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ze(e) ? this.k(e) : this._(e);
+    e = P(this, e, t), H(e) ? e === h || e == null || e === "" ? (this._$AH !== h && this._$AR(), this._$AH = h) : e !== this._$AH && e !== z && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ze(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -416,7 +416,7 @@ class B {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== h && L(this._$AH) ? this._$AA.nextSibling.data = e : this.T(q.createTextNode(e)), this._$AH = e;
+    this._$AH !== h && H(this._$AH) ? this._$AA.nextSibling.data = e : this.T(q.createTextNode(e)), this._$AH = e;
   }
   $(e) {
     var s;
@@ -435,7 +435,7 @@ class B {
     oe(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, n = 0;
-    for (const s of e) n === t.length ? t.push(i = new B(this.O(H()), this.O(H()), this, this.options)) : i = t[n], i._$AI(s), n++;
+    for (const s of e) n === t.length ? t.push(i = new B(this.O(L()), this.O(L()), this, this.options)) : i = t[n], i._$AI(s), n++;
     n < t.length && (this._$AR(i && i._$AB.nextSibling, n), t.length = n);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -463,11 +463,11 @@ class G {
   _$AI(e, t = this, i, n) {
     const s = this.strings;
     let o = !1;
-    if (s === void 0) e = P(this, e, t, 0), o = !L(e) || e !== this._$AH && e !== z, o && (this._$AH = e);
+    if (s === void 0) e = P(this, e, t, 0), o = !H(e) || e !== this._$AH && e !== z, o && (this._$AH = e);
     else {
       const l = e;
       let a, c;
-      for (e = s[0], a = 0; a < s.length - 1; a++) c = P(this, l[i + a], t, a), c === z && (c = this._$AH[a]), o || (o = !L(c) || c !== this._$AH[a]), c === h ? e = h : e !== h && (e += (c != null ? c : "") + s[a + 1]), this._$AH[a] = c;
+      for (e = s[0], a = 0; a < s.length - 1; a++) c = P(this, l[i + a], t, a), c === z && (c = this._$AH[a]), o || (o = !H(c) || c !== this._$AH[a]), c === h ? e = h : e !== h && (e += (c != null ? c : "") + s[a + 1]), this._$AH[a] = c;
     }
     o && !n && this.j(e);
   }
@@ -526,7 +526,7 @@ const st = (r, e, t) => {
   let n = i._$litPart$;
   if (n === void 0) {
     const l = (o = t == null ? void 0 : t.renderBefore) != null ? o : null;
-    i._$litPart$ = n = new B(e.insertBefore(H(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = n = new B(e.insertBefore(L(), l), l, void 0, t != null ? t : {});
   }
   return n._$AI(r), n;
 };
@@ -2517,16 +2517,20 @@ Y(ne, "properties", {
       overflow: hidden;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      /* Padding généreux en % : à 15% par côté, le carré de contenu
-         restant (70% de large) touche presque exactement le cercle par
-         ses coins — marge de sécurité correcte sans calcul de corde par
-         ligne. */
-      padding: 15%;
+      gap: 5px;
+      /* Le contenu est un empilement vertical centré, pas un bloc plein
+         cadre : contrairement à un carré inscrit, il n'a pas besoin d'une
+         marge symétrique généreuse pour que ses "coins" restent dans le
+         cercle (il n'a pas de coins à cet endroit). Marge horizontale
+         réduite (les lignes les plus larges — tuiles Aujourd'hui/Semaine —
+         sont proches du centre vertical, là où la corde du cercle est la
+         plus large) ; un peu plus de marge en haut/bas où le cercle se
+         resserre. */
+      padding: 9% 7%;
       text-align: center;
     }
     .round-clock {
-      font-size: clamp(1.1rem, 10cqw, 1.5rem);
+      font-size: clamp(1.6rem, 15cqw, 2.3rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -2536,22 +2540,23 @@ Y(ne, "properties", {
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      margin: 2px 0;
+      margin: 3px 0;
     }
     .round-icon {
-      width: clamp(42px, 19cqw, 62px);
-      height: clamp(42px, 19cqw, 62px);
+      width: clamp(62px, 29cqw, 92px);
+      height: clamp(62px, 29cqw, 92px);
     }
     .round-temp {
-      font-size: clamp(1.25rem, 11.5cqw, 1.8rem);
+      font-size: clamp(1.8rem, 17cqw, 2.6rem);
       font-weight: 800;
       line-height: 1;
       margin-top: 2px;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.62rem, 5.2cqw, 0.75rem);
-      margin-top: 1px;
+      font-size: clamp(0.85rem, 7cqw, 1.05rem);
+      font-weight: 500;
+      margin-top: 2px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2564,8 +2569,8 @@ Y(ne, "properties", {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 4px 7px;
-      margin-top: 3px;
+      gap: 5px 10px;
+      margin-top: 5px;
       cursor: pointer;
     }
     .round-indicators:focus-visible {
@@ -2575,27 +2580,27 @@ Y(ne, "properties", {
     .round-chip {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
-      font-size: clamp(0.56rem, 4.6cqw, 0.66rem);
+      gap: 3px;
+      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(10px, 4cqw, 12px);
+      --mdc-icon-size: clamp(14px, 5.5cqw, 17px);
       flex-shrink: 0;
     }
     .round-launchers {
       display: flex;
-      gap: 5px;
-      margin-top: 5px;
+      gap: 7px;
+      margin-top: 8px;
     }
     .round-launcher {
       display: flex;
       flex-direction: column;
-      gap: 1px;
-      padding: 4px 7px;
-      border-radius: 12px;
+      gap: 2px;
+      padding: 6px 10px;
+      border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
@@ -2604,13 +2609,13 @@ Y(ne, "properties", {
     .round-launcher-top {
       display: flex;
       align-items: center;
-      gap: 3px;
-      font-size: clamp(0.58rem, 4.8cqw, 0.68rem);
+      gap: 4px;
+      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.52rem, 4.2cqw, 0.6rem);
+      font-size: clamp(0.68rem, 5.5cqw, 0.8rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -2621,11 +2626,11 @@ Y(ne, "properties", {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(12px, 4.5cqw, 14px);
+      --mdc-icon-size: clamp(15px, 5.8cqw, 18px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(11px, 4cqw, 13px);
+      --mdc-icon-size: clamp(14px, 5.2cqw, 17px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }

@@ -1801,16 +1801,20 @@ class EchoWeatherCard extends LitElement {
       overflow: hidden;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      /* Padding généreux en % : à 15% par côté, le carré de contenu
-         restant (70% de large) touche presque exactement le cercle par
-         ses coins — marge de sécurité correcte sans calcul de corde par
-         ligne. */
-      padding: 15%;
+      gap: 5px;
+      /* Le contenu est un empilement vertical centré, pas un bloc plein
+         cadre : contrairement à un carré inscrit, il n'a pas besoin d'une
+         marge symétrique généreuse pour que ses "coins" restent dans le
+         cercle (il n'a pas de coins à cet endroit). Marge horizontale
+         réduite (les lignes les plus larges — tuiles Aujourd'hui/Semaine —
+         sont proches du centre vertical, là où la corde du cercle est la
+         plus large) ; un peu plus de marge en haut/bas où le cercle se
+         resserre. */
+      padding: 9% 7%;
       text-align: center;
     }
     .round-clock {
-      font-size: clamp(1.1rem, 10cqw, 1.5rem);
+      font-size: clamp(1.6rem, 15cqw, 2.3rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -1820,22 +1824,23 @@ class EchoWeatherCard extends LitElement {
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      margin: 2px 0;
+      margin: 3px 0;
     }
     .round-icon {
-      width: clamp(42px, 19cqw, 62px);
-      height: clamp(42px, 19cqw, 62px);
+      width: clamp(62px, 29cqw, 92px);
+      height: clamp(62px, 29cqw, 92px);
     }
     .round-temp {
-      font-size: clamp(1.25rem, 11.5cqw, 1.8rem);
+      font-size: clamp(1.8rem, 17cqw, 2.6rem);
       font-weight: 800;
       line-height: 1;
       margin-top: 2px;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.62rem, 5.2cqw, 0.75rem);
-      margin-top: 1px;
+      font-size: clamp(0.85rem, 7cqw, 1.05rem);
+      font-weight: 500;
+      margin-top: 2px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1848,8 +1853,8 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 4px 7px;
-      margin-top: 3px;
+      gap: 5px 10px;
+      margin-top: 5px;
       cursor: pointer;
     }
     .round-indicators:focus-visible {
@@ -1859,27 +1864,27 @@ class EchoWeatherCard extends LitElement {
     .round-chip {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
-      font-size: clamp(0.56rem, 4.6cqw, 0.66rem);
+      gap: 3px;
+      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(10px, 4cqw, 12px);
+      --mdc-icon-size: clamp(14px, 5.5cqw, 17px);
       flex-shrink: 0;
     }
     .round-launchers {
       display: flex;
-      gap: 5px;
-      margin-top: 5px;
+      gap: 7px;
+      margin-top: 8px;
     }
     .round-launcher {
       display: flex;
       flex-direction: column;
-      gap: 1px;
-      padding: 4px 7px;
-      border-radius: 12px;
+      gap: 2px;
+      padding: 6px 10px;
+      border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
@@ -1888,13 +1893,13 @@ class EchoWeatherCard extends LitElement {
     .round-launcher-top {
       display: flex;
       align-items: center;
-      gap: 3px;
-      font-size: clamp(0.58rem, 4.8cqw, 0.68rem);
+      gap: 4px;
+      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.52rem, 4.2cqw, 0.6rem);
+      font-size: clamp(0.68rem, 5.5cqw, 0.8rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1905,11 +1910,11 @@ class EchoWeatherCard extends LitElement {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(12px, 4.5cqw, 14px);
+      --mdc-icon-size: clamp(15px, 5.8cqw, 18px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(11px, 4cqw, 13px);
+      --mdc-icon-size: clamp(14px, 5.2cqw, 17px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }
