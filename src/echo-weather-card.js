@@ -1214,12 +1214,27 @@ class EchoWeatherCard extends LitElement {
   static styles = css`
     /* container-type permet des tailles fluides (clamp + cqw) qui suivent
        la taille réelle du composant plutôt que le viewport — utile dans un
-       conteneur View Assist dont la taille n'est pas celle de l'écran. */
+       conteneur View Assist dont la taille n'est pas celle de l'écran.
+       Mais les container queries sont une fonctionnalité CSS relativement
+       récente (Chromium 105+, mi-2022) : un WebView embarqué dans un ROM
+       custom sur un appareil ancien (Echo Show 5 / Spot rootés) peut ne
+       jamais l'avoir reçue, auquel cas toute unité cqw devient invalide et
+       les tailles retombent sur leur valeur par défaut minuscule — repéré
+       via un écart de taille significatif sur un vrai appareil. Toutes les
+       tailles fluides passent donc par calc(N * var(--_fluid-unit))
+       plutôt que "Ncqw" en dur : --_fluid-unit vaut 1vw par défaut
+       (fonctionne partout, y compris les très vieux navigateurs), et
+       seulement 1cqw quand @supports confirme que le navigateur gère
+       réellement les container queries (cf. plus bas). vw se base sur le
+       viewport plutôt que le conteneur — une approximation moins précise
+       si la carte n'occupe pas tout l'écran, mais correcte pour l'usage
+       principal visé (carte plein écran sur un smart display). */
     :host {
       display: block;
       height: 100%;
       box-sizing: border-box;
       container-type: inline-size;
+      --_fluid-unit: 1vw;
       --_gap: var(--echo-weather-gap, 14px);
       /* Espacement vertical entre sections, distinct de --_gap (horizontal,
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
@@ -1230,26 +1245,26 @@ class EchoWeatherCard extends LitElement {
          chacune leur propre variable ci-dessous) — actuelle et quotidien
          ont plus de marge verticale que les prévisions horaires, donc
          rien ne les oblige à partager la même taille. */
-      --_icon-size: var(--echo-weather-icon-size, clamp(64px, 8.5cqw, 84px));
+      --_icon-size: var(--echo-weather-icon-size, clamp(64px, calc(8.5 * var(--_fluid-unit)), 84px));
       --_current-icon-size: var(
         --echo-weather-current-icon-size,
-        clamp(100px, 15cqw, 155px)
+        clamp(100px, calc(15 * var(--_fluid-unit)), 155px)
       );
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
-        clamp(3rem, 7.6cqw, 4.6rem)
+        clamp(3rem, calc(7.6 * var(--_fluid-unit)), 4.6rem)
       );
       --_hourly-temp-size: var(
         --echo-weather-hourly-temp-size,
-        clamp(1.15rem, 2.4cqw, 1.5rem)
+        clamp(1.15rem, calc(2.4 * var(--_fluid-unit)), 1.5rem)
       );
       --_daily-icon-size: var(
         --echo-weather-daily-icon-size,
-        clamp(38px, 5.2cqw, 49px)
+        clamp(38px, calc(5.2 * var(--_fluid-unit)), 49px)
       );
       --_daily-temp-size: var(
         --echo-weather-daily-temp-size,
-        clamp(1.3rem, 2.6cqw, 1.6rem)
+        clamp(1.3rem, calc(2.6 * var(--_fluid-unit)), 1.6rem)
       );
       /* Jeu de couleurs sombre (par défaut) — repris/écrasé par
          :host(.light) ci-dessous quand le mode clair est actif (soleil
@@ -1299,6 +1314,16 @@ class EchoWeatherCard extends LitElement {
         var(--primary-font-family, inherit)
       );
       color: var(--_text-color);
+    }
+
+    /* N'écrase --_fluid-unit en 1cqw que si le navigateur reconnaît
+       vraiment container-type — sur un WebView qui ne le fait pas,
+       @supports renvoie faux et le repli 1vw défini sur :host ci-dessus
+       reste actif. */
+    @supports (container-type: inline-size) {
+      :host {
+        --_fluid-unit: 1cqw;
+      }
     }
 
     /* Mode clair : appliqué par render() (classe hôte) d'après le soleil,
@@ -1398,7 +1423,7 @@ class EchoWeatherCard extends LitElement {
     }
     .current-condition {
       color: var(--_secondary-color);
-      font-size: clamp(1.15rem, 2.1cqw, 1.45rem);
+      font-size: clamp(1.15rem, calc(2.1 * var(--_fluid-unit)), 1.45rem);
       font-weight: 500;
       margin-top: 6px;
     }
@@ -1416,7 +1441,7 @@ class EchoWeatherCard extends LitElement {
       box-shadow: var(--_tile-shadow);
     }
     .indicator-label {
-      font-size: clamp(0.82rem, 1.3cqw, 0.95rem);
+      font-size: clamp(0.82rem, calc(1.3 * var(--_fluid-unit)), 0.95rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1427,7 +1452,7 @@ class EchoWeatherCard extends LitElement {
       gap: 8px;
     }
     .indicator-value {
-      font-size: clamp(1.35rem, 2.5cqw, 1.65rem);
+      font-size: clamp(1.35rem, calc(2.5 * var(--_fluid-unit)), 1.65rem);
       font-weight: 800;
     }
     .indicator-uv .indicator-value {
@@ -1441,7 +1466,7 @@ class EchoWeatherCard extends LitElement {
       gap: 10px;
     }
     .indicator-category {
-      font-size: clamp(0.88rem, 1.4cqw, 1.05rem);
+      font-size: clamp(0.88rem, calc(1.4 * var(--_fluid-unit)), 1.05rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1463,18 +1488,18 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       align-items: center;
       gap: 9px;
-      font-size: clamp(1.8rem, 3.9cqw, 2.6rem);
+      font-size: clamp(1.8rem, calc(3.9 * var(--_fluid-unit)), 2.6rem);
       font-weight: 800;
       white-space: nowrap;
     }
     .humidity-icon {
-      --mdc-icon-size: clamp(32px, 4.8cqw, 43px);
+      --mdc-icon-size: clamp(32px, calc(4.8 * var(--_fluid-unit)), 43px);
       color: var(--echo-weather-humidity-color, #4fc3f7);
       flex-shrink: 0;
     }
     .current-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.95rem, 1.6cqw, 1.15rem);
+      font-size: clamp(0.95rem, calc(1.6 * var(--_fluid-unit)), 1.15rem);
       margin-top: 4px;
     }
     .current-info {
@@ -1505,14 +1530,14 @@ class EchoWeatherCard extends LitElement {
       gap: 4px;
     }
     .clock {
-      font-size: clamp(2.4rem, 5.2cqw, 3.4rem);
+      font-size: clamp(2.4rem, calc(5.2 * var(--_fluid-unit)), 3.4rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
     .date-line {
       color: var(--_secondary-color);
-      font-size: clamp(1.25rem, 2.5cqw, 1.7rem);
+      font-size: clamp(1.25rem, calc(2.5 * var(--_fluid-unit)), 1.7rem);
       font-weight: 600;
       text-align: right;
       margin-top: 2px;
@@ -1522,13 +1547,13 @@ class EchoWeatherCard extends LitElement {
       align-items: center;
       gap: 7px;
       color: var(--_secondary-color);
-      font-size: clamp(0.88rem, 1.5cqw, 1.08rem);
+      font-size: clamp(0.88rem, calc(1.5 * var(--_fluid-unit)), 1.08rem);
       font-weight: 500;
       text-align: right;
       margin-top: 2px;
     }
     .moon-icon {
-      --mdc-icon-size: clamp(17px, 2.4cqw, 21px);
+      --mdc-icon-size: clamp(17px, calc(2.4 * var(--_fluid-unit)), 21px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
@@ -1552,7 +1577,7 @@ class EchoWeatherCard extends LitElement {
     }
     .hourly-time {
       color: var(--_secondary-color);
-      font-size: clamp(0.9rem, 1.6cqw, 1.05rem);
+      font-size: clamp(0.9rem, calc(1.6 * var(--_fluid-unit)), 1.05rem);
       font-weight: 600;
     }
     .hourly-icon {
@@ -1565,7 +1590,7 @@ class EchoWeatherCard extends LitElement {
     }
     .hourly-pop {
       color: var(--_secondary-color);
-      font-size: clamp(0.75rem, 1.3cqw, 0.9rem);
+      font-size: clamp(0.75rem, calc(1.3 * var(--_fluid-unit)), 0.9rem);
       font-weight: 600;
     }
 
@@ -1598,7 +1623,7 @@ class EchoWeatherCard extends LitElement {
     }
     .daily-day {
       color: var(--_secondary-color);
-      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
+      font-size: clamp(0.95rem, calc(1.7 * var(--_fluid-unit)), 1.15rem);
       font-weight: 600;
       text-transform: capitalize;
     }
@@ -1642,7 +1667,7 @@ class EchoWeatherCard extends LitElement {
       box-shadow: var(--_tile-shadow);
     }
     .band-icon {
-      --mdc-icon-size: clamp(16px, 2.2cqw, 20px);
+      --mdc-icon-size: clamp(16px, calc(2.2 * var(--_fluid-unit)), 20px);
       flex-shrink: 0;
     }
     .band-wind .band-icon {
@@ -1659,12 +1684,12 @@ class EchoWeatherCard extends LitElement {
     }
     .band-label {
       color: var(--_secondary-color);
-      font-size: clamp(0.8rem, 1.4cqw, 0.95rem);
+      font-size: clamp(0.8rem, calc(1.4 * var(--_fluid-unit)), 0.95rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .band-value {
-      font-size: clamp(0.85rem, 1.5cqw, 1.05rem);
+      font-size: clamp(0.85rem, calc(1.5 * var(--_fluid-unit)), 1.05rem);
       font-weight: 700;
       white-space: nowrap;
     }
@@ -1900,7 +1925,7 @@ class EchoWeatherCard extends LitElement {
       flex-shrink: 0;
     }
     .round-clock {
-      font-size: clamp(2.1rem, 20cqw, 3rem);
+      font-size: clamp(2.1rem, calc(20 * var(--_fluid-unit)), 3rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -1908,7 +1933,7 @@ class EchoWeatherCard extends LitElement {
     /* Date sous l'horloge, plus grande — lecture au même niveau que
        l'horloge plutôt que noyée dans une ligne d'infos secondaires. */
     .round-date {
-      font-size: clamp(1.1rem, 9.5cqw, 1.4rem);
+      font-size: clamp(1.1rem, calc(9.5 * var(--_fluid-unit)), 1.4rem);
       font-weight: 600;
       margin-top: 1px;
       max-width: 100%;
@@ -1927,7 +1952,7 @@ class EchoWeatherCard extends LitElement {
       justify-content: center;
       gap: 5px;
       color: var(--_secondary-color);
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      font-size: clamp(0.85rem, calc(7 * var(--_fluid-unit)), 1.02rem);
       font-weight: 500;
       margin-top: 1px;
       max-width: 100%;
@@ -1940,7 +1965,7 @@ class EchoWeatherCard extends LitElement {
       min-width: 0;
     }
     .round-date-icon {
-      --mdc-icon-size: clamp(13px, 5.2cqw, 17px);
+      --mdc-icon-size: clamp(13px, calc(5.2 * var(--_fluid-unit)), 17px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
@@ -1965,8 +1990,8 @@ class EchoWeatherCard extends LitElement {
       text-align: left;
     }
     .round-icon {
-      width: clamp(90px, 39cqw, 126px);
-      height: clamp(90px, 39cqw, 126px);
+      width: clamp(90px, calc(39 * var(--_fluid-unit)), 126px);
+      height: clamp(90px, calc(39 * var(--_fluid-unit)), 126px);
       flex-shrink: 0;
       /* Comme .current-icon en mise en page large : c'est la seule icône
          encore animée (SMIL) ici aussi, et elle porte le même filter
@@ -1977,13 +2002,13 @@ class EchoWeatherCard extends LitElement {
       will-change: transform;
     }
     .round-temp {
-      font-size: clamp(2.6rem, 24cqw, 3.7rem);
+      font-size: clamp(2.6rem, calc(24 * var(--_fluid-unit)), 3.7rem);
       font-weight: 800;
       line-height: 1;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(1.1rem, 9.5cqw, 1.35rem);
+      font-size: clamp(1.1rem, calc(9.5 * var(--_fluid-unit)), 1.35rem);
       font-weight: 500;
       margin-top: 2px;
       max-width: 100%;
@@ -1993,7 +2018,7 @@ class EchoWeatherCard extends LitElement {
     }
     .round-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.75rem, 6.2cqw, 0.92rem);
+      font-size: clamp(0.75rem, calc(6.2 * var(--_fluid-unit)), 0.92rem);
       font-weight: 600;
       margin-top: 2px;
       white-space: nowrap;
@@ -2004,7 +2029,7 @@ class EchoWeatherCard extends LitElement {
        naturellement en bas d'écran. */
     .round-updated {
       color: var(--_secondary-color);
-      font-size: clamp(0.72rem, 5.8cqw, 0.85rem);
+      font-size: clamp(0.72rem, calc(5.8 * var(--_fluid-unit)), 0.85rem);
       margin-top: 3px;
       white-space: nowrap;
     }
@@ -2027,13 +2052,13 @@ class EchoWeatherCard extends LitElement {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: clamp(1rem, 8.2cqw, 1.2rem);
+      font-size: clamp(1rem, calc(8.2 * var(--_fluid-unit)), 1.2rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(18px, 7cqw, 22px);
+      --mdc-icon-size: clamp(18px, calc(7 * var(--_fluid-unit)), 22px);
       flex-shrink: 0;
     }
     .round-launchers {
@@ -2056,12 +2081,12 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: clamp(1rem, 8.2cqw, 1.2rem);
+      font-size: clamp(1rem, calc(8.2 * var(--_fluid-unit)), 1.2rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      font-size: clamp(0.85rem, calc(7 * var(--_fluid-unit)), 1.02rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -2072,11 +2097,11 @@ class EchoWeatherCard extends LitElement {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(19px, 7.4cqw, 23px);
+      --mdc-icon-size: clamp(19px, calc(7.4 * var(--_fluid-unit)), 23px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(18px, 6.8cqw, 22px);
+      --mdc-icon-size: clamp(18px, calc(6.8 * var(--_fluid-unit)), 22px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }
