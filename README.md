@@ -1,5 +1,11 @@
 # echo-weather-card
 
+> [!NOTE]
+> Projet à vocation personnelle : développé pour mes propres appareils
+> (Echo Show 5 / Echo Spot). Il ne sera pas activement maintenu et les
+> issues ne sont pas ouvertes. Envie de l'améliorer, de l'adapter ou
+> d'aller plus loin ? Forkez le dépôt !
+
 Carte météo Home Assistant compacte et sans chrome, pensée pour les petits
 smart displays (Amazon Echo Show 5 sous LineageOS/VACA + [View
 Assist](https://dinki.github.io/View-Assist/), écran 960x480 en paysage —
