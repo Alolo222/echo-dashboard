@@ -1369,7 +1369,13 @@ class EchoWeatherCard extends LitElement {
       );
       --_mode-surface: #e6f3fb;
       --_mode-text: #16232e;
-      --_mode-secondary: #57697a;
+      /* Nettement plus foncé que la première tentative (#57697a) : sur les
+         tuiles quasi blanches (--_tile-background) ou tout fond clair en
+         général, un gris moyen manquait franchement de contraste (signalé
+         explicitement illisible sur appareil réel) — mieux vaut un texte
+         secondaire clairement lisible partout qu'une subtilité qui ne
+         tient pas la route en usage réel. */
+      --_mode-secondary: #3d4d5c;
       --_mode-divider: rgba(22, 35, 46, 0.14);
       --_mode-tile-bg: linear-gradient(
         180deg,
