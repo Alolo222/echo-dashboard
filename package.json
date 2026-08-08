@@ -1,6 +1,6 @@
 {
   "name": "echo-weather-card",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Carte météo Home Assistant compacte pour smart displays (Echo Show 5 / View Assist).",
   "type": "module",
   "license": "MIT",

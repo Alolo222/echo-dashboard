@@ -11,8 +11,8 @@ mais fonctionne dans n'importe quel dashboard Lovelace).
 > test. Police Nunito appliquée via `--echo-weather-font-family` (non
 > incluse par la carte, voir [Polices](#polices) plus bas).
 
-Statut : en développement actif. L'API et les options ci-dessous sont
-globalement stables mais peuvent encore évoluer avant une release 1.0.
+Statut : stable (v1.0). Testé sur Echo Show 5 et Echo Spot 1ère gen
+(2017), tous deux sous LineageOS + View Assist.
 
 ## Fonctionnalités
 
