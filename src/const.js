@@ -54,4 +54,10 @@ export const DEFAULT_CONFIG = {
   // météo actuelle + deux tuiles "Aujourd'hui"/"Semaine" qui ouvrent le
   // détail au tap plutôt que d'essayer de tout afficher à la fois.
   layout: null,
+  // Facteur d'échelle manuel de toute la carte (CSS zoom). 1 = pas de
+  // changement. Filet de rattrapage si les tailles fluides ne
+  // correspondent pas à l'attendu sur un appareil donné (WebView non
+  // standard, densité d'écran particulière...) — ex: 1.3 pour agrandir
+  // 30%, 0.85 pour réduire. À ajuster à l'œil sur l'appareil réel.
+  zoom: 1,
 };

@@ -121,6 +121,11 @@ background: null                # ex: "transparent" ou tout CSS `background`
 theme_mode: auto                # "auto" (selon le soleil), "light", "dark"
 layout: null                    # null (mise en page large habituelle) ou
                                  # "round" (écran circulaire, voir plus bas)
+zoom: 1                         # facteur d'échelle manuel (CSS zoom) de
+                                 # toute la carte — filet de rattrapage si
+                                 # le texte ne suit pas correctement la
+                                 # taille de l'écran sur un appareil donné
+                                 # (voir "Taille du texte" plus bas)
 ```
 
 ## Mode round (écrans circulaires)
@@ -171,6 +176,30 @@ Les options `show_*` habituelles s'appliquent aussi en mode round (ex:
 elle-même en cercle (`border-radius: 50%` sur son propre fond) plutôt que
 de compter sur le boîtier physique, donc l'aperçu reste fidèle même
 affiché dans une fenêtre carrée classique.
+
+## Taille du texte
+
+La carte utilise des tailles fluides (`clamp()` + unités *container
+query*, `cqw`) qui suivent la largeur réelle du composant. Sur un WebView
+embarqué ancien (ROM custom sur un Echo Show 5 / Spot rooté par exemple),
+les *container queries* — une fonctionnalité CSS relativement récente
+(Chromium 105+, mi-2022) — peuvent ne pas être supportées ; la carte
+retombe alors automatiquement sur des unités `vw` (repli fonctionnel
+partout, mais qui ne donne exactement le même résultat que `cqw` que si
+la carte occupe tout l'écran).
+
+Si le texte reste malgré tout trop petit (ou trop grand) sur un appareil
+donné, `zoom` permet un ajustement manuel :
+
+```yaml
+zoom: 1.15   # 15% plus grand ; 1 = taille normale, 0.9 = 10% plus petit
+```
+
+`zoom` recalcule vraiment la mise en page à l'échelle choisie (contrairement
+à un simple agrandissement visuel) : un facteur trop élevé peut faire
+déborder la carte de son cadre si le contenu configuré (`hourly_count`,
+`daily_count`...) ne laisse pas assez de marge. Réduire ces valeurs ou
+`zoom` lui-même si ça arrive.
 
 ## Point de rosée
 

@@ -132,6 +132,26 @@ class EchoWeatherCard extends LitElement {
     return !this._isNight();
   }
 
+  // style inline de .card : fond personnalisé + zoom manuel. zoom existe
+  // en secours pour les appareils où les tailles fluides (--_fluid-unit,
+  // cqw/vw) ne correspondent pas à l'attendu malgré tout — plutôt que de
+  // continuer à deviner la cause exacte à distance (WebView non standard,
+  // densité d'écran particulière...), l'utilisateur peut l'ajuster
+  // lui-même. zoom recalcule vraiment la mise en page à l'échelle
+  // choisie (contrairement à transform: scale()), donc >1 peut faire
+  // déborder .card de son hôte si l'espace autour ne l'absorbe pas —
+  // c'est un réglage volontairement manuel, sans garde-fou automatique.
+  _cardStyle() {
+    const parts = [];
+    if (this._config.background != null) {
+      parts.push(`background:${this._config.background}`);
+    }
+    if (this._config.zoom != null && this._config.zoom !== 1) {
+      parts.push(`zoom:${this._config.zoom}`);
+    }
+    return parts.join(";");
+  }
+
   render() {
     if (!this._config || !this._hass) return nothing;
 
@@ -153,10 +173,7 @@ class EchoWeatherCard extends LitElement {
       return this._renderRound(stateObj, locale, timeFormat);
     }
 
-    const cardStyle =
-      this._config.background != null
-        ? `background:${this._config.background}`
-        : "";
+    const cardStyle = this._cardStyle();
 
     return html`
       <div class="card" style=${cardStyle}>
@@ -195,10 +212,7 @@ class EchoWeatherCard extends LitElement {
       : null;
     const now = new Date();
 
-    const cardStyle =
-      this._config.background != null
-        ? `background:${this._config.background}`
-        : "";
+    const cardStyle = this._cardStyle();
 
     const openCurrent = () => {
       this._roundDialog = "current";
