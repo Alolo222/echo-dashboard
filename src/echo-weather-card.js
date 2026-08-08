@@ -27,11 +27,51 @@ class EchoWeatherCard extends LitElement {
     if (!config?.entity) {
       throw new Error("echo-weather-card: 'entity' est requis");
     }
-    this._config = {
+    const merged = {
       ...DEFAULT_CONFIG,
       ...config,
       icons: { ...DEFAULT_CONFIG.icons, ...(config.icons || {}) },
     };
+    this._config = this._validateConfig(merged, config);
+  }
+
+  // Validation légère : avertit dans la console et retombe sur la valeur
+  // par défaut plutôt que d'échouer silencieusement (ex: hourly_count en
+  // chaîne de caractères) ou de casser le rendu (theme_mode invalide ne
+  // matchant aucun mode). Seule `entity` manquante est bloquante
+  // (cf. setConfig ci-dessus) — une faute de frappe ailleurs ne doit pas
+  // empêcher tout le reste de s'afficher.
+  _validateConfig(merged, rawConfig) {
+    const warn = (key, fallback) =>
+      console.warn(
+        `[echo-weather-card] "${key}" invalide (${JSON.stringify(rawConfig[key])}), valeur par défaut utilisée (${JSON.stringify(fallback)})`
+      );
+
+    if (!Number.isInteger(merged.hourly_count) || merged.hourly_count < 0) {
+      warn("hourly_count", DEFAULT_CONFIG.hourly_count);
+      merged.hourly_count = DEFAULT_CONFIG.hourly_count;
+    }
+    if (!Number.isInteger(merged.daily_count) || merged.daily_count < 0) {
+      warn("daily_count", DEFAULT_CONFIG.daily_count);
+      merged.daily_count = DEFAULT_CONFIG.daily_count;
+    }
+    if (!["auto", "light", "dark"].includes(merged.theme_mode)) {
+      warn("theme_mode", DEFAULT_CONFIG.theme_mode);
+      merged.theme_mode = DEFAULT_CONFIG.theme_mode;
+    }
+    if (merged.layout !== null && merged.layout !== "round") {
+      warn("layout", DEFAULT_CONFIG.layout);
+      merged.layout = DEFAULT_CONFIG.layout;
+    }
+    if (
+      typeof merged.zoom !== "number" ||
+      !Number.isFinite(merged.zoom) ||
+      merged.zoom <= 0
+    ) {
+      warn("zoom", DEFAULT_CONFIG.zoom);
+      merged.zoom = DEFAULT_CONFIG.zoom;
+    }
+    return merged;
   }
 
   static getStubConfig(hass) {
@@ -159,6 +199,17 @@ class EchoWeatherCard extends LitElement {
     if (!stateObj) {
       return html`<div class="error">
         Entité ${this._config.entity} introuvable
+      </div>`;
+    }
+    // Entité présente mais sans donnée exploitable (intégration hors
+    // ligne, redémarrage HA...) : sans ce filtre, Math.round(undefined)
+    // affichait un déroutant "NaN°C" au lieu d'un message clair.
+    if (
+      ["unavailable", "unknown"].includes(stateObj.state) ||
+      stateObj.attributes.temperature == null
+    ) {
+      return html`<div class="error">
+        Entité ${this._config.entity} indisponible
       </div>`;
     }
 

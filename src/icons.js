@@ -39,10 +39,19 @@ export function conditionToIconSlug(condition, isNight) {
 /**
  * Construit l'URL de l'icône. Centralise la logique CDN vs base_url locale
  * (ex: /local/meteocons) pour préparer un mode offline.
+ *
+ * base_url, s'il est fourni, prime sur tout (accès direct à un dossier —
+ * local ou non — déjà organisé pour un style donné). Sinon on compose
+ * l'URL du CDN à partir de icons.style (fill/line/flat/monochrome, cf.
+ * dépôt Meteocons) — auparavant ignoré : changer icons.style n'avait
+ * aucun effet, DEFAULT_ICON_BASE_URL pointait en dur vers "fill".
  */
 export function iconUrl(slug, iconsConfig) {
-  const base = iconsConfig?.base_url || DEFAULT_ICON_BASE_URL;
-  return `${base.replace(/\/$/, "")}/${slug}.svg`;
+  if (iconsConfig?.base_url) {
+    return `${iconsConfig.base_url.replace(/\/$/, "")}/${slug}.svg`;
+  }
+  const style = iconsConfig?.style || "fill";
+  return `${DEFAULT_ICON_BASE_URL}/${style}/${slug}.svg`;
 }
 
 // Les SVG Meteocons embarquent leur animation en SMIL (<animateTransform>,

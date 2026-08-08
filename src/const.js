@@ -2,8 +2,10 @@
 
 export const CARD_TAG = "echo-weather-card";
 
-export const DEFAULT_ICON_BASE_URL =
-  "https://cdn.jsdelivr.net/npm/@meteocons/svg/fill";
+// Racine du CDN Meteocons, sans le style — icons.js y ajoute
+// icons.style (fill/line/flat/monochrome) ou icons.base_url en entier
+// si fourni.
+export const DEFAULT_ICON_BASE_URL = "https://cdn.jsdelivr.net/npm/@meteocons/svg";
 
 // Bitmask WeatherEntityFeature (home-assistant/core: components/weather/const.py)
 export const FEATURE_FORECAST_DAILY = 1;
