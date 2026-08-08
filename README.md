@@ -16,7 +16,8 @@ l'entité satellite View Assist, avec un mode nuit dédié.
 ![Aperçu de la carte à 960x480](docs/screenshot.png)
 
 > Rendu généré via un navigateur headless en 960x480 avec des données de
-> test. Police système par défaut (voir [Polices](#polices) plus bas).
+> test. Police Nunito appliquée via `--echo-home-font-family` (non
+> incluse par la carte, voir [Polices](#polices) plus bas).
 
 C'est le remplacement, en vraie carte Lit, de la vue d'accueil (« clock
 view ») fournie par défaut par View Assist — telle que je l'avais
