@@ -19,6 +19,11 @@ export const DEFAULT_CONFIG = {
     provider: "meteocons",
     style: "fill",
     base_url: null,
+    // Les icônes de prévisions (horaires/quotidiennes) sont toujours
+    // figées (animation retirée) pour préserver le FPS. L'icône météo
+    // actuelle reste animée par défaut ; à mettre à false si l'appareil
+    // peine à suivre même une seule icône animée.
+    animate_current: true,
   },
   show_current: true,
   show_hourly: true,

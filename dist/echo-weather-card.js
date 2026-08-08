@@ -575,7 +575,12 @@ const Pe = "echo-weather-card", Qe = "https://cdn.jsdelivr.net/npm/@meteocons/sv
   icons: {
     provider: "meteocons",
     style: "fill",
-    base_url: null
+    base_url: null,
+    // Les icônes de prévisions (horaires/quotidiennes) sont toujours
+    // figées (animation retirée) pour préserver le FPS. L'icône météo
+    // actuelle reste animée par défaut ; à mettre à false si l'appareil
+    // peine à suivre même une seule icône animée.
+    animate_current: !0
   },
   show_current: !0,
   show_hourly: !0,
@@ -1220,7 +1225,11 @@ class X extends P {
     const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], v = _ && !["unknown", "unavailable"].includes(_.state), ie = this._config.show_humidity && u != null, qe = this._config.show_clock || this._config.show_date, I = /* @__PURE__ */ new Date(), se = this._config.show_date ? pt(I) : null, B = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], k = B && !["unknown", "unavailable"].includes(B.state) ? _t(B.state) : null, N = [];
     return k && N.push(k.label), se && N.push(se), p`
       <div class="current">
-        <img class="current-icon" src=${n} alt=${o} />
+        <img
+          class="current-icon"
+          src=${this._config.icons.animate_current ? n : this._staticIcon(n)}
+          alt=${o}
+        />
         <div class="current-info">
           <div class="current-main">
             <div class="current-temp">${Math.round(l)}${a}</div>

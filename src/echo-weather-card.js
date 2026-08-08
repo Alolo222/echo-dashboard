@@ -212,7 +212,11 @@ class EchoWeatherCard extends LitElement {
 
     return html`
       <div class="current">
-        <img class="current-icon" src=${url} alt=${conditionLabel} />
+        <img
+          class="current-icon"
+          src=${this._config.icons.animate_current ? url : this._staticIcon(url)}
+          alt=${conditionLabel}
+        />
         <div class="current-info">
           <div class="current-main">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>

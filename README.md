@@ -79,6 +79,10 @@ icons:
   provider: meteocons
   style: fill                   # cf. dépôt Meteocons pour les styles dispo
   base_url: null                # ex: /local/meteocons pour un usage hors-ligne
+  animate_current: true         # false = fige aussi l'icône météo actuelle
+                                 # (les icônes de prévisions sont toujours
+                                 # figées) — utile si l'appareil peine à
+                                 # suivre même une seule icône animée
 
 # --- Sections et éléments affichés ---
 show_current: true
