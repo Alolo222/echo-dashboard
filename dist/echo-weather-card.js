@@ -1387,10 +1387,11 @@ I(K, "properties", {
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
       --_row-gap: var(--echo-weather-row-gap, 5px);
+      /* Icônes horaires uniquement désormais (actuelle et quotidien ont
+         chacune leur propre variable ci-dessous) — actuelle et quotidien
+         ont plus de marge verticale que les prévisions horaires, donc
+         rien ne les oblige à partager la même taille. */
       --_icon-size: var(--echo-weather-icon-size, clamp(64px, 8.5cqw, 84px));
-      /* Icône météo actuelle : dimensionnée séparément des icônes horaire/
-         quotidien (dérivées de --_icon-size, cf. plus bas) — la ligne
-         actuelle a de la marge verticale que les prévisions n'ont pas. */
       --_current-icon-size: var(
         --echo-weather-current-icon-size,
         clamp(100px, 15cqw, 155px)
@@ -1403,9 +1404,13 @@ I(K, "properties", {
         --echo-weather-hourly-temp-size,
         clamp(1.15rem, 2.4cqw, 1.5rem)
       );
+      --_daily-icon-size: var(
+        --echo-weather-daily-icon-size,
+        clamp(38px, 5.2cqw, 49px)
+      );
       --_daily-temp-size: var(
         --echo-weather-daily-temp-size,
-        clamp(1.05rem, 2.1cqw, 1.3rem)
+        clamp(1.3rem, 2.6cqw, 1.6rem)
       );
       /* Jeu de couleurs sombre (par défaut) — repris/écrasé par
          :host(.light) ci-dessous quand le mode clair est actif (soleil
@@ -1709,10 +1714,10 @@ I(K, "properties", {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 2px;
+      gap: 3px;
       flex: 1;
       min-width: 0;
-      padding: 4px 4px;
+      padding: 6px 4px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
@@ -1720,13 +1725,13 @@ I(K, "properties", {
     }
     .daily-day {
       color: var(--_secondary-color);
-      font-size: clamp(0.9rem, 1.6cqw, 1.05rem);
+      font-size: clamp(0.95rem, 1.7cqw, 1.15rem);
       font-weight: 600;
       text-transform: capitalize;
     }
     .daily-icon {
-      width: calc(var(--_icon-size) * 0.46);
-      height: calc(var(--_icon-size) * 0.46);
+      width: var(--_daily-icon-size);
+      height: var(--_daily-icon-size);
     }
     .daily-temps {
       font-size: var(--_daily-temp-size);
