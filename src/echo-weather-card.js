@@ -212,9 +212,7 @@ class EchoWeatherCard extends LitElement {
 
     return html`
       <div class="current">
-        <div class="current-icon-wrap">
-          <img class="current-icon" src=${url} alt=${conditionLabel} />
-        </div>
+        <img class="current-icon" src=${url} alt=${conditionLabel} />
         <div class="current-info">
           <div class="current-main">
             <div class="current-temp">${Math.round(temp)}${tempUnit}</div>
@@ -618,34 +616,18 @@ class EchoWeatherCard extends LitElement {
       padding-bottom: var(--_row-gap);
       border-bottom: 1px solid var(--_divider-color);
     }
-    .current-icon-wrap {
-      position: relative;
+    .current-icon {
       width: var(--_current-icon-size);
       height: var(--_current-icon-size);
       flex-shrink: 0;
-    }
-    .current-icon {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-    /* Halo de lisibilité en mode clair pour l'icône actuelle : un dégradé
-       radial statique derrière l'icône plutôt qu'un filter drop-shadow
-       (cf. commentaire plus bas sur .hourly-icon/.daily-icon) — un fond
-       qui ne change jamais est peint une seule fois par le compositeur,
-       sans recalcul à chaque frame de l'icône animée par-dessus. */
-    :host(.light) .current-icon-wrap::before {
-      content: "";
-      position: absolute;
-      inset: 4%;
-      border-radius: 50%;
-      background: radial-gradient(
-        closest-side,
-        rgba(10, 20, 30, 0.32) 0%,
-        rgba(10, 20, 30, 0.16) 55%,
-        rgba(10, 20, 30, 0) 78%
-      );
+      /* Seule icône encore animée (SMIL) : on la promeut sur sa propre
+         couche de composition GPU plutôt que de la laisser peinte dans le
+         même calque que le reste de la carte. Sans ça, chaque frame de
+         l'animation peut forcer le moteur à repeindre toute la zone
+         environnante (pas juste l'icône) — ce qui expliquerait qu'elle
+         tourne bien seule sur une page vide mais rame une fois intégrée à
+         une mise en page chargée. */
+      will-change: transform;
     }
     .current-temp {
       font-size: var(--_current-temp-size);
@@ -927,14 +909,13 @@ class EchoWeatherCard extends LitElement {
        fond sombre : en mode clair elles deviennent quasi invisibles sans
        aide. drop-shadow() (contrairement à box-shadow) suit la silhouette
        réelle de l'icône (alpha), donc ça ajoute un halo sombre autour des
-       traits clairs sans plaque/cercle disgracieux derrière.
-       Volontairement PAS appliqué à .current-icon : c'est la seule icône
-       encore animée (SMIL), et un drop-shadow sur un contenu qui change à
-       chaque frame doit être recalculé à chaque frame (contrairement à un
-       contenu statique, mis en cache après le premier paint) — sur le GPU
-       modeste de l'Echo Show 5, ça suffisait à plafonner l'animation à
-       ~10fps. Les icônes horaires/quotidiennes sont figées (cf. icons.js)
-       donc le filtre n'y coûte plus qu'un calcul unique. */
+       traits clairs sans plaque/cercle disgracieux derrière. Un halo
+       statique (dégradé radial) a été testé sur l'icône actuelle pour
+       éviter tout recalcul par frame, mais n'a ni amélioré le FPS ni le
+       rendu (cercle visible, moins fidèle à la silhouette) : le vrai coût
+       semble ailleurs (cf. will-change sur .current-icon), donc retour au
+       drop-shadow partout, cohérent visuellement sur les trois tailles. */
+    :host(.light) .current-icon,
     :host(.light) .hourly-icon,
     :host(.light) .daily-icon {
       filter: drop-shadow(0 0 2px rgba(10, 20, 30, 0.45))
