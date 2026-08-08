@@ -1,6 +1,6 @@
-var ze = Object.defineProperty;
-var qe = (r, e, t) => e in r ? ze(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var I = (r, e, t) => qe(r, typeof e != "symbol" ? e + "" : e, t);
+var qe = Object.defineProperty;
+var ze = (r, e, t) => e in r ? qe(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var I = (r, e, t) => ze(r, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
@@ -48,7 +48,7 @@ const Te = (r) => new $e(typeof r == "string" ? r : r + "", void 0, Q), ke = (r,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Ue, defineProperty: Re, getOwnPropertyDescriptor: He, getOwnPropertyNames: De, getOwnPropertySymbols: Oe, getPrototypeOf: Le } = Object, g = globalThis, ne = g.trustedTypes, Be = ne ? ne.emptyScript : "", F = g.reactiveElementPolyfillSupport, C = (r, e) => r, Z = { toAttribute(r, e) {
+const { is: Re, defineProperty: Ue, getOwnPropertyDescriptor: He, getOwnPropertyNames: De, getOwnPropertySymbols: Oe, getPrototypeOf: Le } = Object, g = globalThis, ne = g.trustedTypes, Be = ne ? ne.emptyScript : "", F = g.reactiveElementPolyfillSupport, C = (r, e) => r, Z = { toAttribute(r, e) {
   switch (e) {
     case Boolean:
       r = r ? Be : null;
@@ -76,7 +76,7 @@ const { is: Ue, defineProperty: Re, getOwnPropertyDescriptor: He, getOwnProperty
       }
   }
   return t;
-} }, Ae = (r, e) => !Ue(r, e), oe = { attribute: !0, type: String, converter: Z, reflect: !1, useDefault: !1, hasChanged: Ae };
+} }, Ae = (r, e) => !Re(r, e), oe = { attribute: !0, type: String, converter: Z, reflect: !1, useDefault: !1, hasChanged: Ae };
 var fe, ge;
 (fe = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (ge = g.litPropertyMetadata) != null || (g.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let A = class extends HTMLElement {
@@ -90,7 +90,7 @@ let A = class extends HTMLElement {
   static createProperty(e, t = oe) {
     if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
       const i = Symbol(), s = this.getPropertyDescriptor(e, i, t);
-      s !== void 0 && Re(this.prototype, e, s);
+      s !== void 0 && Ue(this.prototype, e, s);
     }
   }
   static getPropertyDescriptor(e, t, i) {
@@ -294,7 +294,7 @@ A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const M = globalThis, ae = (r) => r, D = M.trustedTypes, le = D ? D.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, xe = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, Ee = "?" + f, Ie = `<${Ee}>`, $ = document, z = () => $.createComment(""), q = (r) => r === null || typeof r != "object" && typeof r != "function", ee = Array.isArray, Fe = (r) => ee(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", J = `[ 	
+const M = globalThis, ae = (r) => r, D = M.trustedTypes, le = D ? D.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, xe = "$lit$", f = `lit$${Math.random().toFixed(9).slice(2)}$`, Ee = "?" + f, Ie = `<${Ee}>`, $ = document, q = () => $.createComment(""), z = (r) => r === null || typeof r != "object" && typeof r != "function", ee = Array.isArray, Fe = (r) => ee(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", J = `[ 	
 \f\r]`, S = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ce = /-->/g, de = />/g, b = RegExp(`>|${J}(?:([^\\s"'>=/]+)(${J}*=${J}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), he = /'/g, ue = /"/g, Se = /^(?:script|style|textarea|title)$/i, Je = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), p = Je(1), x = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), pe = /* @__PURE__ */ new WeakMap(), y = $.createTreeWalker($, 129);
 function Ce(r, e) {
@@ -333,8 +333,8 @@ class T {
           const u = s.textContent.split(f), m = u.length - 1;
           if (m > 0) {
             s.textContent = D ? D.emptyScript : "";
-            for (let _ = 0; _ < m; _++) s.append(u[_], z()), y.nextNode(), a.push({ type: 2, index: ++n });
-            s.append(u[m], z());
+            for (let _ = 0; _ < m; _++) s.append(u[_], q()), y.nextNode(), a.push({ type: 2, index: ++n });
+            s.append(u[m], q());
           }
         }
       } else if (s.nodeType === 8) if (s.data === Ee) a.push({ type: 2, index: n });
@@ -354,7 +354,7 @@ function E(r, e, t = r, i) {
   var o, l, a;
   if (e === x) return e;
   let s = i !== void 0 ? (o = t._$Co) == null ? void 0 : o[i] : t._$Cl;
-  const n = q(e) ? void 0 : e._$litDirective$;
+  const n = z(e) ? void 0 : e._$litDirective$;
   return (s == null ? void 0 : s.constructor) !== n && ((l = s == null ? void 0 : s._$AO) == null || l.call(s, !1), n === void 0 ? s = void 0 : (s = new n(r), s._$AT(r, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = s : t._$Cl = s), s !== void 0 && (e = E(r, s._$AS(r, e.values), s, i)), e;
 }
 class je {
@@ -407,7 +407,7 @@ class k {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = E(this, e, t), q(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== x && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Fe(e) ? this.k(e) : this._(e);
+    e = E(this, e, t), z(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== x && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Fe(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -416,7 +416,7 @@ class k {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== d && q(this._$AH) ? this._$AA.nextSibling.data = e : this.T($.createTextNode(e)), this._$AH = e;
+    this._$AH !== d && z(this._$AH) ? this._$AA.nextSibling.data = e : this.T($.createTextNode(e)), this._$AH = e;
   }
   $(e) {
     var n;
@@ -435,7 +435,7 @@ class k {
     ee(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, s = 0;
-    for (const n of e) s === t.length ? t.push(i = new k(this.O(z()), this.O(z()), this, this.options)) : i = t[s], i._$AI(n), s++;
+    for (const n of e) s === t.length ? t.push(i = new k(this.O(q()), this.O(q()), this, this.options)) : i = t[s], i._$AI(n), s++;
     s < t.length && (this._$AR(i && i._$AB.nextSibling, s), t.length = s);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -463,11 +463,11 @@ class O {
   _$AI(e, t = this, i, s) {
     const n = this.strings;
     let o = !1;
-    if (n === void 0) e = E(this, e, t, 0), o = !q(e) || e !== this._$AH && e !== x, o && (this._$AH = e);
+    if (n === void 0) e = E(this, e, t, 0), o = !z(e) || e !== this._$AH && e !== x, o && (this._$AH = e);
     else {
       const l = e;
       let a, c;
-      for (e = n[0], a = 0; a < n.length - 1; a++) c = E(this, l[i + a], t, a), c === x && (c = this._$AH[a]), o || (o = !q(c) || c !== this._$AH[a]), c === d ? e = d : e !== d && (e += (c != null ? c : "") + n[a + 1]), this._$AH[a] = c;
+      for (e = n[0], a = 0; a < n.length - 1; a++) c = E(this, l[i + a], t, a), c === x && (c = this._$AH[a]), o || (o = !z(c) || c !== this._$AH[a]), c === d ? e = d : e !== d && (e += (c != null ? c : "") + n[a + 1]), this._$AH[a] = c;
     }
     o && !s && this.j(e);
   }
@@ -526,7 +526,7 @@ const Ke = (r, e, t) => {
   let s = i._$litPart$;
   if (s === void 0) {
     const l = (o = t == null ? void 0 : t.renderBefore) != null ? o : null;
-    i._$litPart$ = s = new k(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = s = new k(e.insertBefore(q(), l), l, void 0, t != null ? t : {});
   }
   return s._$AI(r), s;
 };
@@ -628,7 +628,7 @@ function it(r, e, t) {
     hour12: t === "12"
   }).format(r).replace(/\s/g, "");
 }
-function R(r, e, t) {
+function U(r, e, t) {
   return new Intl.DateTimeFormat(e, {
     hour: "numeric",
     minute: "2-digit",
@@ -1191,9 +1191,9 @@ class K extends P {
   }
   _renderCurrent(e, t, i) {
     const s = V(e.state, this._isNight()), n = W(s, this._config.icons), o = Y(this._hass, e.state), l = e.attributes.temperature, a = e.attributes.temperature_unit || "°C", c = e.attributes.apparent_temperature, h = e.attributes.humidity, u = e.last_updated ? new Date(e.last_updated) : null, m = [];
-    this._config.show_feels_like && c != null && m.push(`Ressenti ${Math.round(c)}°`), this._config.show_last_updated && u && m.push(`Maj à ${R(u, t, i)}`);
-    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], v = _ && !["unknown", "unavailable"].includes(_.state), te = this._config.show_humidity && h != null, Pe = this._config.show_clock || this._config.show_date, L = /* @__PURE__ */ new Date(), ie = this._config.show_date ? dt(L) : null, B = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], N = B && !["unknown", "unavailable"].includes(B.state) ? ut(B.state) : null, U = [];
-    return N && U.push(N.label), ie && U.push(ie), p`
+    this._config.show_feels_like && c != null && m.push(`Ressenti ${Math.round(c)}°`), this._config.show_last_updated && u && m.push(`Maj à ${U(u, t, i)}`);
+    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], v = _ && !["unknown", "unavailable"].includes(_.state), te = this._config.show_humidity && h != null, Pe = this._config.show_clock || this._config.show_date, L = /* @__PURE__ */ new Date(), ie = this._config.show_date ? dt(L) : null, B = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], N = B && !["unknown", "unavailable"].includes(B.state) ? ut(B.state) : null, R = [];
+    return N && R.push(N.label), ie && R.push(ie), p`
       <div class="current">
         <img class="current-icon" src=${n} alt=${o} />
         <div class="current-info">
@@ -1221,17 +1221,17 @@ class K extends P {
               <div class="current-side">
                 <div class="clock-group">
                   ${this._config.show_clock ? p`<div class="clock">
-                        ${R(L, t, i)}
+                        ${U(L, t, i)}
                       </div>` : d}
                   ${this._config.show_date ? p`<div class="date-line">
                         ${rt(L, t)}
                       </div>` : d}
-                  ${U.length ? p`<div class="moon-line">
+                  ${R.length ? p`<div class="moon-line">
                         ${N ? p`<ha-icon
                               class="moon-icon"
                               icon=${N.icon}
                             ></ha-icon>` : d}
-                        <span>${U.join(" · ")}</span>
+                        <span>${R.join(" · ")}</span>
                       </div>` : d}
                 </div>
               </div>
@@ -1296,12 +1296,12 @@ class K extends P {
         type: "sunrise",
         icon: "mdi:weather-sunset-up",
         label: "Lever",
-        value: R(c, t, i)
+        value: U(c, t, i)
       }), h && s.push({
         type: "sunset",
         icon: "mdi:weather-sunset-down",
         label: "Coucher",
-        value: R(h, t, i)
+        value: U(h, t, i)
       });
     }
     return s.length ? p`
@@ -1486,7 +1486,12 @@ I(K, "properties", {
       padding: var(--_row-gap) var(--_gap);
       gap: var(--_row-gap);
       background: var(--_mode-bg);
-      border-radius: var(--echo-weather-radius, 22px);
+      /* 0 par défaut : la carte est pensée pour occuper tout l'écran d'un
+         smart display (Echo Show, tablette...) plutôt qu'être une tuile
+         parmi d'autres dans un dashboard — des coins arrondis par défaut
+         créeraient un cadre visible contre les bords physiques de l'écran.
+         Reste réglable via --echo-weather-radius pour un usage en tuile. */
+      border-radius: var(--echo-weather-radius, 0px);
     }
 
     .error {

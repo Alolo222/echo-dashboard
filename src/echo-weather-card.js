@@ -564,7 +564,12 @@ class EchoWeatherCard extends LitElement {
       padding: var(--_row-gap) var(--_gap);
       gap: var(--_row-gap);
       background: var(--_mode-bg);
-      border-radius: var(--echo-weather-radius, 22px);
+      /* 0 par défaut : la carte est pensée pour occuper tout l'écran d'un
+         smart display (Echo Show, tablette...) plutôt qu'être une tuile
+         parmi d'autres dans un dashboard — des coins arrondis par défaut
+         créeraient un cadre visible contre les bords physiques de l'écran.
+         Reste réglable via --echo-weather-radius pour un usage en tuile. */
+      border-radius: var(--echo-weather-radius, 0px);
     }
 
     .error {
