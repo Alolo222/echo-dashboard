@@ -48,4 +48,10 @@ export const DEFAULT_CONFIG = {
   // "auto" (par défaut) : fond + couleurs clair le jour, sombre la nuit,
   // d'après le soleil (sun_entity). "light"/"dark" forcent un mode fixe.
   theme_mode: "auto",
+  // null (par défaut) : mise en page actuelle/horaire/quotidienne empilée,
+  // pensée pour un écran large (Echo Show). "round" : mise en page compacte
+  // pour petit écran circulaire (Echo Spot 1ère gen, 480x480) — horloge +
+  // météo actuelle + deux tuiles "Aujourd'hui"/"Semaine" qui ouvrent le
+  // détail au tap plutôt que d'essayer de tout afficher à la fois.
+  layout: null,
 };

@@ -19,6 +19,7 @@ class EchoWeatherCard extends LitElement {
     _hourly: { state: true },
     _daily: { state: true },
     _detailForecast: { state: true },
+    _roundDialog: { state: true },
   };
 
   setConfig(config) {
@@ -147,6 +148,10 @@ class EchoWeatherCard extends LitElement {
     const timeFormat =
       this._config.time_format || this._hass.locale?.time_format || "24";
 
+    if (this._config.layout === "round") {
+      return this._renderRound(stateObj, locale, timeFormat);
+    }
+
     const cardStyle =
       this._config.background != null
         ? `background:${this._config.background}`
@@ -167,6 +172,417 @@ class EchoWeatherCard extends LitElement {
         ${this._renderBottomBand(stateObj, locale, timeFormat)}
       </div>
       ${this._renderDayDetail(stateObj, locale)}
+    `;
+  }
+
+  // --- Mise en page "round" (petit écran circulaire, ex: Echo Spot 1ère
+  // gen 2017, 480x480) : pas la place pour empiler actuelle/horaire/
+  // quotidienne/bandeau comme en mode large. À la place, un écran d'accueil
+  // minimal (horloge + météo actuelle + deux tuiles "Aujourd'hui"/
+  // "Semaine") où chaque élément est une porte d'entrée vers plus de détail
+  // au tap (ha-dialog), plutôt que d'essayer de tout montrer à la fois. ---
+  _renderRound(stateObj, locale, timeFormat) {
+    const slug = conditionToIconSlug(stateObj.state, this._isNight());
+    const url = iconUrl(slug, this._config.icons);
+    const conditionLabel = localizeCondition(this._hass, stateObj.state);
+    const temp = stateObj.attributes.temperature;
+    const tempUnit = stateObj.attributes.temperature_unit || "°C";
+    const now = new Date();
+
+    const cardStyle =
+      this._config.background != null
+        ? `background:${this._config.background}`
+        : "";
+
+    const openCurrent = () => {
+      this._roundDialog = "current";
+    };
+    const openHourly = () => {
+      this._roundDialog = "hourly";
+    };
+    const openDaily = () => {
+      this._roundDialog = "daily";
+    };
+
+    return html`
+      <div class="card round" style=${cardStyle}>
+        ${this._config.show_clock
+          ? html`<div class="round-clock">
+              ${formatTime(now, locale, timeFormat)}
+            </div>`
+          : nothing}
+        ${this._config.show_current
+          ? html`
+              <div
+                class="round-current"
+                role="button"
+                tabindex="0"
+                @click=${openCurrent}
+                @keydown=${(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openCurrent();
+                  }
+                }}
+              >
+                <img
+                  class="round-icon"
+                  src=${this._config.icons.animate_current
+                    ? url
+                    : this._staticIcon(url)}
+                  alt=${conditionLabel}
+                />
+                <div class="round-temp">${Math.round(temp)}${tempUnit}</div>
+                <div class="round-condition">${conditionLabel}</div>
+              </div>
+            `
+          : nothing}
+        <div class="round-launchers">
+          ${this._config.show_hourly
+            ? this._renderRoundLauncher(
+                "mdi:clock-outline",
+                "Aujourd'hui",
+                openHourly
+              )
+            : nothing}
+          ${this._config.show_daily
+            ? this._renderRoundLauncher(
+                "mdi:calendar-week",
+                "Semaine",
+                openDaily
+              )
+            : nothing}
+        </div>
+      </div>
+      ${this._renderRoundDialog(stateObj, locale, timeFormat)}
+      ${this._renderDayDetail(stateObj, locale)}
+    `;
+  }
+
+  _renderRoundLauncher(icon, label, onOpen) {
+    return html`
+      <div
+        class="round-launcher"
+        role="button"
+        tabindex="0"
+        @click=${onOpen}
+        @keydown=${(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen();
+          }
+        }}
+      >
+        <ha-icon icon=${icon}></ha-icon>
+        <span>${label}</span>
+        <ha-icon class="round-chevron" icon=${"mdi:chevron-right"}></ha-icon>
+      </div>
+    `;
+  }
+
+  _renderRoundDialog(stateObj, locale, timeFormat) {
+    if (this._roundDialog === "current") {
+      return this._renderCurrentDetail(stateObj, locale, timeFormat);
+    }
+    if (this._roundDialog === "hourly") {
+      return this._renderHourlyOverview(locale, timeFormat);
+    }
+    if (this._roundDialog === "daily") {
+      return this._renderDailyOverview(locale);
+    }
+    return nothing;
+  }
+
+  _renderDialogHeader(title, close) {
+    return html`
+      <div class="detail-header">
+        <div class="detail-date">${title}</div>
+        <ha-icon
+          class="detail-close"
+          icon=${"mdi:close"}
+          role="button"
+          tabindex="0"
+          @click=${close}
+          @keydown=${(e) => {
+            if (e.key === "Enter" || e.key === " ") close();
+          }}
+        ></ha-icon>
+      </div>
+    `;
+  }
+
+  // Détail de la météo actuelle (mode round uniquement) : reprend les
+  // mêmes données que le mode large (UV, qualité de l'air, humidité, vent,
+  // point de rosée, lever/coucher, mise à jour) mais en liste verticale
+  // plutôt qu'éclatées entre plusieurs zones — il n'y a pas la place pour
+  // les afficher directement sur l'écran rond.
+  _renderCurrentDetail(stateObj, locale, timeFormat) {
+    const close = () => {
+      this._roundDialog = null;
+    };
+    const tempUnit = stateObj.attributes.temperature_unit || "°C";
+    const feelsLike = stateObj.attributes.apparent_temperature;
+    const humidity = stateObj.attributes.humidity;
+    const windSpeed = stateObj.attributes.wind_speed;
+    const windUnit = stateObj.attributes.wind_speed_unit || "";
+
+    const uvObj =
+      this._config.uv_entity && this._hass.states[this._config.uv_entity];
+    const airQualityObj =
+      this._config.air_quality_entity &&
+      this._hass.states[this._config.air_quality_entity];
+    const dewPointObj =
+      this._config.dew_point_entity &&
+      this._hass.states[this._config.dew_point_entity];
+    const dewPoint = dewPointObj
+      ? Number(dewPointObj.state)
+      : stateObj.attributes.dew_point;
+    const sunObj = this._hass.states[this._config.sun_entity || "sun.sun"];
+
+    const rows = [];
+    if (this._config.show_feels_like && feelsLike != null) {
+      rows.push({
+        icon: "mdi:thermometer",
+        label: "Ressenti",
+        value: `${Math.round(feelsLike)}${tempUnit}`,
+      });
+    }
+    if (this._config.show_humidity && humidity != null) {
+      rows.push({
+        icon: "mdi:water-percent",
+        label: "Humidité",
+        value: `${Math.round(humidity)}%`,
+      });
+    }
+    if (uvObj && !["unknown", "unavailable"].includes(uvObj.state)) {
+      const category = uvCategory(uvObj.state);
+      rows.push({
+        icon: "mdi:weather-sunny-alert",
+        label: "Indice UV",
+        value: category ? `${uvObj.state} · ${category}` : `${uvObj.state}`,
+      });
+    }
+    if (
+      airQualityObj &&
+      !["unknown", "unavailable"].includes(airQualityObj.state)
+    ) {
+      const category =
+        airQualityObj.attributes.Libellé || airQualityObj.attributes.libelle;
+      const unit = airQualityObj.attributes.unit_of_measurement;
+      rows.push({
+        icon: "mdi:air-filter",
+        label: "Qualité de l'air",
+        value: category
+          ? `${airQualityObj.state} · ${category}`
+          : `${airQualityObj.state}${unit ? ` ${unit}` : ""}`,
+      });
+    }
+    if (this._config.show_wind && windSpeed != null) {
+      rows.push({
+        icon: "mdi:weather-windy",
+        label: "Vent",
+        value: `${Math.round(windSpeed)} ${windUnit}`.trim(),
+      });
+    }
+    if (
+      this._config.show_dew_point &&
+      dewPoint != null &&
+      Number.isFinite(dewPoint)
+    ) {
+      const unit = dewPointObj
+        ? dewPointObj.attributes.unit_of_measurement || tempUnit
+        : tempUnit;
+      rows.push({
+        icon: "mdi:thermometer-water",
+        label: "Point de rosée",
+        value: `${dewPoint.toFixed(1)}${unit}`,
+      });
+    }
+    if (this._config.show_sun && sunObj) {
+      if (sunObj.attributes.next_rising) {
+        rows.push({
+          icon: "mdi:weather-sunset-up",
+          label: "Lever",
+          value: formatTime(
+            new Date(sunObj.attributes.next_rising),
+            locale,
+            timeFormat
+          ),
+        });
+      }
+      if (sunObj.attributes.next_setting) {
+        rows.push({
+          icon: "mdi:weather-sunset-down",
+          label: "Coucher",
+          value: formatTime(
+            new Date(sunObj.attributes.next_setting),
+            locale,
+            timeFormat
+          ),
+        });
+      }
+    }
+    if (this._config.show_last_updated && stateObj.last_updated) {
+      rows.push({
+        icon: "mdi:update",
+        label: "Mise à jour",
+        value: formatTime(
+          new Date(stateObj.last_updated),
+          locale,
+          timeFormat
+        ),
+      });
+    }
+
+    return html`
+      <ha-dialog open hideActions @closed=${close}>
+        <div class="detail detail-list">
+          ${this._renderDialogHeader("Météo actuelle", close)}
+          ${rows.length
+            ? html`<div class="detail-rows">
+                ${rows.map(
+                  (r) => html`<div class="detail-row">
+                    <ha-icon icon=${r.icon}></ha-icon>
+                    <span class="detail-row-label">${r.label}</span>
+                    <span class="detail-row-value">${r.value}</span>
+                  </div>`
+                )}
+              </div>`
+            : html`<div class="detail-row-empty">
+                Aucune information supplémentaire configurée.
+              </div>`}
+        </div>
+      </ha-dialog>
+    `;
+  }
+
+  // Liste des prochaines heures (mode round uniquement) — même donnée que
+  // _renderHourly, mais en liste verticale scrollable plutôt qu'en rangée
+  // horizontale (pas la largeur nécessaire sur un écran rond).
+  _renderHourlyOverview(locale, timeFormat) {
+    const close = () => {
+      this._roundDialog = null;
+    };
+    const now = Date.now();
+    const items = (this._hourly || [])
+      .filter((f) => new Date(f.datetime).getTime() >= now)
+      .slice(0, this._config.hourly_count);
+
+    return html`
+      <ha-dialog open hideActions @closed=${close}>
+        <div class="detail detail-list">
+          ${this._renderDialogHeader("Aujourd'hui", close)}
+          ${items.length
+            ? html`<div class="hourly-list">
+                ${items.map((forecast) => {
+                  const date = new Date(forecast.datetime);
+                  const slug = conditionToIconSlug(
+                    forecast.condition,
+                    this._isNight(date)
+                  );
+                  const url = iconUrl(slug, this._config.icons);
+                  const label = localizeCondition(
+                    this._hass,
+                    forecast.condition
+                  );
+                  const pop = forecast.precipitation_probability;
+                  return html`<div class="hourly-list-item">
+                    <span class="hourly-list-time"
+                      >${formatHour(date, locale, timeFormat)}</span
+                    >
+                    <img
+                      class="hourly-list-icon"
+                      src=${this._staticIcon(url)}
+                      alt=${label}
+                    />
+                    <span class="hourly-list-temp"
+                      >${Math.round(forecast.temperature)}°</span
+                    >
+                    <span class="hourly-list-pop"
+                      >${this._config.show_precipitation_probability &&
+                      pop > 0
+                        ? `${pop}%`
+                        : ""}</span
+                    >
+                  </div>`;
+                })}
+              </div>`
+            : html`<div class="detail-row-empty">
+                Pas de prévision disponible.
+              </div>`}
+        </div>
+      </ha-dialog>
+    `;
+  }
+
+  // Liste des prochains jours (mode round uniquement) — chaque jour est
+  // lui-même cliquable et renvoie vers _renderDayDetail (même détail que
+  // le tap sur une tuile .daily-item en mode large) : on ferme cette liste
+  // et on ouvre le détail du jour choisi, plutôt que d'empiler les dialog.
+  _renderDailyOverview(locale) {
+    const close = () => {
+      this._roundDialog = null;
+    };
+    const items = (this._daily || []).slice(0, this._config.daily_count);
+
+    return html`
+      <ha-dialog open hideActions @closed=${close}>
+        <div class="detail detail-list">
+          ${this._renderDialogHeader("Cette semaine", close)}
+          ${items.length
+            ? html`<div class="daily-list">
+                ${items.map((forecast) => {
+                  const date = new Date(forecast.datetime);
+                  const slug = conditionToIconSlug(forecast.condition, false);
+                  const url = iconUrl(slug, this._config.icons);
+                  const label = localizeCondition(
+                    this._hass,
+                    forecast.condition
+                  );
+                  const openDay = () => {
+                    this._roundDialog = null;
+                    this._detailForecast = forecast;
+                  };
+                  return html`<div
+                    class="daily-list-item"
+                    role="button"
+                    tabindex="0"
+                    @click=${openDay}
+                    @keydown=${(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openDay();
+                      }
+                    }}
+                  >
+                    <span class="daily-list-day"
+                      >${formatWeekday(date, locale)}</span
+                    >
+                    <img
+                      class="daily-list-icon"
+                      src=${this._staticIcon(url)}
+                      alt=${label}
+                    />
+                    <span class="daily-list-temps">
+                      <span class="daily-max"
+                        >${Math.round(forecast.temperature)}°</span
+                      >
+                      <span class="daily-min"
+                        >${Math.round(forecast.templow)}°</span
+                      >
+                    </span>
+                    <ha-icon
+                      class="round-chevron"
+                      icon=${"mdi:chevron-right"}
+                    ></ha-icon>
+                  </div>`;
+                })}
+              </div>`
+            : html`<div class="detail-row-empty">
+                Pas de prévision disponible.
+              </div>`}
+        </div>
+      </ha-dialog>
     `;
   }
 
@@ -571,19 +987,7 @@ class EchoWeatherCard extends LitElement {
     return html`
       <ha-dialog open hideActions @closed=${close}>
         <div class="detail">
-          <div class="detail-header">
-            <div class="detail-date">${formatDate(date, locale)}</div>
-            <ha-icon
-              class="detail-close"
-              icon=${"mdi:close"}
-              role="button"
-              tabindex="0"
-              @click=${close}
-              @keydown=${(e) => {
-                if (e.key === "Enter" || e.key === " ") close();
-              }}
-            ></ha-icon>
-          </div>
+          ${this._renderDialogHeader(formatDate(date, locale), close)}
           <img class="detail-icon" src=${url} alt=${label} />
           <div class="detail-condition">${label}</div>
           <div class="detail-temps">
@@ -1182,6 +1586,155 @@ class EchoWeatherCard extends LitElement {
     .detail-row-value {
       font-weight: 700;
       font-size: 0.95rem;
+    }
+    .detail-row-empty {
+      color: var(--_secondary-color);
+      font-size: 0.9rem;
+      margin-top: 12px;
+      text-align: center;
+    }
+    .detail-list {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .hourly-list,
+    .daily-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .hourly-list-item,
+    .daily-list-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: var(--_tile-background);
+      border: 1px solid var(--_tile-border);
+    }
+    .daily-list-item {
+      cursor: pointer;
+    }
+    .hourly-list-time,
+    .daily-list-day {
+      width: 44px;
+      flex-shrink: 0;
+      color: var(--_secondary-color);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .hourly-list-icon,
+    .daily-list-icon {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .hourly-list-temp,
+    .daily-list-temps {
+      flex: 1;
+      font-weight: 700;
+    }
+    .hourly-list-pop {
+      color: var(--_secondary-color);
+      font-size: 0.8rem;
+      width: 32px;
+      text-align: right;
+    }
+
+    /* --- Mise en page "round" (petit écran circulaire) --- */
+    .card.round {
+      aspect-ratio: 1 / 1;
+      max-width: 100%;
+      max-height: 100%;
+      margin: 0 auto;
+      /* On se clippe nous-mêmes en cercle plutôt que de compter sur le
+         boîtier physique : ça garantit qu'on ne dessine jamais rien au-delà
+         de la zone visible, et ça donne un aperçu fidèle même testé dans
+         une fenêtre carrée classique. */
+      border-radius: 50%;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      /* Padding généreux en % : à 15% par côté, le carré de contenu
+         restant (70% de large) touche presque exactement le cercle par
+         ses coins — marge de sécurité correcte sans calcul de corde par
+         ligne. */
+      padding: 15%;
+      text-align: center;
+    }
+    .round-clock {
+      font-size: clamp(1.4rem, 13cqw, 2rem);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .round-current {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      margin: 4px 0;
+    }
+    .round-icon {
+      width: clamp(56px, 26cqw, 84px);
+      height: clamp(56px, 26cqw, 84px);
+    }
+    .round-temp {
+      font-size: clamp(1.6rem, 15cqw, 2.4rem);
+      font-weight: 800;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .round-condition {
+      color: var(--_secondary-color);
+      font-size: clamp(0.7rem, 6cqw, 0.85rem);
+      margin-top: 2px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .round-launchers {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .round-launcher {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--_tile-background);
+      border: 1px solid var(--_tile-border);
+      box-shadow: var(--_tile-shadow);
+      font-size: clamp(0.62rem, 5.2cqw, 0.72rem);
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .round-launcher:focus-visible,
+    .round-current:focus-visible {
+      outline: 2px solid var(--_text-color);
+      outline-offset: 2px;
+    }
+    .round-launcher ha-icon {
+      --mdc-icon-size: clamp(12px, 4.5cqw, 14px);
+      flex-shrink: 0;
+    }
+    .round-chevron {
+      --mdc-icon-size: clamp(11px, 4cqw, 13px);
+      color: var(--_secondary-color);
+      flex-shrink: 0;
+    }
+    :host(.light) .round-icon {
+      filter: drop-shadow(0 0 2px rgba(10, 20, 30, 0.45))
+        drop-shadow(0 0 5px rgba(10, 20, 30, 0.25));
     }
   `;
 }

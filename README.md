@@ -23,6 +23,10 @@ globalement stables mais peuvent encore évoluer avant une release 1.0.
   Cliquer/tap sur un jour ouvre une fenêtre de détail (précipitations,
   vent, humidité, indice UV si l'intégration météo les fournit par jour).
 - Vent, point de rosée, lever/coucher du soleil en bandeau bas.
+- Mise en page alternative `layout: round` pour petits écrans circulaires
+  (Echo Spot 1ère gen 2017, 480x480) : horloge + météo actuelle + deux
+  tuiles "Aujourd'hui"/"Semaine" qui ouvrent le détail au tap. Voir
+  [Mode round](#mode-round-écrans-circulaires) plus bas.
 - Icônes [Meteocons](https://github.com/basmilius/meteocons) chargées
   depuis un CDN (ou une base locale) ; les icônes de prévisions sont
   automatiquement figées (animation retirée) pour préserver le FPS sur du
@@ -115,7 +119,45 @@ title: null                     # titre optionnel affiché en haut
 background: null                # ex: "transparent" ou tout CSS `background`
                                  # — sinon dégradé par défaut selon le thème
 theme_mode: auto                # "auto" (selon le soleil), "light", "dark"
+layout: null                    # null (mise en page large habituelle) ou
+                                 # "round" (écran circulaire, voir plus bas)
 ```
+
+## Mode round (écrans circulaires)
+
+`layout: round` remplace entièrement la mise en page par un écran d'accueil
+minimal pensé pour un petit écran circulaire (testé pour l'Echo Spot 1ère
+génération 2017, 480x480 — LineageOS + View Assist, voir le [guide
+communautaire](https://xdaforums.com/t/rom-unofficial-11-rook-lineageos-18-1-for-the-amazon-echo-spot-2017.4762459/)).
+Il n'y a pas la place pour empiler actuelle/horaire/quotidienne/bandeau
+comme en mise en page large : à la place, chaque élément affiché est une
+porte d'entrée vers plus de détail au tap, plutôt que d'essayer de tout
+montrer à la fois.
+
+![Aperçu du mode round à 480x480](docs/screenshot-round.png)
+
+```yaml
+type: custom:echo-weather-card
+entity: weather.maison
+layout: round
+```
+
+Écran d'accueil : horloge, icône + température + condition (météo
+actuelle), et deux tuiles "Aujourd'hui" / "Semaine".
+
+- **Tap sur la météo actuelle** → détail complet (ressenti, humidité,
+  UV, qualité de l'air, vent, point de rosée, lever/coucher, dernière
+  mise à jour) — tout ce qui n'a pas la place sur l'écran principal.
+- **Tap sur "Aujourd'hui"** → liste des prochaines heures.
+- **Tap sur "Semaine"** → liste des prochains jours, chacun cliquable à
+  son tour vers son détail complet (même fenêtre que le tap sur un jour
+  en mise en page large).
+
+Les options `show_*` habituelles s'appliquent aussi en mode round (ex:
+`show_daily: false` retire la tuile "Semaine"). La carte se clippe
+elle-même en cercle (`border-radius: 50%` sur son propre fond) plutôt que
+de compter sur le boîtier physique, donc l'aperçu reste fidèle même
+affiché dans une fenêtre carrée classique.
 
 ## Point de rosée
 
