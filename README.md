@@ -270,6 +270,8 @@ un thème), comme dans l'exemple de police ci-dessus.
 | `--echo-weather-tile-background` | Fond des tuiles (UV, prévisions, bandeau) | dégradé translucide selon le thème |
 | `--echo-weather-tile-border` | Bordure des tuiles | selon le thème |
 | `--echo-weather-tile-shadow` | Ombre/relief des tuiles | selon le thème |
+| `--echo-weather-dialog-row-background` | Fond des lignes dans les fenêtres de détail (heure/jour) | teinte distincte du fond du dialogue, selon le thème |
+| `--echo-weather-dialog-row-border` | Bordure des lignes dans les fenêtres de détail | selon le thème |
 | `--echo-weather-gap` | Espacement horizontal (icônes, tuiles) | `14px` |
 | `--echo-weather-row-gap` | Espacement vertical entre sections | `2px` |
 | `--echo-weather-icon-size` | Taille des icônes horaires | `clamp(64px, 8.5cqw, 84px)` |

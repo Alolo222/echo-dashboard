@@ -1287,9 +1287,9 @@ class EchoWeatherCard extends LitElement {
          + ombre portée) plutôt qu'un simple aplat. */
       --_mode-bg: radial-gradient(
         130% 140% at 18% -10%,
-        #1c2c40 0%,
-        #101a26 45%,
-        #05080c 100%
+        #1f3350 0%,
+        #111e30 45%,
+        #0a1424 100%
       );
       /* Couleur pleine (pas un dégradé) pour les endroits qui ont besoin
          d'une vraie <color> CSS, ex: --mdc-theme-surface de ha-dialog —
@@ -1297,7 +1297,7 @@ class EchoWeatherCard extends LitElement {
          déclaration est ignorée et le composant retombe sur son propre
          thème par défaut (d'où un fond noir en mode clair, repéré via
          test sur appareil réel). */
-      --_mode-surface: #101a26;
+      --_mode-surface: #111e30;
       --_mode-text: #ffffff;
       --_mode-secondary: #a9b4bf;
       --_mode-divider: rgba(255, 255, 255, 0.14);
@@ -1309,6 +1309,15 @@ class EchoWeatherCard extends LitElement {
       --_mode-tile-border: rgba(255, 255, 255, 0.14);
       --_mode-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18),
         0 3px 10px rgba(0, 0, 0, 0.35);
+      /* Tuiles des dialogues (menus heure/jour) : le fond du dialogue est
+         un aplat uni (--_mode-surface), pas le dégradé riche de la carte
+         (--_mode-bg) — les tuiles habituelles (--_mode-tile-bg, quasi
+         blanches translucides) s'y distinguent à peine, surtout en clair
+         (blanc quasi-transparent sur fond quasi-blanc). Couleur dédiée,
+         nettement différenciée de --_mode-surface plutôt qu'une simple
+         translucidité qui dépend trop de ce qu'il y a derrière. */
+      --_mode-dialog-row-bg: #1f3350;
+      --_mode-dialog-row-border: rgba(255, 255, 255, 0.16);
       --_text-color: var(--echo-weather-text-color, var(--_mode-text));
       --_secondary-color: var(
         --echo-weather-secondary-color,
@@ -1318,6 +1327,14 @@ class EchoWeatherCard extends LitElement {
       --_tile-background: var(--echo-weather-tile-background, var(--_mode-tile-bg));
       --_tile-border: var(--echo-weather-tile-border, var(--_mode-tile-border));
       --_tile-shadow: var(--echo-weather-tile-shadow, var(--_mode-tile-shadow));
+      --_dialog-row-background: var(
+        --echo-weather-dialog-row-background,
+        var(--_mode-dialog-row-bg)
+      );
+      --_dialog-row-border: var(
+        --echo-weather-dialog-row-border,
+        var(--_mode-dialog-row-border)
+      );
       /* --primary-font-family est la variable de thème HA standard (ce que
          change un thème/View Assist quand on choisit une police) : on la
          lit en repli avant d'abandonner à inherit, sinon un changement de
@@ -1346,11 +1363,11 @@ class EchoWeatherCard extends LitElement {
     :host(.light) {
       --_mode-bg: radial-gradient(
         130% 140% at 18% -10%,
-        #eef7fc 0%,
-        #d7e9f4 45%,
-        #bcdaeb 100%
+        #e6f3fb 0%,
+        #cde6f5 45%,
+        #a9d3ec 100%
       );
-      --_mode-surface: #eef7fc;
+      --_mode-surface: #e6f3fb;
       --_mode-text: #16232e;
       --_mode-secondary: #57697a;
       --_mode-divider: rgba(22, 35, 46, 0.14);
@@ -1362,6 +1379,11 @@ class EchoWeatherCard extends LitElement {
       --_mode-tile-border: rgba(22, 35, 46, 0.12);
       --_mode-tile-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7),
         0 3px 10px rgba(22, 35, 46, 0.1);
+      /* cf. commentaire sur --_mode-dialog-row-bg (mode sombre) : une
+         teinte nettement distincte de --_mode-surface plutôt qu'un blanc
+         translucide qui s'y fond. */
+      --_mode-dialog-row-bg: #cde6f5;
+      --_mode-dialog-row-border: rgba(22, 35, 46, 0.16);
     }
 
     .card {
@@ -1833,8 +1855,8 @@ class EchoWeatherCard extends LitElement {
       gap: 10px;
       padding: 8px 12px;
       border-radius: 10px;
-      background: var(--_tile-background);
-      border: 1px solid var(--_tile-border);
+      background: var(--_dialog-row-background);
+      border: 1px solid var(--_dialog-row-border);
     }
     .detail-row ha-icon {
       --mdc-icon-size: 18px;
@@ -1875,8 +1897,8 @@ class EchoWeatherCard extends LitElement {
       gap: 10px;
       padding: 8px 10px;
       border-radius: 10px;
-      background: var(--_tile-background);
-      border: 1px solid var(--_tile-border);
+      background: var(--_dialog-row-background);
+      border: 1px solid var(--_dialog-row-border);
     }
     .daily-list-item {
       cursor: pointer;
