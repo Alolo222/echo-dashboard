@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
-import { conditionToIconSlug, iconUrl } from "./icons.js";
+import { conditionToIconSlug, iconUrl, getStaticIconUrl } from "./icons.js";
 import {
   formatDate,
   formatHour,
@@ -96,6 +96,16 @@ class EchoWeatherCard extends LitElement {
         if (type === "daily") this._daily = forecast;
       }
     );
+  }
+
+  // Icônes des prévisions (horaires/quotidiennes) : version figée, sans
+  // l'animation SMIL embarquée dans les SVG Meteocons — seule l'icône
+  // météo actuelle a besoin de bouger, et beaucoup d'icônes animées à
+  // l'écran en même temps fait chuter le FPS sur du matériel modeste
+  // (Echo Show 5). Tant que la version figée n'est pas prête (premier
+  // fetch), on affiche l'animée le temps d'un re-render.
+  _staticIcon(url) {
+    return getStaticIconUrl(url, () => this.requestUpdate()) || url;
   }
 
   _isNight(date) {
@@ -405,7 +415,11 @@ class EchoWeatherCard extends LitElement {
               <div class="hourly-time">
                 ${formatHour(date, locale, timeFormat)}
               </div>
-              <img class="hourly-icon" src=${url} alt=${label} />
+              <img
+                class="hourly-icon"
+                src=${this._staticIcon(url)}
+                alt=${label}
+              />
               <div class="hourly-temp">
                 ${Math.round(forecast.temperature)}°
               </div>
@@ -434,7 +448,11 @@ class EchoWeatherCard extends LitElement {
           return html`
             <div class="daily-item">
               <div class="daily-day">${formatWeekday(date, locale)}</div>
-              <img class="daily-icon" src=${url} alt=${label} />
+              <img
+                class="daily-icon"
+                src=${this._staticIcon(url)}
+                alt=${label}
+              />
               <div class="daily-temps">
                 <span class="daily-max"
                   >${Math.round(forecast.temperature)}°</span
