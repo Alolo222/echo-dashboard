@@ -804,15 +804,15 @@ D(V, "properties", {
       width: 100%;
       overflow: hidden;
       box-sizing: border-box;
-      --_clock-size: var(--echo-home-clock-size, clamp(5rem, 32vh, 11rem));
-      --_date-size: var(--echo-home-date-size, clamp(1.3rem, 8vh, 2.4rem));
+      --_clock-size: var(--echo-home-clock-size, clamp(6rem, 44vh, 16rem));
+      --_date-size: var(--echo-home-date-size, clamp(1.7rem, 11vh, 3.4rem));
       --_weather-icon-size: var(
         --echo-home-weather-icon-size,
-        clamp(44px, 13vh, 76px)
+        clamp(56px, 16vh, 100px)
       );
       --_weather-temp-size: var(
         --echo-home-weather-temp-size,
-        clamp(1.3rem, 7vh, 2.2rem)
+        clamp(1.7rem, 9vh, 3rem)
       );
       --_text-color: var(--echo-home-text-color, #ffffff);
       /* "red" tel quel par défaut (pas une teinte adoucie) : c'est
@@ -941,17 +941,17 @@ D(V, "properties", {
        round. Valeurs propres à ce layout (pas de variable CSS exposée),
        comme pour echo-weather-card. */
     .card.round .clock {
-      font-size: clamp(3rem, 26vmin, 6rem);
+      font-size: clamp(3.6rem, 34vmin, 8rem);
     }
     .card.round .date {
-      font-size: clamp(0.95rem, 6.5vmin, 1.5rem);
+      font-size: clamp(1.2rem, 8.5vmin, 2rem);
     }
     .card.round .weather-icon {
-      width: clamp(30px, 9vmin, 46px);
-      height: clamp(30px, 9vmin, 46px);
+      width: clamp(36px, 12vmin, 58px);
+      height: clamp(36px, 12vmin, 58px);
     }
     .card.round .weather-temp {
-      font-size: clamp(0.95rem, 6vmin, 1.4rem);
+      font-size: clamp(1.2rem, 8vmin, 1.9rem);
     }
   `);
 customElements.define($e, V);

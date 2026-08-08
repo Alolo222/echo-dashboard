@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+- Horloge, date et bloc météo nettement plus grands (horloge notamment,
+  qui se rapproche désormais de l'échelle "55vh" du template View Assist
+  d'origine) — le texte occupait trop peu d'espace à l'écran en v1.0.0.
+
 ## 1.0.0
 
 Première version. Réplique en vraie carte Lit la vue d'accueil View

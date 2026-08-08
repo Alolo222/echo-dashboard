@@ -219,10 +219,10 @@ rien à régler. À poser sur le sélecteur `:host` de la carte (via
 | `--echo-home-night-color` | Couleur de l'horloge en mode nuit | `red` |
 | `--echo-home-night-opacity` | Opacité de l'horloge en mode nuit | `0.35` |
 | `--echo-home-shader-color` | Voile posé sur l'image de fond pour la lisibilité | `rgba(0, 0, 0, 0.15)` |
-| `--echo-home-clock-size` | Taille de l'horloge (mise en page large) | `clamp(5rem, 32vh, 11rem)` |
-| `--echo-home-date-size` | Taille de la date (mise en page large) | `clamp(1.3rem, 8vh, 2.4rem)` |
-| `--echo-home-weather-icon-size` | Taille de l'icône météo (mise en page large) | `clamp(44px, 13vh, 76px)` |
-| `--echo-home-weather-temp-size` | Taille de la température (mise en page large) | `clamp(1.3rem, 7vh, 2.2rem)` |
+| `--echo-home-clock-size` | Taille de l'horloge (mise en page large) | `clamp(6rem, 44vh, 16rem)` |
+| `--echo-home-date-size` | Taille de la date (mise en page large) | `clamp(1.7rem, 11vh, 3.4rem)` |
+| `--echo-home-weather-icon-size` | Taille de l'icône météo (mise en page large) | `clamp(56px, 16vh, 100px)` |
+| `--echo-home-weather-temp-size` | Taille de la température (mise en page large) | `clamp(1.7rem, 9vh, 3rem)` |
 
 Le mode round a ses propres tailles ajustées, non exposées en variables
 CSS (comme dans echo-weather-card).
