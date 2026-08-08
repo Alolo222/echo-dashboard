@@ -76,7 +76,7 @@ const { is: Ge, defineProperty: We, getOwnPropertyDescriptor: Qe, getOwnProperty
       }
   }
   return t;
-} }, Te = (s, e) => !Ge(s, e), me = { attribute: !0, type: String, converter: oe, reflect: !1, useDefault: !1, hasChanged: Te };
+} }, Le = (s, e) => !Ge(s, e), me = { attribute: !0, type: String, converter: oe, reflect: !1, useDefault: !1, hasChanged: Le };
 var Ce, Me;
 (Ce = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (Me = A.litPropertyMetadata) != null || (A.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
 let U = class extends HTMLElement {
@@ -210,7 +210,7 @@ let U = class extends HTMLElement {
     var o, l;
     if (e !== void 0) {
       const a = this.constructor;
-      if (n === !1 && (r = this[e]), i != null || (i = a.getPropertyOptions(e)), !(((o = i.hasChanged) != null ? o : Te)(r, t) || i.useDefault && i.reflect && r === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(a._$Eu(e, i)))) return;
+      if (n === !1 && (r = this[e]), i != null || (i = a.getPropertyOptions(e)), !(((o = i.hasChanged) != null ? o : Le)(r, t) || i.useDefault && i.reflect && r === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(a._$Eu(e, i)))) return;
       this.C(e, t, i);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
@@ -294,7 +294,7 @@ U.elementStyles = [], U.shadowRootOptions = { mode: "open" }, U[B("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const O = globalThis, _e = (s) => s, K = O.trustedTypes, ge = K ? K.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, Le = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, Ne = "?" + x, et = `<${Ne}>`, z = document, j = () => z.createComment(""), J = (s) => s === null || typeof s != "object" && typeof s != "function", de = Array.isArray, tt = (s) => de(s) || typeof (s == null ? void 0 : s[Symbol.iterator]) == "function", ie = `[ 	
+const O = globalThis, _e = (s) => s, K = O.trustedTypes, ge = K ? K.createPolicy("lit-html", { createHTML: (s) => s }) : void 0, Te = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, Ne = "?" + x, et = `<${Ne}>`, z = document, j = () => z.createComment(""), J = (s) => s === null || typeof s != "object" && typeof s != "function", de = Array.isArray, tt = (s) => de(s) || typeof (s == null ? void 0 : s[Symbol.iterator]) == "function", ie = `[ 	
 \f\r]`, I = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, fe = /-->/g, ve = />/g, S = RegExp(`>|${ie}(?:([^\\s"'>=/]+)(${ie}*=${ie}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), we = /'/g, ye = /"/g, He = /^(?:script|style|textarea|title)$/i, it = (s) => (e, ...t) => ({ _$litType$: s, strings: e, values: t }), d = it(1), R = Symbol.for("lit-noChange"), u = Symbol.for("lit-nothing"), be = /* @__PURE__ */ new WeakMap(), M = z.createTreeWalker(z, 129);
 function Ie(s, e) {
@@ -309,7 +309,7 @@ const nt = (s, e) => {
     let c, h, p = -1, m = 0;
     for (; m < a.length && (o.lastIndex = m, h = o.exec(a), h !== null); ) m = o.lastIndex, o === I ? h[1] === "!--" ? o = fe : h[1] !== void 0 ? o = ve : h[2] !== void 0 ? (He.test(h[2]) && (n = RegExp("</" + h[2], "g")), o = S) : h[3] !== void 0 && (o = S) : o === S ? h[0] === ">" ? (o = n != null ? n : I, p = -1) : h[1] === void 0 ? p = -2 : (p = o.lastIndex - h[2].length, c = h[1], o = h[3] === void 0 ? S : h[3] === '"' ? ye : we) : o === ye || o === we ? o = S : o === fe || o === ve ? o = I : (o = S, n = void 0);
     const _ = o === S && s[l + 1].startsWith("/>") ? " " : "";
-    r += o === I ? a + et : p >= 0 ? (i.push(c), a.slice(0, p) + Le + a.slice(p) + x + _) : a + x + (p === -2 ? l : _);
+    r += o === I ? a + et : p >= 0 ? (i.push(c), a.slice(0, p) + Te + a.slice(p) + x + _) : a + x + (p === -2 ? l : _);
   }
   return [Ie(s, r + (s[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), i];
 };
@@ -325,7 +325,7 @@ class V {
     }
     for (; (n = M.nextNode()) !== null && a.length < l; ) {
       if (n.nodeType === 1) {
-        if (n.hasAttributes()) for (const p of n.getAttributeNames()) if (p.endsWith(Le)) {
+        if (n.hasAttributes()) for (const p of n.getAttributeNames()) if (p.endsWith(Te)) {
           const m = h[o++], _ = n.getAttribute(p).split(x), g = /([.?@])?(.*)/.exec(m);
           a.push({ type: 1, index: r, name: g[2], strings: _, ctor: g[1] === "." ? rt : g[1] === "?" ? ot : g[1] === "@" ? at : X }), n.removeAttribute(p);
         } else p.startsWith(x) && (a.push({ type: 6, index: r }), n.removeAttribute(p));
@@ -350,12 +350,12 @@ class V {
     return i.innerHTML = e, i;
   }
 }
-function T(s, e, t = s, i) {
+function L(s, e, t = s, i) {
   var o, l, a;
   if (e === R) return e;
   let n = i !== void 0 ? (o = t._$Co) == null ? void 0 : o[i] : t._$Cl;
   const r = J(e) ? void 0 : e._$litDirective$;
-  return (n == null ? void 0 : n.constructor) !== r && ((l = n == null ? void 0 : n._$AO) == null || l.call(n, !1), r === void 0 ? n = void 0 : (n = new r(s), n._$AT(s, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = n : t._$Cl = n), n !== void 0 && (e = T(s, n._$AS(s, e.values), n, i)), e;
+  return (n == null ? void 0 : n.constructor) !== r && ((l = n == null ? void 0 : n._$AO) == null || l.call(n, !1), r === void 0 ? n = void 0 : (n = new r(s), n._$AT(s, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = n : t._$Cl = n), n !== void 0 && (e = L(s, n._$AS(s, e.values), n, i)), e;
 }
 class st {
   constructor(e, t) {
@@ -407,7 +407,7 @@ class G {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = T(this, e, t), J(e) ? e === u || e == null || e === "" ? (this._$AH !== u && this._$AR(), this._$AH = u) : e !== this._$AH && e !== R && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : tt(e) ? this.k(e) : this._(e);
+    e = L(this, e, t), J(e) ? e === u || e == null || e === "" ? (this._$AH !== u && this._$AR(), this._$AH = u) : e !== this._$AH && e !== R && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : tt(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -463,11 +463,11 @@ class X {
   _$AI(e, t = this, i, n) {
     const r = this.strings;
     let o = !1;
-    if (r === void 0) e = T(this, e, t, 0), o = !J(e) || e !== this._$AH && e !== R, o && (this._$AH = e);
+    if (r === void 0) e = L(this, e, t, 0), o = !J(e) || e !== this._$AH && e !== R, o && (this._$AH = e);
     else {
       const l = e;
       let a, c;
-      for (e = r[0], a = 0; a < r.length - 1; a++) c = T(this, l[i + a], t, a), c === R && (c = this._$AH[a]), o || (o = !J(c) || c !== this._$AH[a]), c === u ? e = u : e !== u && (e += (c != null ? c : "") + r[a + 1]), this._$AH[a] = c;
+      for (e = r[0], a = 0; a < r.length - 1; a++) c = L(this, l[i + a], t, a), c === R && (c = this._$AH[a]), o || (o = !J(c) || c !== this._$AH[a]), c === u ? e = u : e !== u && (e += (c != null ? c : "") + r[a + 1]), this._$AH[a] = c;
     }
     o && !n && this.j(e);
   }
@@ -497,7 +497,7 @@ class at extends X {
   }
   _$AI(e, t = this) {
     var o;
-    if ((e = (o = T(this, e, t, 0)) != null ? o : u) === R) return;
+    if ((e = (o = L(this, e, t, 0)) != null ? o : u) === R) return;
     const i = this._$AH, n = e === u && i !== u || e.capture !== i.capture || e.once !== i.once || e.passive !== i.passive, r = e !== u && (i === u || n);
     n && this.element.removeEventListener(this.name, this, i), r && this.element.addEventListener(this.name, this, e), this._$AH = e;
   }
@@ -514,7 +514,7 @@ class lt {
     return this._$AM._$AU;
   }
   _$AI(e) {
-    T(this, e);
+    L(this, e);
   }
 }
 const ne = O.litHtmlPolyfillSupport;
@@ -1252,7 +1252,7 @@ class ae extends F {
       this._roundDialog = "daily";
     }, w = (this._hourly || []).find(
       (H) => new Date(H.datetime).getTime() >= Date.now()
-    ), W = w ? `${re(new Date(w.datetime), t, i)} · ${Math.round(w.temperature)}°` : null, L = (this._daily || [])[0], N = L ? `↑${Math.round(L.temperature)}° ↓${Math.round(L.templow)}°` : null, k = [];
+    ), W = w ? `${re(new Date(w.datetime), t, i)} · ${Math.round(w.temperature)}°` : null, T = (this._daily || [])[0], N = T ? `↑${Math.round(T.temperature)}° ↓${Math.round(T.templow)}°` : null, k = [];
     this._config.show_feels_like && c != null && k.push(`Ressenti ${Math.round(c)}°`), this._config.show_humidity && h != null && k.push(`Humidité ${Math.round(h)}%`);
     const P = this._config.show_date ? Ee(m) : null, $ = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], y = $ && !["unknown", "unavailable"].includes($.state) ? qe($.state) : null, Q = [];
     return y && Q.push(y.label), P && Q.push(P), d`
@@ -1616,7 +1616,7 @@ class ae extends F {
   _renderCurrent(e, t, i) {
     const n = E(e.state, this._isNight()), r = q(n, this._config.icons), o = C(this._hass, e.state), l = e.attributes.temperature, a = e.attributes.temperature_unit || "°C", c = e.attributes.apparent_temperature, h = e.attributes.humidity, p = e.last_updated ? new Date(e.last_updated) : null, m = [];
     this._config.show_feels_like && c != null && m.push(`Ressenti ${Math.round(c)}°`), this._config.show_last_updated && p && m.push(`Maj à ${b(p, t, i)}`);
-    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], g = _ && !["unknown", "unavailable"].includes(_.state), f = this._config.air_quality_entity && this._hass.states[this._config.air_quality_entity], v = f && !["unknown", "unavailable"].includes(f.state), w = g || v, W = this._config.show_humidity && h != null, L = this._config.show_clock || this._config.show_date, N = /* @__PURE__ */ new Date(), k = this._config.show_date ? Ee(N) : null, P = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], $ = P && !["unknown", "unavailable"].includes(P.state) ? qe(P.state) : null, y = [];
+    const _ = this._config.uv_entity && this._hass.states[this._config.uv_entity], g = _ && !["unknown", "unavailable"].includes(_.state), f = this._config.air_quality_entity && this._hass.states[this._config.air_quality_entity], v = f && !["unknown", "unavailable"].includes(f.state), w = g || v, W = this._config.show_humidity && h != null, T = this._config.show_clock || this._config.show_date, N = /* @__PURE__ */ new Date(), k = this._config.show_date ? Ee(N) : null, P = this._config.show_moon && this._hass.states[this._config.moon_entity || "sensor.moon_phase"], $ = P && !["unknown", "unavailable"].includes(P.state) ? qe(P.state) : null, y = [];
     return $ && y.push($.label), k && y.push(k), d`
       <div class="current">
         <img
@@ -1648,7 +1648,7 @@ class ae extends F {
                 </div>
               ` : u}
         </div>
-        ${L ? d`
+        ${T ? d`
               <div class="current-side">
                 <div class="clock-group">
                   ${this._config.show_clock ? d`<div class="clock">
@@ -2540,8 +2540,12 @@ ee(ae, "properties", {
       border-radius: 50%;
       overflow: hidden;
       align-items: center;
-      justify-content: center;
-      gap: 5px;
+      /* flex-start plutôt que center : l'horloge doit rester collée en
+         haut, pas flotter au milieu d'un bloc lui-même centré dans le
+         cercle. Le contenu est désormais assez grand pour occuper
+         l'essentiel de la hauteur disponible de toute façon. */
+      justify-content: flex-start;
+      gap: 3px;
       /* Le contenu est un empilement vertical centré, pas un bloc plein
          cadre : contrairement à un carré inscrit, il n'a pas besoin d'une
          marge symétrique généreuse pour que ses "coins" restent dans le
@@ -2550,11 +2554,20 @@ ee(ae, "properties", {
          sont proches du centre vertical, là où la corde du cercle est la
          plus large) ; un peu plus de marge en haut/bas où le cercle se
          resserre. */
-      padding: 9% 7%;
+      padding: 5% 6%;
       text-align: center;
     }
+    /* flex-shrink:0 sur tous les blocs : sans ça, si le contenu (agrandi
+       à la demande) dépasse d'un rien la hauteur fixe du cercle, flexbox
+       écrase chaque élément proportionnellement au lieu de déborder —
+       ce qui corrompait le rendu du texte (hauteur de ligne comprimée en
+       dessous de sa taille de police) plutôt que de simplement déborder
+       de façon visible et prévisible pendant les tests. */
+    .card.round > * {
+      flex-shrink: 0;
+    }
     .round-clock {
-      font-size: clamp(1.8rem, 17cqw, 2.6rem);
+      font-size: clamp(2.1rem, 20cqw, 3rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -2562,9 +2575,9 @@ ee(ae, "properties", {
     /* Date sous l'horloge, plus grande — lecture au même niveau que
        l'horloge plutôt que noyée dans une ligne d'infos secondaires. */
     .round-date {
-      font-size: clamp(0.95rem, 8cqw, 1.2rem);
+      font-size: clamp(1.1rem, 9.5cqw, 1.4rem);
       font-weight: 600;
-      margin-top: 2px;
+      margin-top: 1px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2579,11 +2592,11 @@ ee(ae, "properties", {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 5px;
       color: var(--_secondary-color);
-      font-size: clamp(0.62rem, 5cqw, 0.75rem);
+      font-size: clamp(0.72rem, 6cqw, 0.9rem);
       font-weight: 500;
-      margin-top: 2px;
+      margin-top: 1px;
       max-width: 100%;
       min-width: 0;
     }
@@ -2594,7 +2607,7 @@ ee(ae, "properties", {
       min-width: 0;
     }
     .round-date-icon {
-      --mdc-icon-size: clamp(11px, 4.4cqw, 14px);
+      --mdc-icon-size: clamp(13px, 5.2cqw, 17px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
@@ -2605,9 +2618,11 @@ ee(ae, "properties", {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       cursor: pointer;
       margin: 4px 0;
+      width: 100%;
+      justify-content: center;
     }
     .round-current-info {
       display: flex;
@@ -2617,20 +2632,20 @@ ee(ae, "properties", {
       text-align: left;
     }
     .round-icon {
-      width: clamp(76px, 34cqw, 112px);
-      height: clamp(76px, 34cqw, 112px);
+      width: clamp(90px, 39cqw, 126px);
+      height: clamp(90px, 39cqw, 126px);
       flex-shrink: 0;
     }
     .round-temp {
-      font-size: clamp(2.1rem, 20cqw, 3rem);
+      font-size: clamp(2.6rem, 24cqw, 3.7rem);
       font-weight: 800;
       line-height: 1;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.95rem, 8cqw, 1.15rem);
+      font-size: clamp(1.1rem, 9.5cqw, 1.35rem);
       font-weight: 500;
-      margin-top: 3px;
+      margin-top: 2px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2638,9 +2653,9 @@ ee(ae, "properties", {
     }
     .round-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.65rem, 5.4cqw, 0.8rem);
+      font-size: clamp(0.75rem, 6.2cqw, 0.92rem);
       font-weight: 600;
-      margin-top: 3px;
+      margin-top: 2px;
       white-space: nowrap;
     }
     /* Pied de page sous les deux tuiles Aujourd'hui/Semaine plutôt que
@@ -2650,7 +2665,7 @@ ee(ae, "properties", {
     .round-updated {
       color: var(--_secondary-color);
       font-size: clamp(0.6rem, 4.8cqw, 0.72rem);
-      margin-top: 6px;
+      margin-top: 3px;
       white-space: nowrap;
     }
     /* Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
@@ -2671,27 +2686,27 @@ ee(ae, "properties", {
     .round-chip {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      gap: 4px;
+      font-size: clamp(1rem, 8.2cqw, 1.2rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(16px, 6.2cqw, 19px);
+      --mdc-icon-size: clamp(18px, 7cqw, 22px);
       flex-shrink: 0;
     }
     .round-launchers {
       display: flex;
-      gap: 8px;
-      margin-top: 9px;
+      gap: 9px;
+      margin-top: 6px;
     }
     .round-launcher {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 7px 11px;
-      border-radius: 15px;
+      gap: 3px;
+      padding: 9px 13px;
+      border-radius: 16px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
@@ -2700,13 +2715,13 @@ ee(ae, "properties", {
     .round-launcher-top {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      gap: 5px;
+      font-size: clamp(1rem, 8.2cqw, 1.2rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
+      font-size: clamp(0.85rem, 7cqw, 1.02rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -2717,11 +2732,11 @@ ee(ae, "properties", {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(17px, 6.5cqw, 20px);
+      --mdc-icon-size: clamp(19px, 7.4cqw, 23px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(16px, 6cqw, 19px);
+      --mdc-icon-size: clamp(18px, 6.8cqw, 22px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }

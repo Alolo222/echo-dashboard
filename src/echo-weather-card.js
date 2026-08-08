@@ -1855,8 +1855,12 @@ class EchoWeatherCard extends LitElement {
       border-radius: 50%;
       overflow: hidden;
       align-items: center;
-      justify-content: center;
-      gap: 5px;
+      /* flex-start plutôt que center : l'horloge doit rester collée en
+         haut, pas flotter au milieu d'un bloc lui-même centré dans le
+         cercle. Le contenu est désormais assez grand pour occuper
+         l'essentiel de la hauteur disponible de toute façon. */
+      justify-content: flex-start;
+      gap: 3px;
       /* Le contenu est un empilement vertical centré, pas un bloc plein
          cadre : contrairement à un carré inscrit, il n'a pas besoin d'une
          marge symétrique généreuse pour que ses "coins" restent dans le
@@ -1865,11 +1869,20 @@ class EchoWeatherCard extends LitElement {
          sont proches du centre vertical, là où la corde du cercle est la
          plus large) ; un peu plus de marge en haut/bas où le cercle se
          resserre. */
-      padding: 9% 7%;
+      padding: 5% 6%;
       text-align: center;
     }
+    /* flex-shrink:0 sur tous les blocs : sans ça, si le contenu (agrandi
+       à la demande) dépasse d'un rien la hauteur fixe du cercle, flexbox
+       écrase chaque élément proportionnellement au lieu de déborder —
+       ce qui corrompait le rendu du texte (hauteur de ligne comprimée en
+       dessous de sa taille de police) plutôt que de simplement déborder
+       de façon visible et prévisible pendant les tests. */
+    .card.round > * {
+      flex-shrink: 0;
+    }
     .round-clock {
-      font-size: clamp(1.8rem, 17cqw, 2.6rem);
+      font-size: clamp(2.1rem, 20cqw, 3rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
@@ -1877,9 +1890,9 @@ class EchoWeatherCard extends LitElement {
     /* Date sous l'horloge, plus grande — lecture au même niveau que
        l'horloge plutôt que noyée dans une ligne d'infos secondaires. */
     .round-date {
-      font-size: clamp(0.95rem, 8cqw, 1.2rem);
+      font-size: clamp(1.1rem, 9.5cqw, 1.4rem);
       font-weight: 600;
-      margin-top: 2px;
+      margin-top: 1px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1894,11 +1907,11 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 5px;
       color: var(--_secondary-color);
-      font-size: clamp(0.62rem, 5cqw, 0.75rem);
+      font-size: clamp(0.72rem, 6cqw, 0.9rem);
       font-weight: 500;
-      margin-top: 2px;
+      margin-top: 1px;
       max-width: 100%;
       min-width: 0;
     }
@@ -1909,7 +1922,7 @@ class EchoWeatherCard extends LitElement {
       min-width: 0;
     }
     .round-date-icon {
-      --mdc-icon-size: clamp(11px, 4.4cqw, 14px);
+      --mdc-icon-size: clamp(13px, 5.2cqw, 17px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
@@ -1920,9 +1933,11 @@ class EchoWeatherCard extends LitElement {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       cursor: pointer;
       margin: 4px 0;
+      width: 100%;
+      justify-content: center;
     }
     .round-current-info {
       display: flex;
@@ -1932,20 +1947,20 @@ class EchoWeatherCard extends LitElement {
       text-align: left;
     }
     .round-icon {
-      width: clamp(76px, 34cqw, 112px);
-      height: clamp(76px, 34cqw, 112px);
+      width: clamp(90px, 39cqw, 126px);
+      height: clamp(90px, 39cqw, 126px);
       flex-shrink: 0;
     }
     .round-temp {
-      font-size: clamp(2.1rem, 20cqw, 3rem);
+      font-size: clamp(2.6rem, 24cqw, 3.7rem);
       font-weight: 800;
       line-height: 1;
     }
     .round-condition {
       color: var(--_secondary-color);
-      font-size: clamp(0.95rem, 8cqw, 1.15rem);
+      font-size: clamp(1.1rem, 9.5cqw, 1.35rem);
       font-weight: 500;
-      margin-top: 3px;
+      margin-top: 2px;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1953,9 +1968,9 @@ class EchoWeatherCard extends LitElement {
     }
     .round-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.65rem, 5.4cqw, 0.8rem);
+      font-size: clamp(0.75rem, 6.2cqw, 0.92rem);
       font-weight: 600;
-      margin-top: 3px;
+      margin-top: 2px;
       white-space: nowrap;
     }
     /* Pied de page sous les deux tuiles Aujourd'hui/Semaine plutôt que
@@ -1965,7 +1980,7 @@ class EchoWeatherCard extends LitElement {
     .round-updated {
       color: var(--_secondary-color);
       font-size: clamp(0.6rem, 4.8cqw, 0.72rem);
-      margin-top: 6px;
+      margin-top: 3px;
       white-space: nowrap;
     }
     /* Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
@@ -1986,27 +2001,27 @@ class EchoWeatherCard extends LitElement {
     .round-chip {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      gap: 4px;
+      font-size: clamp(1rem, 8.2cqw, 1.2rem);
       font-weight: 700;
       color: var(--_secondary-color);
       white-space: nowrap;
     }
     .round-chip ha-icon {
-      --mdc-icon-size: clamp(16px, 6.2cqw, 19px);
+      --mdc-icon-size: clamp(18px, 7cqw, 22px);
       flex-shrink: 0;
     }
     .round-launchers {
       display: flex;
-      gap: 8px;
-      margin-top: 9px;
+      gap: 9px;
+      margin-top: 6px;
     }
     .round-launcher {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 7px 11px;
-      border-radius: 15px;
+      gap: 3px;
+      padding: 9px 13px;
+      border-radius: 16px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
@@ -2015,13 +2030,13 @@ class EchoWeatherCard extends LitElement {
     .round-launcher-top {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: clamp(0.85rem, 7cqw, 1.02rem);
+      gap: 5px;
+      font-size: clamp(1rem, 8.2cqw, 1.2rem);
       font-weight: 600;
       white-space: nowrap;
     }
     .round-launcher-preview {
-      font-size: clamp(0.75rem, 6.2cqw, 0.9rem);
+      font-size: clamp(0.85rem, 7cqw, 1.02rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -2032,11 +2047,11 @@ class EchoWeatherCard extends LitElement {
       outline-offset: 2px;
     }
     .round-launcher-top ha-icon {
-      --mdc-icon-size: clamp(17px, 6.5cqw, 20px);
+      --mdc-icon-size: clamp(19px, 7.4cqw, 23px);
       flex-shrink: 0;
     }
     .round-chevron {
-      --mdc-icon-size: clamp(16px, 6cqw, 19px);
+      --mdc-icon-size: clamp(18px, 6.8cqw, 22px);
       color: var(--_secondary-color);
       flex-shrink: 0;
     }
