@@ -192,6 +192,13 @@ class EchoWeatherCard extends LitElement {
       this._config.uv_entity && this._hass.states[this._config.uv_entity];
     const showUv =
       uvObj && !["unknown", "unavailable"].includes(uvObj.state);
+    const airQualityObj =
+      this._config.air_quality_entity &&
+      this._hass.states[this._config.air_quality_entity];
+    const showAirQuality =
+      airQualityObj &&
+      !["unknown", "unavailable"].includes(airQualityObj.state);
+    const showIndicators = showUv || showAirQuality;
     const showHumidityLine = this._config.show_humidity && humidity != null;
 
     const showSide = this._config.show_clock || this._config.show_date;
@@ -227,10 +234,19 @@ class EchoWeatherCard extends LitElement {
                 </div>`
               : nothing}
           </div>
-          ${showUv || showHumidityLine
+          ${showIndicators || showHumidityLine
             ? html`
                 <div class="uv-group">
-                  ${showUv ? this._renderIndicators(uvObj) : nothing}
+                  ${showIndicators
+                    ? html`<div class="indicators-row">
+                        ${showUv
+                          ? this._renderIndicator("uv", uvObj)
+                          : nothing}
+                        ${showAirQuality
+                          ? this._renderIndicator("air", airQualityObj)
+                          : nothing}
+                      </div>`
+                    : nothing}
                   ${showHumidityLine
                     ? html`<div class="humidity-line">
                         <ha-icon
@@ -277,22 +293,30 @@ class EchoWeatherCard extends LitElement {
     `;
   }
 
-  // Indice UV, à droite de la température — tuile à deux lignes (libellé
-  // au-dessus, valeur + catégorie qualitative en dessous). L'UV a une
-  // échelle universelle (OMS) donc la catégorie (Faible/Modéré/Élevé/...)
-  // est fiable à afficher automatiquement, contrairement à la qualité de
-  // l'air (mise de côté pour le moment : son échelle dépend entièrement
-  // de l'entité choisie par l'utilisateur, pas de seuils génériques
-  // fiables sans plus d'info — cf. air_quality_entity, toujours en
-  // config mais non affiché ici pour l'instant). L'appelant a déjà
-  // vérifié que uvObj est utilisable (évite de refaire le lookup ici).
-  _renderIndicators(uvObj) {
-    const category = uvCategory(uvObj.state);
+  // Indice UV et qualité de l'air, côte à côte à droite de la température
+  // — tuiles à deux lignes (libellé au-dessus, valeur + catégorie
+  // qualitative en dessous). L'UV a une échelle universelle (OMS) donc la
+  // catégorie (Faible/Modéré/Élevé/...) est calculée ici (uvCategory).
+  // La qualité de l'air n'a pas d'échelle générique fiable (dépend de
+  // l'intégration choisie par l'utilisateur) : on affiche un libellé
+  // qualitatif seulement si l'entité elle-même en expose un (attribut
+  // "Libellé"/"libelle", ex: intégrations atmofrance/recosante), sinon
+  // juste la valeur brute + son unité. L'appelant a déjà vérifié que
+  // l'entité est utilisable (évite de refaire le lookup ici).
+  _renderIndicator(kind, obj) {
+    const isUv = kind === "uv";
+    const label = isUv ? "Indice UV" : "Qualité de l'air";
+    const category = isUv
+      ? uvCategory(obj.state)
+      : obj.attributes.Libellé || obj.attributes.libelle || null;
+    const unit = !isUv ? obj.attributes.unit_of_measurement : null;
     return html`
-      <div class="indicator-box indicator-uv">
-        <div class="indicator-label">Indice UV</div>
+      <div class="indicator-box indicator-${kind}">
+        <div class="indicator-label">${label}</div>
         <div class="indicator-row">
-          <span class="indicator-value">${uvObj.state}</span>
+          <span class="indicator-value"
+            >${obj.state}${unit ? ` ${unit}` : ""}</span
+          >
           ${category
             ? html`<span class="indicator-category">${category}</span>`
             : nothing}
@@ -685,6 +709,13 @@ class EchoWeatherCard extends LitElement {
     }
     .indicator-uv .indicator-value {
       color: var(--echo-weather-uv-color, #ffb74d);
+    }
+    .indicator-air .indicator-value {
+      color: var(--echo-weather-air-quality-color, #66bb6a);
+    }
+    .indicators-row {
+      display: flex;
+      gap: 10px;
     }
     .indicator-category {
       font-size: clamp(0.88rem, 1.4cqw, 1.05rem);
