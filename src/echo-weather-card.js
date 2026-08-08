@@ -647,25 +647,47 @@ class EchoWeatherCard extends LitElement {
 
   // Liste des prochaines heures (mode round uniquement) — même donnée que
   // _renderHourly, mais en liste verticale scrollable plutôt qu'en rangée
-  // horizontale (pas la largeur nécessaire sur un écran rond).
+  // horizontale (pas la largeur nécessaire sur un écran rond). Indépendant
+  // de hourly_count : cette limite n'a de sens que pour l'aperçu affiché
+  // en permanence en mise en page large (Echo Show) — ici, dans une liste
+  // qu'on ouvre volontairement au tap, autant montrer tout ce que fournit
+  // l'intégration météo. Un repère de date s'intercale dès que la liste
+  // passe au jour suivant, pour rester lisible sur plusieurs jours.
   _renderHourlyOverview(locale, timeFormat) {
     const close = () => {
       this._roundDialog = null;
     };
     const now = Date.now();
-    const items = (this._hourly || [])
-      .filter((f) => new Date(f.datetime).getTime() >= now)
-      .slice(0, this._config.hourly_count);
+    const items = (this._hourly || []).filter(
+      (f) => new Date(f.datetime).getTime() >= now
+    );
+
+    let lastDay = null;
+    const rows = [];
+    items.forEach((forecast) => {
+      const date = new Date(forecast.datetime);
+      const dayKey = date.toDateString();
+      if (dayKey !== lastDay) {
+        rows.push({ marker: formatShortDate(date, locale) });
+        lastDay = dayKey;
+      }
+      rows.push({ forecast, date });
+    });
 
     return html`
       <ha-dialog class="round-dialog" open hideActions @closed=${close}>
         <div class="round-dialog-wrap">
           <div class="detail detail-list round-detail">
             ${this._renderDialogHeader("Aujourd'hui", close, true)}
-            ${items.length
+            ${rows.length
               ? html`<div class="hourly-list">
-                  ${items.map((forecast) => {
-                    const date = new Date(forecast.datetime);
+                  ${rows.map((row) => {
+                    if (row.marker) {
+                      return html`<div class="hourly-list-day-marker">
+                        ${row.marker}
+                      </div>`;
+                    }
+                    const { forecast, date } = row;
                     const slug = conditionToIconSlug(
                       forecast.condition,
                       this._isNight(date)
@@ -711,11 +733,13 @@ class EchoWeatherCard extends LitElement {
   // lui-même cliquable et renvoie vers _renderDayDetail (même détail que
   // le tap sur une tuile .daily-item en mode large) : on ferme cette liste
   // et on ouvre le détail du jour choisi, plutôt que d'empiler les dialog.
+  // Indépendant de daily_count, comme _renderHourlyOverview (cf. son
+  // commentaire) : tout ce que fournit l'intégration météo.
   _renderDailyOverview(locale) {
     const close = () => {
       this._roundDialog = null;
     };
-    const items = (this._daily || []).slice(0, this._config.daily_count);
+    const items = this._daily || [];
 
     return html`
       <ha-dialog class="round-dialog" open hideActions @closed=${close}>
@@ -739,6 +763,7 @@ class EchoWeatherCard extends LitElement {
                       this._roundDialog = null;
                       this._detailForecast = forecast;
                     };
+                    const pop = forecast.precipitation_probability;
                     return html`<div
                       class="daily-list-item"
                       role="button"
@@ -767,6 +792,12 @@ class EchoWeatherCard extends LitElement {
                           >${Math.round(forecast.templow)}°</span
                         >
                       </span>
+                      <span class="daily-list-pop"
+                        >${this._config.show_precipitation_probability &&
+                        pop != null
+                          ? `${Math.round(pop)}%`
+                          : ""}</span
+                      >
                       <ha-icon
                         class="round-chevron"
                         icon=${"mdi:chevron-right"}
@@ -1981,11 +2012,27 @@ class EchoWeatherCard extends LitElement {
       flex: 1;
       font-weight: 700;
     }
-    .hourly-list-pop {
+    .hourly-list-pop,
+    .daily-list-pop {
       color: var(--_secondary-color);
       font-size: 0.8rem;
       width: 32px;
       text-align: right;
+      flex-shrink: 0;
+    }
+    /* Repère de date dans la liste des prochaines heures, dès qu'on passe
+       au jour suivant — la liste n'étant plus limitée à "aujourd'hui"
+       (hourly_count ne s'applique pas ici), elle peut couvrir plusieurs
+       jours. */
+    .hourly-list-day-marker {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      margin-top: 10px;
+      padding: 0 2px;
+    }
+    .hourly-list-day-marker:first-child {
+      margin-top: 0;
     }
 
     /* --- Mise en page "round" (petit écran circulaire) --- */
