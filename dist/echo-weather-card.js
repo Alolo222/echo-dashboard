@@ -1386,7 +1386,7 @@ I(K, "properties", {
          entre icônes/tuiles) : on tient désormais 4 blocs empilés (actuelle,
          horaire, quotidienne, bandeau bas) dans les mêmes 480px, un peu
          moins d'air entre eux était nécessaire pour que tout rentre. */
-      --_row-gap: var(--echo-weather-row-gap, 4px);
+      --_row-gap: var(--echo-weather-row-gap, 2px);
       /* Icônes horaires uniquement désormais (actuelle et quotidien ont
          chacune leur propre variable ci-dessous) — actuelle et quotidien
          ont plus de marge verticale que les prévisions horaires, donc
