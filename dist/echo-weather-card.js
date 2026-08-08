@@ -1393,11 +1393,11 @@ I(K, "properties", {
          actuelle a de la marge verticale que les prévisions n'ont pas. */
       --_current-icon-size: var(
         --echo-weather-current-icon-size,
-        clamp(88px, 13cqw, 132px)
+        clamp(100px, 15cqw, 155px)
       );
       --_current-temp-size: var(
         --echo-weather-current-temp-size,
-        clamp(2.75rem, 7cqw, 4.25rem)
+        clamp(3rem, 7.6cqw, 4.6rem)
       );
       --_hourly-temp-size: var(
         --echo-weather-hourly-temp-size,
@@ -1533,9 +1533,9 @@ I(K, "properties", {
     }
     .current-condition {
       color: var(--_secondary-color);
-      font-size: clamp(1rem, 1.8cqw, 1.25rem);
+      font-size: clamp(1.15rem, 2.1cqw, 1.45rem);
       font-weight: 500;
-      margin-top: 4px;
+      margin-top: 6px;
     }
     /* Indice UV : tuile à deux lignes (libellé au-dessus, valeur +
        catégorie en dessous) — la version d'origine, jugée plus lisible
@@ -1543,15 +1543,15 @@ I(K, "properties", {
     .indicator-box {
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 4px 12px;
+      gap: 3px;
+      padding: 6px 14px;
       border-radius: 14px;
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
     }
     .indicator-label {
-      font-size: clamp(0.75rem, 1.2cqw, 0.85rem);
+      font-size: clamp(0.82rem, 1.3cqw, 0.95rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1559,17 +1559,17 @@ I(K, "properties", {
     .indicator-row {
       display: flex;
       align-items: baseline;
-      gap: 7px;
+      gap: 8px;
     }
     .indicator-value {
-      font-size: clamp(1.2rem, 2.2cqw, 1.45rem);
+      font-size: clamp(1.35rem, 2.5cqw, 1.65rem);
       font-weight: 800;
     }
     .indicator-uv .indicator-value {
       color: var(--echo-weather-uv-color, #ffb74d);
     }
     .indicator-category {
-      font-size: clamp(0.8rem, 1.3cqw, 0.95rem);
+      font-size: clamp(0.88rem, 1.4cqw, 1.05rem);
       font-weight: 600;
       color: var(--_secondary-color);
       white-space: nowrap;
@@ -1590,20 +1590,20 @@ I(K, "properties", {
     .humidity-line {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: clamp(1.6rem, 3.4cqw, 2.3rem);
+      gap: 9px;
+      font-size: clamp(1.8rem, 3.9cqw, 2.6rem);
       font-weight: 800;
       white-space: nowrap;
     }
     .humidity-icon {
-      --mdc-icon-size: clamp(28px, 4.2cqw, 38px);
+      --mdc-icon-size: clamp(32px, 4.8cqw, 43px);
       color: var(--echo-weather-humidity-color, #4fc3f7);
       flex-shrink: 0;
     }
     .current-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.85rem, 1.4cqw, 1rem);
-      margin-top: 2px;
+      font-size: clamp(0.95rem, 1.6cqw, 1.15rem);
+      margin-top: 4px;
     }
     .current-info {
       display: flex;
@@ -1630,17 +1630,17 @@ I(K, "properties", {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      gap: 2px;
+      gap: 4px;
     }
     .clock {
-      font-size: clamp(2.1rem, 4.4cqw, 2.9rem);
+      font-size: clamp(2.4rem, 5.2cqw, 3.4rem);
       font-weight: 700;
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
     .date-line {
       color: var(--_secondary-color);
-      font-size: clamp(1.1rem, 2.2cqw, 1.5rem);
+      font-size: clamp(1.25rem, 2.5cqw, 1.7rem);
       font-weight: 600;
       text-align: right;
       margin-top: 2px;
@@ -1648,15 +1648,15 @@ I(K, "properties", {
     .moon-line {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       color: var(--_secondary-color);
-      font-size: clamp(0.78rem, 1.3cqw, 0.95rem);
+      font-size: clamp(0.88rem, 1.5cqw, 1.08rem);
       font-weight: 500;
       text-align: right;
       margin-top: 2px;
     }
     .moon-icon {
-      --mdc-icon-size: clamp(15px, 2.1cqw, 18px);
+      --mdc-icon-size: clamp(17px, 2.4cqw, 21px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
