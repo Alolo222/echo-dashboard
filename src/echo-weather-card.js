@@ -4,6 +4,7 @@ import { conditionToIconSlug, iconUrl, getStaticIconUrl } from "./icons.js";
 import {
   formatDate,
   formatHour,
+  formatShortDate,
   formatTime,
   formatWeekday,
   localizeCondition,
@@ -187,6 +188,8 @@ class EchoWeatherCard extends LitElement {
     const conditionLabel = localizeCondition(this._hass, stateObj.state);
     const temp = stateObj.attributes.temperature;
     const tempUnit = stateObj.attributes.temperature_unit || "°C";
+    const feelsLike = stateObj.attributes.apparent_temperature;
+    const humidity = stateObj.attributes.humidity;
     const lastUpdated = stateObj.last_updated
       ? new Date(stateObj.last_updated)
       : null;
@@ -221,11 +224,47 @@ class EchoWeatherCard extends LitElement {
       ? `↑${Math.round(firstDay.temperature)}° ↓${Math.round(firstDay.templow)}°`
       : null;
 
+    const metaParts = [];
+    if (this._config.show_feels_like && feelsLike != null) {
+      metaParts.push(`Ressenti ${Math.round(feelsLike)}°`);
+    }
+    if (this._config.show_humidity && humidity != null) {
+      metaParts.push(`Humidité ${Math.round(humidity)}%`);
+    }
+
+    // Date + phase de lune + saint du jour combinés sur une seule ligne
+    // sous l'horloge — date abrégée (formatShortDate) plutôt qu'en toutes
+    // lettres (formatDate), sinon ça ne tient jamais à trois sur un écran
+    // aussi étroit ; tronqué avec ellipsis en dernier recours (cf. CSS).
+    const saint = this._config.show_date ? saintOfDay(now) : null;
+    const moonObj =
+      this._config.show_moon &&
+      this._hass.states[this._config.moon_entity || "sensor.moon_phase"];
+    const phase =
+      moonObj && !["unknown", "unavailable"].includes(moonObj.state)
+        ? moonPhase(moonObj.state)
+        : null;
+    const dateLineParts = [];
+    if (this._config.show_date) dateLineParts.push(formatShortDate(now, locale));
+    if (phase) dateLineParts.push(phase.label);
+    if (saint) dateLineParts.push(saint);
+
     return html`
       <div class="card round" style=${cardStyle}>
         ${this._config.show_clock
           ? html`<div class="round-clock">
               ${formatTime(now, locale, timeFormat)}
+            </div>`
+          : nothing}
+        ${dateLineParts.length
+          ? html`<div class="round-date-line">
+              ${phase
+                ? html`<ha-icon
+                    class="round-date-icon"
+                    icon=${phase.icon}
+                  ></ha-icon>`
+                : nothing}
+              <span>${dateLineParts.join(" · ")}</span>
             </div>`
           : nothing}
         ${this._config.show_current
@@ -252,6 +291,11 @@ class EchoWeatherCard extends LitElement {
                 <div class="round-current-info">
                   <div class="round-temp">${Math.round(temp)}${tempUnit}</div>
                   <div class="round-condition">${conditionLabel}</div>
+                  ${metaParts.length
+                    ? html`<div class="round-meta">
+                        ${metaParts.join(" · ")}
+                      </div>`
+                    : nothing}
                   ${this._config.show_last_updated && lastUpdated
                     ? html`<div class="round-updated">
                         Maj à
@@ -288,8 +332,9 @@ class EchoWeatherCard extends LitElement {
   }
 
   // Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
-  // rosée, humidité) sous la condition — juste icône + valeur, sans
-  // libellé, pour tenir sur une seule ligne (ou deux si ça déborde).
+  // rosée) sous la condition — juste icône + valeur, sans libellé, pour
+  // tenir sur une seule ligne (ou deux si ça déborde). Humidité exclue :
+  // déjà dans la ligne Ressenti/Humidité sous la condition.
   // Tape dessus ouvre le même détail complet que la météo actuelle.
   _renderRoundIndicators(stateObj, onOpen) {
     const chips = [];
@@ -307,13 +352,9 @@ class EchoWeatherCard extends LitElement {
     ) {
       chips.push({ icon: "mdi:air-filter", value: airQualityObj.state });
     }
-    const humidity = stateObj.attributes.humidity;
-    if (this._config.show_humidity && humidity != null) {
-      chips.push({
-        icon: "mdi:water-percent",
-        value: `${Math.round(humidity)}%`,
-      });
-    }
+    // Humidité volontairement absente d'ici : déjà affichée dans la ligne
+    // "Ressenti · Humidité" sous la condition (cf. _renderRound), pas
+    // besoin de la répéter dans les indicateurs.
     const windSpeed = stateObj.attributes.wind_speed;
     if (this._config.show_wind && windSpeed != null) {
       chips.push({
@@ -1830,6 +1871,34 @@ class EchoWeatherCard extends LitElement {
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
+    /* Date + phase de lune + saint du jour, combinés sur une seule ligne
+       sous l'horloge. min-width:0 à chaque niveau flex imbriqué, sinon
+       l'ellipsis du span interne n'a jamais l'occasion de se déclencher
+       (un flex-item ne rétrécit pas sous sa largeur de contenu par
+       défaut). */
+    .round-date-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--_secondary-color);
+      font-size: clamp(0.65rem, 5.4cqw, 0.8rem);
+      font-weight: 500;
+      margin-top: 2px;
+      max-width: 100%;
+      min-width: 0;
+    }
+    .round-date-line span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .round-date-icon {
+      --mdc-icon-size: clamp(12px, 4.6cqw, 15px);
+      color: var(--echo-weather-moon-color, #b0bec5);
+      flex-shrink: 0;
+    }
     /* Icône à gauche, infos (temp/condition/maj) à droite — comme le bloc
        météo actuelle en mise en page large, pour profiter de la largeur
        disponible plutôt que d'empiler verticalement. */
@@ -1868,15 +1937,22 @@ class EchoWeatherCard extends LitElement {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .round-updated {
+    .round-meta {
       color: var(--_secondary-color);
-      font-size: clamp(0.62rem, 5cqw, 0.75rem);
+      font-size: clamp(0.65rem, 5.4cqw, 0.8rem);
+      font-weight: 600;
       margin-top: 3px;
       white-space: nowrap;
     }
-    /* Ligne compacte d'indicateurs (UV, qualité de l'air, humidité, vent,
-       point de rosée) — juste icône + valeur, pas de libellé, pour tenir
-       sur une seule ligne dans le peu d'espace restant. */
+    .round-updated {
+      color: var(--_secondary-color);
+      font-size: clamp(0.6rem, 4.8cqw, 0.72rem);
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+    /* Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
+       rosée) — juste icône + valeur, pas de libellé, pour tenir sur une
+       seule ligne dans le peu d'espace restant. */
     .round-indicators {
       display: flex;
       flex-wrap: wrap;

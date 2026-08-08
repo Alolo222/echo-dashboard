@@ -142,11 +142,13 @@ entity: weather.maison
 layout: round
 ```
 
-Écran d'accueil : horloge, icône + température + condition (météo
-actuelle), une ligne compacte d'indicateurs (UV, qualité de l'air,
-humidité, vent, point de rosée — ceux configurés/disponibles), et deux
-tuiles "Aujourd'hui" / "Semaine" avec un aperçu texte (prochaine heure,
-min/max du jour).
+Écran d'accueil : horloge, date + phase de lune + saint du jour sur une
+ligne, météo actuelle en icône-à-gauche/infos-à-droite (température,
+condition, ressenti + humidité, dernière mise à jour — comme le bloc
+météo actuelle en mise en page large), une ligne compacte d'indicateurs
+(UV, qualité de l'air, vent, point de rosée — ceux configurés/
+disponibles), et deux tuiles "Aujourd'hui" / "Semaine" avec un aperçu
+texte (prochaine heure, min/max du jour).
 
 - **Tap sur la météo actuelle ou la ligne d'indicateurs** → détail complet
   (ressenti, humidité, UV, qualité de l'air, vent, point de rosée,

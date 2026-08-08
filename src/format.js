@@ -33,6 +33,18 @@ export function formatDate(date, locale) {
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
+// Version courte (jour abrégé) de formatDate — utile là où formatDate
+// (jour en toutes lettres) prend trop de place, ex: combinée avec la
+// phase de lune et le saint du jour sur une seule ligne en mode round.
+export function formatShortDate(date, locale) {
+  const formatted = new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(date);
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
+
 /**
  * Traduit une condition météo HA (ex: "partlycloudy") via les traductions
  * du frontend Home Assistant, avec repli sur la valeur brute si absente.
