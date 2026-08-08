@@ -232,10 +232,10 @@ class EchoWeatherCard extends LitElement {
       metaParts.push(`Humidité ${Math.round(humidity)}%`);
     }
 
-    // Date + phase de lune + saint du jour combinés sur une seule ligne
-    // sous l'horloge — date abrégée (formatShortDate) plutôt qu'en toutes
-    // lettres (formatDate), sinon ça ne tient jamais à trois sur un écran
-    // aussi étroit ; tronqué avec ellipsis en dernier recours (cf. CSS).
+    // Date en plus gros sous l'horloge, phase de lune + saint du jour en
+    // plus petit sur une ligne séparée en dessous — l'icône de lune se
+    // colle directement au libellé qu'elle représente plutôt que d'être
+    // placée avant la date (confus : elle semblait illustrer la date).
     const saint = this._config.show_date ? saintOfDay(now) : null;
     const moonObj =
       this._config.show_moon &&
@@ -244,10 +244,9 @@ class EchoWeatherCard extends LitElement {
       moonObj && !["unknown", "unavailable"].includes(moonObj.state)
         ? moonPhase(moonObj.state)
         : null;
-    const dateLineParts = [];
-    if (this._config.show_date) dateLineParts.push(formatShortDate(now, locale));
-    if (phase) dateLineParts.push(phase.label);
-    if (saint) dateLineParts.push(saint);
+    const moonLineParts = [];
+    if (phase) moonLineParts.push(phase.label);
+    if (saint) moonLineParts.push(saint);
 
     return html`
       <div class="card round" style=${cardStyle}>
@@ -256,15 +255,20 @@ class EchoWeatherCard extends LitElement {
               ${formatTime(now, locale, timeFormat)}
             </div>`
           : nothing}
-        ${dateLineParts.length
-          ? html`<div class="round-date-line">
+        ${this._config.show_date
+          ? html`<div class="round-date">
+              ${formatShortDate(now, locale)}
+            </div>`
+          : nothing}
+        ${moonLineParts.length
+          ? html`<div class="round-moon-line">
               ${phase
                 ? html`<ha-icon
                     class="round-date-icon"
                     icon=${phase.icon}
                   ></ha-icon>`
                 : nothing}
-              <span>${dateLineParts.join(" · ")}</span>
+              <span>${moonLineParts.join(" · ")}</span>
             </div>`
           : nothing}
         ${this._config.show_current
@@ -296,12 +300,6 @@ class EchoWeatherCard extends LitElement {
                         ${metaParts.join(" · ")}
                       </div>`
                     : nothing}
-                  ${this._config.show_last_updated && lastUpdated
-                    ? html`<div class="round-updated">
-                        Maj à
-                        ${formatTime(lastUpdated, locale, timeFormat)}
-                      </div>`
-                    : nothing}
                 </div>
               </div>
             `
@@ -325,6 +323,11 @@ class EchoWeatherCard extends LitElement {
               )
             : nothing}
         </div>
+        ${this._config.show_last_updated && lastUpdated
+          ? html`<div class="round-updated">
+              Maj à ${formatTime(lastUpdated, locale, timeFormat)}
+            </div>`
+          : nothing}
       </div>
       ${this._renderRoundDialog(stateObj, locale, timeFormat)}
       ${this._renderDayDetail(stateObj, locale, true)}
@@ -1871,31 +1874,42 @@ class EchoWeatherCard extends LitElement {
       font-variant-numeric: tabular-nums;
       line-height: 1;
     }
-    /* Date + phase de lune + saint du jour, combinés sur une seule ligne
-       sous l'horloge. min-width:0 à chaque niveau flex imbriqué, sinon
-       l'ellipsis du span interne n'a jamais l'occasion de se déclencher
-       (un flex-item ne rétrécit pas sous sa largeur de contenu par
-       défaut). */
-    .round-date-line {
+    /* Date sous l'horloge, plus grande — lecture au même niveau que
+       l'horloge plutôt que noyée dans une ligne d'infos secondaires. */
+    .round-date {
+      font-size: clamp(0.95rem, 8cqw, 1.2rem);
+      font-weight: 600;
+      margin-top: 2px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    /* Lune + saint, sur leur propre ligne en dessous — plus petit, icône
+       collée à son libellé (et non à la date, qu'elle n'illustre pas).
+       min-width:0 à chaque niveau flex imbriqué, sinon l'ellipsis du span
+       interne n'a jamais l'occasion de se déclencher (un flex-item ne
+       rétrécit pas sous sa largeur de contenu par défaut). */
+    .round-moon-line {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
       color: var(--_secondary-color);
-      font-size: clamp(0.65rem, 5.4cqw, 0.8rem);
+      font-size: clamp(0.62rem, 5cqw, 0.75rem);
       font-weight: 500;
       margin-top: 2px;
       max-width: 100%;
       min-width: 0;
     }
-    .round-date-line span {
+    .round-moon-line span {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       min-width: 0;
     }
     .round-date-icon {
-      --mdc-icon-size: clamp(12px, 4.6cqw, 15px);
+      --mdc-icon-size: clamp(11px, 4.4cqw, 14px);
       color: var(--echo-weather-moon-color, #b0bec5);
       flex-shrink: 0;
     }
@@ -1944,10 +1958,14 @@ class EchoWeatherCard extends LitElement {
       margin-top: 3px;
       white-space: nowrap;
     }
+    /* Pied de page sous les deux tuiles Aujourd'hui/Semaine plutôt que
+       collée à une donnée du bloc météo actuelle (point de rosée, etc.)
+       sans rapport direct — une info de dernière mise à jour se lit
+       naturellement en bas d'écran. */
     .round-updated {
       color: var(--_secondary-color);
       font-size: clamp(0.6rem, 4.8cqw, 0.72rem);
-      margin-top: 2px;
+      margin-top: 6px;
       white-space: nowrap;
     }
     /* Ligne compacte d'indicateurs (UV, qualité de l'air, vent, point de
