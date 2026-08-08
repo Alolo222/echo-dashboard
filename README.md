@@ -17,9 +17,11 @@ globalement stables mais peuvent encore évoluer avant une release 1.0.
 ## Fonctionnalités
 
 - Météo actuelle : icône animée, température, condition, ressenti,
-  humidité, indice UV (optionnel), horloge, date, phase de lune, saint du
-  jour.
+  humidité, indice UV et qualité de l'air (optionnels), horloge, date,
+  phase de lune, saint du jour.
 - Prévisions horaires et journalières, nombre de créneaux configurable.
+  Cliquer/tap sur un jour ouvre une fenêtre de détail (précipitations,
+  vent, humidité, indice UV si l'intégration météo les fournit par jour).
 - Vent, point de rosée, lever/coucher du soleil en bandeau bas.
 - Icônes [Meteocons](https://github.com/basmilius/meteocons) chargées
   depuis un CDN (ou une base locale) ; les icônes de prévisions sont

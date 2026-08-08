@@ -18,6 +18,7 @@ class EchoWeatherCard extends LitElement {
     _config: { state: true },
     _hourly: { state: true },
     _daily: { state: true },
+    _detailForecast: { state: true },
   };
 
   setConfig(config) {
@@ -165,6 +166,7 @@ class EchoWeatherCard extends LitElement {
         ${this._config.show_daily ? this._renderDaily(locale) : nothing}
         ${this._renderBottomBand(stateObj, locale, timeFormat)}
       </div>
+      ${this._renderDayDetail(stateObj, locale)}
     `;
   }
 
@@ -474,7 +476,20 @@ class EchoWeatherCard extends LitElement {
           const label = localizeCondition(this._hass, forecast.condition);
 
           return html`
-            <div class="daily-item">
+            <div
+              class="daily-item"
+              role="button"
+              tabindex="0"
+              @click=${() => {
+                this._detailForecast = forecast;
+              }}
+              @keydown=${(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  this._detailForecast = forecast;
+                }
+              }}
+            >
               <div class="daily-day">${formatWeekday(date, locale)}</div>
               <img
                 class="daily-icon"
@@ -493,6 +508,105 @@ class EchoWeatherCard extends LitElement {
           `;
         })}
       </div>
+    `;
+  }
+
+  // Détail d'un jour de prévision, ouvert au clic/tap sur une tuile
+  // .daily-item — ha-dialog est un composant du frontend HA, toujours
+  // disponible dans ce contexte (la carte ne tourne que dans HA). Les
+  // champs au-delà de température/condition varient selon l'intégration
+  // météo ; chaque ligne n'apparaît que si la donnée existe sur la
+  // prévision.
+  _renderDayDetail(stateObj, locale) {
+    const forecast = this._detailForecast;
+    if (!forecast) return nothing;
+
+    const close = () => {
+      this._detailForecast = null;
+    };
+    const date = new Date(forecast.datetime);
+    const slug = conditionToIconSlug(forecast.condition, false);
+    const url = iconUrl(slug, this._config.icons);
+    const label = localizeCondition(this._hass, forecast.condition);
+    const tempUnit = stateObj.attributes.temperature_unit || "°C";
+    const windUnit = stateObj.attributes.wind_speed_unit || "";
+
+    const rows = [];
+    if (forecast.precipitation_probability != null) {
+      rows.push({
+        icon: "mdi:water-percent",
+        label: "Probabilité de pluie",
+        value: `${Math.round(forecast.precipitation_probability)}%`,
+      });
+    }
+    if (forecast.precipitation != null) {
+      rows.push({
+        icon: "mdi:weather-pouring",
+        label: "Cumul de précipitations",
+        value: `${forecast.precipitation} mm`,
+      });
+    }
+    if (forecast.wind_speed != null) {
+      rows.push({
+        icon: "mdi:weather-windy",
+        label: "Vent",
+        value: `${Math.round(forecast.wind_speed)} ${windUnit}`.trim(),
+      });
+    }
+    if (forecast.humidity != null) {
+      rows.push({
+        icon: "mdi:water-percent",
+        label: "Humidité",
+        value: `${Math.round(forecast.humidity)}%`,
+      });
+    }
+    if (forecast.uv_index != null) {
+      rows.push({
+        icon: "mdi:weather-sunny-alert",
+        label: "Indice UV",
+        value: `${forecast.uv_index}`,
+      });
+    }
+
+    return html`
+      <ha-dialog open hideActions @closed=${close}>
+        <div class="detail">
+          <div class="detail-header">
+            <div class="detail-date">${formatDate(date, locale)}</div>
+            <ha-icon
+              class="detail-close"
+              icon=${"mdi:close"}
+              role="button"
+              tabindex="0"
+              @click=${close}
+              @keydown=${(e) => {
+                if (e.key === "Enter" || e.key === " ") close();
+              }}
+            ></ha-icon>
+          </div>
+          <img class="detail-icon" src=${url} alt=${label} />
+          <div class="detail-condition">${label}</div>
+          <div class="detail-temps">
+            <span class="detail-max"
+              >${Math.round(forecast.temperature)}${tempUnit}</span
+            >
+            <span class="detail-min"
+              >${Math.round(forecast.templow)}${tempUnit}</span
+            >
+          </div>
+          ${rows.length
+            ? html`<div class="detail-rows">
+                ${rows.map(
+                  (r) => html`<div class="detail-row">
+                    <ha-icon icon=${r.icon}></ha-icon>
+                    <span class="detail-row-label">${r.label}</span>
+                    <span class="detail-row-value">${r.value}</span>
+                  </div>`
+                )}
+              </div>`
+            : nothing}
+        </div>
+      </ha-dialog>
     `;
   }
 
@@ -866,6 +980,12 @@ class EchoWeatherCard extends LitElement {
       background: var(--_tile-background);
       border: 1px solid var(--_tile-border);
       box-shadow: var(--_tile-shadow);
+      /* Cliquable/tap-able : ouvre le détail du jour (_renderDayDetail). */
+      cursor: pointer;
+    }
+    .daily-item:focus-visible {
+      outline: 2px solid var(--_text-color);
+      outline-offset: 2px;
     }
     .daily-day {
       color: var(--_secondary-color);
@@ -976,6 +1096,92 @@ class EchoWeatherCard extends LitElement {
     }
     :host(.portrait) .band-tile {
       flex: 1 1 40%;
+    }
+
+    /* --- Détail d'un jour de prévision (ha-dialog) --- */
+    ha-dialog {
+      --mdc-dialog-min-width: min(90vw, 380px);
+      --mdc-dialog-max-width: min(90vw, 380px);
+      --mdc-theme-surface: var(--_mode-bg, #101a26);
+      --mdc-dialog-content-ink-color: var(--_text-color);
+      --mdc-dialog-heading-ink-color: var(--_text-color);
+      color: var(--_text-color);
+      font-family: inherit;
+    }
+    .detail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 240px;
+      padding: 4px 4px 8px;
+    }
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .detail-date {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .detail-close {
+      --mdc-icon-size: 22px;
+      color: var(--_secondary-color);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .detail-icon {
+      width: 96px;
+      height: 96px;
+      margin-top: 6px;
+    }
+    .detail-condition {
+      color: var(--_secondary-color);
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .detail-temps {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+    .detail-min {
+      color: var(--_secondary-color);
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .detail-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      margin-top: 14px;
+    }
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--_tile-background);
+      border: 1px solid var(--_tile-border);
+    }
+    .detail-row ha-icon {
+      --mdc-icon-size: 18px;
+      color: var(--_secondary-color);
+      flex-shrink: 0;
+    }
+    .detail-row-label {
+      flex: 1;
+      color: var(--_secondary-color);
+      font-size: 0.9rem;
+    }
+    .detail-row-value {
+      font-weight: 700;
+      font-size: 0.95rem;
     }
   `;
 }
