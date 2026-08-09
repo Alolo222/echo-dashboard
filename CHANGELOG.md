@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.1
+
+- Le cadran analogique de la 1.1.0 était un petit médaillon (~50% du
+  diamètre) au milieu de l'écran — très loin du cadran d'origine de
+  l'Echo Spot, qui occupe tout le disque visible (vérifié sur une vraie
+  capture du cadran "classic" trouvée en ligne). Refait en plein écran
+  (`--_analog-size: 94%` du conteneur plutôt qu'un `clamp()` en px),
+  graduations quasi au bord, traits plus fins (aiguilles et graduations)
+  pour un rendu sobre.
+- Graduations de midi et 6h omises : la météo et la date occupent déjà
+  ces zones (haut/bas du cadran) et la graduation s'y superposait de
+  façon maladroite plutôt que de s'effacer derrière.
+- La date n'a plus de position dédiée en mode analogique : le cadran
+  occupant désormais le même disque que le reste, le calcul déjà en
+  place pour le mode digital (qui gère la courbe du cercle) convient
+  tel quel.
+
 ## 1.1.0
 
 - **Horloge analogique** (mode round uniquement) : cadran SVG (12

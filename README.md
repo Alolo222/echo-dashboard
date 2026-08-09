@@ -57,11 +57,12 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
   (2017, écran circulaire 480x480) : mêmes éléments, repositionnés pour
   rester dans la zone visible du cercle (le bloc météo ne se place pas
   dans un coin, qui serait sous le boîtier physique).
-- En mode round, **horloge analogique** en alternative au digital — un
-  clin d'œil au cadran rond de l'Echo Spot sous Alexa, avant
-  LineageOS/View Assist. Un petit bouton discret (masqué la nuit) bascule
-  entre les deux ; le choix est retenu au-delà du rechargement de la
-  page. Voir [Mode round](#mode-round-echo-spot).
+- En mode round, **horloge analogique plein écran** en alternative au
+  digital — un clin d'œil au cadran rond de l'Echo Spot sous Alexa,
+  avant LineageOS/View Assist (le cadran occupe tout le disque visible,
+  pas un petit médaillon au milieu). Un petit bouton discret (masqué la
+  nuit) bascule entre les deux ; le choix est retenu au-delà du
+  rechargement de la page. Voir [Mode round](#mode-round-echo-spot).
 - Aucune entité n'est requise : sans rien configurer, la carte reste une
   horloge plein écran sur fond dégradé.
 - Thème et tailles personnalisables via variables CSS, sans surcharge de

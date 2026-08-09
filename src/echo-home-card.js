@@ -287,17 +287,25 @@ class EchoHomeCard extends LitElement {
     const minutes = now.getMinutes();
     const hourAngle = hours * 30 + minutes * 0.5;
     const minuteAngle = minutes * 6;
+    // Graduations proches du bord (rayon max ~49 sur un viewBox de 50) :
+    // le cadran est pensé plein écran (cf. --_analog-size), pas un petit
+    // médaillon au milieu — donc pas de marge à ménager entre les
+    // graduations et le bord du cercle comme sur une version plus petite.
+    // Celles de midi (i=0) et 6h (i=6) sont omises : la météo et la date
+    // occupent déjà ces zones (haut/bas du cadran), la graduation s'y
+    // superposait de façon maladroite plutôt que de s'effacer derrière.
     const ticks = [];
     for (let i = 0; i < 12; i++) {
+      if (i === 0 || i === 6) continue;
       const major = i % 3 === 0;
       ticks.push(svg`
         <line
           class="tick"
           x1="50"
-          y1=${major ? 6 : 8}
+          y1=${major ? 3 : 5}
           x2="50"
-          y2=${major ? 14 : 11}
-          stroke-width=${major ? 2.5 : 1.5}
+          y2=${major ? 12 : 9}
+          stroke-width=${major ? 2 : 1}
           transform="rotate(${i * 30} 50 50)"
         />
       `);
@@ -315,7 +323,7 @@ class EchoHomeCard extends LitElement {
           x1="50"
           y1="50"
           x2="50"
-          y2="28"
+          y2="27"
           transform="rotate(${hourAngle} 50 50)"
         />
         <line
@@ -323,10 +331,10 @@ class EchoHomeCard extends LitElement {
           x1="50"
           y1="50"
           x2="50"
-          y2="16"
+          y2="15"
           transform="rotate(${minuteAngle} 50 50)"
         />
-        <circle class="hand-center" cx="50" cy="50" r="3" />
+        <circle class="hand-center" cx="50" cy="50" r="2" />
       </svg>
     `;
   }
@@ -561,11 +569,15 @@ class EchoHomeCard extends LitElement {
     }
 
     /* Cadran analogique (mode round uniquement) : rappelle l'horloge
-       ronde de l'Echo Spot sous Alexa, avant LineageOS/View Assist.
-       --_analog-size est un diamètre, pas une taille de police —
-       calibré indépendamment de --_clock-size (cf. .card.round
-       ci-dessous), donc .card.round.analog .date a sa propre position
-       plutôt que de réutiliser le calcul basé sur --_clock-size. */
+       ronde de l'Echo Spot d'origine sous Alexa (avant LineageOS/View
+       Assist) — plein écran, pas un médaillon réduit au milieu (cf.
+       photo de référence du cadran "classic" trouvée en ligne : le
+       cadran occupe tout le disque visible). --_analog-size est donc un
+       pourcentage du conteneur (quasi 100%), pas un diamètre fixe en px
+       — cf. .card.round ci-dessous. Comme le cadran occupe désormais le
+       même disque que le reste (météo, date), sa position ne dicte plus
+       celle de la date : .date retombe sur le même calcul qu'en mode
+       digital (déjà pensé pour la courbe du cercle, cf. plus haut). */
     .analog-clock {
       position: absolute;
       top: 50%;
@@ -584,7 +596,7 @@ class EchoHomeCard extends LitElement {
 
     .analog-clock .tick {
       stroke: currentColor;
-      opacity: 0.7;
+      opacity: 0.75;
     }
 
     .analog-clock .hand {
@@ -593,19 +605,15 @@ class EchoHomeCard extends LitElement {
     }
 
     .analog-clock .hand-hour {
-      stroke-width: 5;
+      stroke-width: 4;
     }
 
     .analog-clock .hand-minute {
-      stroke-width: 3.5;
+      stroke-width: 2.6;
     }
 
     .analog-clock .hand-center {
       fill: currentColor;
-    }
-
-    .card.round.analog .date {
-      top: calc(50% + var(--_analog-size) / 2 + clamp(12px, 4vmin, 24px));
     }
 
     /* Bouton discret pour basculer digital ↔ analogique — masqué la nuit
@@ -679,7 +687,14 @@ class EchoHomeCard extends LitElement {
       --_date-size: clamp(1.6rem, 13vmin, 3.6rem);
       --_weather-icon-size: clamp(40px, 14vmin, 84px);
       --_weather-temp-size: clamp(1.6rem, 13vmin, 3.2rem);
-      --_analog-size: clamp(120px, 50vmin, 240px);
+      /* % plutôt qu'un clamp() en px/vmin : le cadran doit occuper
+         quasiment tout le disque visible (cf. commentaire sur
+         .analog-clock), donc suivre directement la taille réelle de la
+         carte plutôt qu'une cible de taille indépendante. 94% plutôt
+         que 100% pour une petite marge entre les graduations et le bord
+         clippé en cercle (évite un rendu "coupé net" à l'anticrénelage
+         près). */
+      --_analog-size: 94%;
     }
   `;
 }
