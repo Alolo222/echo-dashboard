@@ -57,14 +57,13 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
   (2017, écran circulaire 480x480) : mêmes éléments, repositionnés pour
   rester dans la zone visible du cercle (le bloc météo ne se place pas
   dans un coin, qui serait sous le boîtier physique).
-- En mode round, **horloge analogique plein écran** en alternative au
-  digital — un clin d'œil au cadran rond de l'Echo Spot sous Alexa,
-  avant LineageOS/View Assist. Écran à part entière (pas une variante du
-  digital) : pas de photo de fond, pas de météo, pas de date, juste les
-  aiguilles sur un fond bleu uni personnalisable, comme sur l'appareil
-  d'origine. Un petit bouton discret (masqué la nuit) bascule entre les
-  deux ; le choix est retenu au-delà du rechargement de la page. Voir
-  [Mode round](#mode-round-echo-spot).
+- **Horloge analogique** en alternative au digital, dans les deux mises
+  en page — un clin d'œil au cadran rond de l'Echo Spot sous Alexa, avant
+  LineageOS/View Assist. Cinq styles (`analog_style`), fond uni
+  personnalisable (ou fond dynamique en option en mode large). Un petit
+  bouton discret (masqué la nuit) bascule entre les deux ; le choix est
+  retenu au-delà du rechargement de la page. Voir [Horloge
+  analogique](#horloge-analogique).
 - Aucune entité n'est requise : sans rien configurer, la carte reste une
   horloge plein écran sur fond dégradé.
 - Thème et tailles personnalisables via variables CSS, sans surcharge de
@@ -154,23 +153,31 @@ background: null                # override CSS `background` complet du mode
                                  # deux présentations ont leur propre fond
 layout: null                    # null (paysage, Echo Show) ou "round"
                                  # (écran circulaire, Echo Spot 1ère gen 2017)
-clock_face: digital             # "digital" ou "analog" — mode round
-                                 # uniquement. Valeur de départ seulement :
-                                 # le bouton affiché en mode round retient
-                                 # le choix de l'utilisateur au-delà (voir
-                                 # "Mode round" plus bas), qui prime sur
-                                 # cette option une fois qu'il a tapé dessus
+clock_face: digital             # "digital" ou "analog" — disponible dans
+                                 # les deux mises en page. Valeur de départ
+                                 # seulement : le bouton affiché à l'écran
+                                 # retient le choix de l'utilisateur au-delà
+                                 # (voir "Horloge analogique" plus bas), qui
+                                 # prime sur cette option une fois tapé
 analog_style: aurore            # habillage du cadran analogique : "aurore"
                                  # (défaut), "mono", "clair", "neon" ou
                                  # "ardoise" (voir "Horloge analogique" plus
                                  # bas). Contrairement à clock_face, un seul
                                  # réglage YAML — pas de bouton pour en
-                                 # changer à l'écran ni de mémorisation
+                                 # changer à l'écran ni de mémorisation.
+                                 # Ignoré si analog_background_photo est actif
 analog_background: null         # override CSS `background` complet du mode
                                  # ANALOGIQUE — sinon le dégradé par défaut
-                                 # d'analog_style. Jamais de photo ici (le
-                                 # cadran analogique n'en affiche pas) ; comme
-                                 # background, sans effet la nuit
+                                 # d'analog_style. Pas de photo ici par
+                                 # défaut (voir analog_background_photo) ;
+                                 # comme background, sans effet la nuit
+analog_background_photo: false  # mode analogique EN MISE EN PAGE LARGE
+                                 # uniquement (sans effet en round) : fond
+                                 # dynamique du satellite (diaporama, comme
+                                 # `background` en digital) plutôt que le
+                                 # fond uni du style — qui est alors ignoré,
+                                 # les aiguilles repassent en blanc pour
+                                 # rester lisibles sur n'importe quelle photo
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
                                  # de rattrapage si le texte ne suit pas
                                  # correctement la taille de l'écran
@@ -191,29 +198,16 @@ passe en rouge fortement atténué (`--echo-home-night-color` /
 `--echo-home-night-opacity`), et la date ainsi que le bloc météo sont
 masqués.
 
-## Mode round (Echo Spot)
-
-`layout: round` clippe la carte elle-même en cercle (`border-radius: 50%`
-sur son propre fond) plutôt que de compter sur le boîtier physique, et
-repositionne le bloc météo en haut centré plutôt qu'en coin — un coin
-serait caché sous le boîtier sur un écran rond.
-
-### Horloge analogique
+## Horloge analogique
 
 L'Echo Spot d'origine (sous Alexa, avant LineageOS/View Assist) affichait
-une horloge ronde à aiguilles, plein écran, sur fond uni — pas de photo
-de fond superposée. Un petit bouton discret (en bas du cadran, masqué la
-nuit comme le reste) permet de retrouver ce rendu en alternative au
-digital : c'est un véritable écran à part, pas juste une autre police
-d'horloge — pas de fond dynamique, juste les aiguilles (heure, minute et
-seconde — celle-ci avance en continu via une animation CSS, pas un
-recalcul JS chaque seconde, plus léger sur du matériel modeste), selon
-le style choisi quelques graduations ou chiffres, et, discrètement, la
-météo et la date (voir plus bas).
-
-| Digital | Analogique |
-|---|---|
-| ![Mode round digital](docs/screenshot-round.png) | ![Mode round analogique](docs/screenshot-round-analog.png) |
+une horloge ronde à aiguilles. Disponible en alternative au digital dans
+les deux mises en page (round et large) via un petit bouton discret
+(masqué la nuit comme le reste) : c'est un véritable écran à part, pas
+juste une autre police d'horloge — les aiguilles (heure, minute et
+seconde, celle-ci avance en continu via une animation CSS plutôt qu'un
+recalcul JS chaque seconde, plus léger sur du matériel modeste) plutôt
+que la grosse horloge digitale.
 
 Le choix fait via ce bouton est retenu dans le navigateur (`localStorage`)
 au-delà d'un rechargement de page — `clock_face` dans la config ne sert
@@ -233,12 +227,11 @@ config (pas de bouton pour celui-ci — un seul style par installation) :
 | `ardoise` | Aiguilles rectangulaires plutôt que des traits, seule l'heure 12 est marquée — plus architectural. |
 
 Le fond par défaut de chaque style se personnalise avec l'option
-`analog_background` (voir [Configuration
-complète](#configuration-complète)) — un simple champ YAML, indépendant
-de `background` qui ne concerne que le mode digital. Pour un réglage via
-`card_mod` plutôt que dans la config de la carte, la variable CSS
-`--echo-home-analog-background` fait la même chose et garde la priorité
-sur les deux si elle est définie :
+`analog_background` (voir [Configuration complète](#configuration-complète))
+— un simple champ YAML, indépendant de `background` qui ne concerne que
+le mode digital. Pour un réglage via `card_mod` plutôt que dans la config
+de la carte, la variable CSS `--echo-home-analog-background` fait la
+même chose et garde la priorité sur les deux si elle est définie :
 
 ```yaml
 card_mod:
@@ -250,26 +243,32 @@ card_mod:
 
 La nuit, ce fond n'est jamais utilisé — même en analogique, le mode nuit
 retombe sur son traitement habituel (fond quasi noir, peu de lumière
-émise).
+émise). Comme en digital, `show_weather`/`show_date` affichent la météo
+(icône + température de `weather_entity`) et la date sur le cadran —
+masquées la nuit comme en digital ; leur disposition diffère selon la
+mise en page (voir les deux sections suivantes).
 
-#### Météo et date sur le cadran
+### En mode round (Echo Spot)
 
-Comme en digital, `show_weather`/`show_date` affichent la météo (icône +
-température de `weather_entity`) et la date sur le cadran analogique — en
-plus discret, à la manière d'un guichet de date sur une montre
-mécanique : la météo juste au-dessus du centre, la date juste en
-dessous, symétriques sur l'axe midi-6h, chacune dans la couleur du style
-choisi.
+`layout: round` clippe la carte elle-même en cercle (`border-radius: 50%`
+sur son propre fond) plutôt que de compter sur le boîtier physique. En
+digital, le bloc météo est repositionné en haut centré plutôt qu'en
+coin — un coin serait caché sous le boîtier sur un écran rond.
+
+En analogique, le cadran occupe tout l'écran, sans photo de fond — comme
+l'Echo Spot d'origine. La météo et la date sont posées discrètement
+dessus, à la manière d'un guichet de date sur une montre mécanique : la
+météo juste au-dessus du centre, la date juste en dessous, symétriques
+sur l'axe midi-6h, chacune dans la couleur du style choisi. Les aiguilles
+(et les graduations/chiffres) restent toujours visibles par-dessus :
+une aiguille peut passer devant la météo ou la date sans gêner la
+lecture, ni de l'une ni de l'autre.
+
+| Digital | Analogique |
+|---|---|
+| ![Mode round digital](docs/screenshot-round.png) | ![Mode round analogique](docs/screenshot-round-analog.png) |
 
 ![Météo et date sur les cinq styles](docs/screenshot-round-analog-complications.png)
-
-Les aiguilles (et les graduations/chiffres) restent toujours visibles
-par-dessus, comme sur une vraie montre à guichet : une aiguille peut
-passer devant la météo ou la date sans gêner la lecture, ni de l'une ni
-de l'autre. Comme en digital, ni la météo ni la date ne s'affichent la
-nuit.
-
-![Aperçu du mode round à 480x480](docs/screenshot-round.png)
 
 ```yaml
 type: custom:echo-home-card
@@ -277,6 +276,35 @@ satellite_entity: sensor.viewassist_salon
 weather_entity: weather.maison
 dashboard: dashboard-view-assist
 layout: round
+```
+
+### En mode large (Echo Show)
+
+En analogique, le cadran garde sa forme ronde mais se case à droite de
+l'écran plutôt que de le remplir ; la météo et la date prennent la place
+à gauche, comme un vrai bloc d'info plutôt qu'un guichet discret — il y
+a la place, contrairement au mode round.
+
+![Cadran analogique en mode large](docs/screenshot-landscape-analog.png)
+
+Par défaut, le fond reste uni (dégradé du style choisi, comme en round)
+— `analog_background_photo: true` bascule sur le fond dynamique du
+satellite (même mécanisme que `background` en digital, diaporama de
+`satellite_entity`) avec un voile pour la lisibilité, plutôt que le fond
+uni. `analog_style` est alors ignoré : les aiguilles/graduations
+repassent en blanc (comme `aurore`), pour rester lisibles sur n'importe
+quelle photo. Sans effet en mode round, où le fond uni sans photo
+reproduit volontairement l'Echo Spot d'origine.
+
+![Cadran analogique avec fond diaporama](docs/screenshot-landscape-analog-photo.png)
+
+```yaml
+type: custom:echo-home-card
+satellite_entity: sensor.viewassist_salon
+weather_entity: weather.maison
+dashboard: dashboard-view-assist
+clock_face: analog
+analog_background_photo: true
 ```
 
 ## Taille du texte

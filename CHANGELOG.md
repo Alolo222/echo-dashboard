@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.3.0
+
+- **Horloge analogique en mode large (Echo Show)**, jusque-là round
+  uniquement : cadran casé à droite plutôt que plein écran, météo et
+  date en vrai bloc d'info à gauche (centré sur l'axe horizontal du
+  cadran, symétrique) plutôt qu'en petite complication comme en round —
+  il y a la place. Les cinq styles existants (`analog_style`)
+  s'appliquent tels quels, juste redimensionnés/repositionnés
+  (`--_analog-landscape-size`, cf. static styles) ; `clock_face` et le
+  bouton de bascule fonctionnent désormais dans les deux mises en page.
+- **`analog_background_photo`** : nouvelle option, mode large
+  uniquement (sans effet en round, où le fond uni sans photo reste
+  volontairement fidèle à l'Echo Spot d'origine) — remplace le fond uni
+  du style par le fond dynamique du satellite (même mécanisme que
+  `background` en digital, diaporama) avec un voile pour la lisibilité.
+  `analog_style` est ignoré tant que cette option est active : les
+  aiguilles/graduations repassent en blanc (comme `aurore`), une photo
+  quelconque ne garantissant pas la lisibilité des couleurs d'un style
+  donné.
+- Conçu à partir de deux planches de rendus présentées avant intégration
+  (disposition initiale, puis météo/date recentrées + vraie police/icône
+  après retour que la première mouture "faisait trop basique") — la
+  police Nunito/système du reste de la carte et la vraie icône Meteocons
+  (déjà utilisées ailleurs, cf. `_renderWeather`/`_renderAnalogComplications`)
+  s'appliquent ici sans changement de code : elles étaient déjà
+  génériques, seul le mockup de présentation utilisait des repères
+  provisoires (police système, glyphe dessiné à la main).
+- Nouvelles captures `docs/screenshot-landscape-analog.png` et
+  `docs/screenshot-landscape-analog-photo.png`.
+
 ## 1.2.5
 
 - `docs/screenshot-round.png` régénérée : la 1.2.4 a changé la taille

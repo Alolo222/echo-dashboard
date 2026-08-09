@@ -330,17 +330,29 @@ class EchoHomeCard extends LitElement {
       ? this._hass.states[cfg.weather_entity]
       : undefined;
     const isRound = cfg.layout === "round";
-    // L'horloge analogique n'a de sens que sur l'écran circulaire de
-    // l'Echo Spot — celui qui l'avait à l'origine sous Alexa. Sur
-    // l'Echo Show (paysage), toujours digitale, pas de bouton.
-    const showAnalog = isRound && this._clockFace === "analog";
+    // L'horloge analogique était d'abord round-only (l'Echo Spot
+    // d'origine avait une horloge ronde) ; disponible aussi en paysage
+    // depuis 1.3.0 — cadran à droite, météo/date à gauche (cf.
+    // _renderAnalogComplications et static styles), plutôt que la grosse
+    // horloge digitale.
+    const showAnalog = this._clockFace === "analog";
+    // Fond photo en analogique paysage uniquement (analog_background_photo)
+    // : jamais en round, où l'écran à part sur fond uni reproduit
+    // volontairement l'Echo Spot d'origine (cf. Horloge analogique,
+    // README) — un principe de longue date, pas remis en cause par cette
+    // option. Le style choisi (analog_style) est ignoré tant que cette
+    // option est active : ses couleurs ne sont pas garanties lisibles sur
+    // une photo quelconque, donc on retombe sur le blanc du style par
+    // défaut (aurore) comme sur le mode digital.
+    const usePhotoBackground =
+      showAnalog && !isRound && !isNightMode && cfg.analog_background_photo;
     // La météo n'a pas sa place la nuit : c'est justement ce que le mode
     // nuit cherche à éviter (lumière/information superflue sur un écran
     // de chevet). Entité absente/indisponible => bloc simplement absent,
     // pas d'erreur affichée (aucune entité n'est requise ici). Valable
-    // pour les deux présentations (digitale ou complication discrète sur
-    // le cadran analogique, cf. _renderAnalogComplications) — seule la
-    // façon de l'afficher change avec showAnalog, pas si elle s'affiche.
+    // pour les deux présentations (digitale ou complication sur le
+    // cadran analogique, cf. _renderAnalogComplications) — seule la façon
+    // de l'afficher change avec showAnalog, pas si elle s'affiche.
     const weatherAvailable =
       cfg.show_weather &&
       !isNightMode &&
@@ -352,11 +364,13 @@ class EchoHomeCard extends LitElement {
 
     // Pas de fond dynamique/dégradé habituel en analogique de jour : la
     // couleur unie vient de la règle CSS .card.analog (cf. static
-    // styles) — un style à part, pas une variation du digital. La nuit,
-    // on retombe sur le traitement nuit habituel (fond masqué) malgré
-    // tout, cf. :host(.night) .card.analog qui reprend le dessus.
+    // styles) — un style à part, pas une variation du digital. Exception
+    // en paysage avec analog_background_photo (cf. plus haut), qui
+    // retombe sur le même fond dynamique que le digital. La nuit, on
+    // retombe sur le traitement nuit habituel (fond masqué) malgré tout,
+    // cf. :host(.night) .card.analog qui reprend le dessus.
     const backgroundValue =
-      showAnalog && !isNightMode
+      showAnalog && !isNightMode && !usePhotoBackground
         ? null
         : this._backgroundValue(satelliteState, isNightMode);
     // Le fond par défaut du cadran analogique vient de `analog_background`
@@ -367,11 +381,13 @@ class EchoHomeCard extends LitElement {
     // Indépendant de `background` (mode digital uniquement, cf. const.js)
     // : les deux présentations ont leur propre fond.
     const analogStyle = showAnalog
-      ? ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
+      ? usePhotoBackground
+        ? ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
+        : ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
       : null;
     const cardStyle = this._cardStyle(
       backgroundValue,
-      analogStyle
+      analogStyle && !usePhotoBackground
         ? `--_analog-default-bg:${cfg.analog_background ?? analogStyle.background}`
         : null
     );
@@ -381,13 +397,17 @@ class EchoHomeCard extends LitElement {
     // recalculée sur le bon instant la prochaine fois qu'on y rentre
     // (l'élément SVG est recréé à chaque bascule, cf. plus bas).
     if (!showAnalog) this._secondHandDelay = undefined;
+    // Le voile de lisibilité ne sert qu'au-dessus d'une photo (digital,
+    // ou analogique paysage avec analog_background_photo) — inutile sur
+    // le fond uni du cadran analogique classique.
+    const showShader = !showAnalog || usePhotoBackground;
 
     return html`
       <div
         class="card ${isRound ? "round" : ""} ${showAnalog ? "analog" : ""}"
         style=${cardStyle}
       >
-        ${showAnalog ? nothing : html`<div class="shader"></div>`}
+        ${showShader ? html`<div class="shader"></div>` : nothing}
         ${showWeather ? this._renderWeather(weatherState) : nothing}
         <div class="clockgroup">
           ${cfg.show_clock
@@ -408,7 +428,7 @@ class EchoHomeCard extends LitElement {
             ? html`<div class="date">${formatShortDate(now, locale)}</div>`
             : nothing}
         </div>
-        ${isRound && !isNightMode ? this._renderClockToggle(showAnalog) : nothing}
+        ${!isNightMode ? this._renderClockToggle(showAnalog) : nothing}
       </div>
     `;
   }
@@ -735,8 +755,8 @@ class EchoHomeCard extends LitElement {
     `;
   }
 
-  // Petit bouton discret (mode round uniquement, masqué la nuit comme le
-  // reste — pas de lumière/info superflue sur un écran de chevet) pour
+  // Petit bouton discret (round et large, masqué la nuit comme le reste
+  // — pas de lumière/info superflue sur un écran de chevet) pour
   // basculer digital ↔ analogique. L'icône affichée est celle du cadran
   // vers lequel on bascule (convention usuelle pour un bouton toggle),
   // pas celle du cadran actuel.
@@ -815,6 +835,12 @@ class EchoHomeCard extends LitElement {
         --echo-home-weather-temp-size,
         clamp(1.8rem, 15vh, 5rem)
       );
+      /* Cadran analogique en mode large (Echo Show) uniquement — sans
+         effet en round, qui a son propre --_analog-size (%, cf.
+         .card.round). min(vh, vw) plutôt qu'un simple vh : sur un écran
+         inhabituellement étroit, une valeur purement basée sur la
+         hauteur déborderait sur la colonne météo/date à gauche. */
+      --_analog-landscape-size: min(80vh, 42vw);
       --_text-color: var(--echo-home-text-color, #ffffff);
       /* "red" tel quel par défaut (pas une teinte adoucie) : c'est
          volontairement discret/peu lumineux plutôt que joli — usage
@@ -976,16 +1002,19 @@ class EchoHomeCard extends LitElement {
       transform: translateX(-50%);
     }
 
-    /* Cadran analogique (mode round uniquement) : un écran à part, pas
-       une variante du digital — comme sur l'Echo Spot d'origine sous
-       Alexa (avant LineageOS/View Assist) : juste les aiguilles en plein
-       écran sur un fond uni, sans photo, météo ni date (masquées dans
-       render()). --_analog-size est un pourcentage du conteneur (quasi
-       100%, cf. .card.round plus bas), pas un diamètre fixe en px, pour
-       suivre la taille réelle de la carte. --_analog-default-bg vient du
+    /* Cadran analogique : un écran à part, pas une variante du digital —
+       comme sur l'Echo Spot d'origine sous Alexa (avant LineageOS/View
+       Assist), dont le cadran rond plein écran sert de référence même
+       en mode large (Echo Show, depuis 1.3.0) : mêmes aiguilles, casées
+       à droite plutôt que centrées, la météo/date prenant la place à
+       gauche (cf. .analog-weather/.analog-date plus bas) — toujours pas
+       de photo de fond par défaut, sauf analog_background_photo
+       (paysage uniquement, cf. render()). --_analog-default-bg vient du
        style choisi (analog_style, cf. analog-styles.js et render()) —
        --echo-home-analog-background (personnalisation utilisateur, cf.
-       README) garde la priorité dessus. */
+       README) garde la priorité dessus ; ignoré si
+       analog_background_photo est actif (fond dynamique posé en
+       background direct par render() dans ce cas, pas ici). */
     .card.analog {
       background: var(--echo-home-analog-background, var(--_analog-default-bg));
     }
@@ -1001,12 +1030,32 @@ class EchoHomeCard extends LitElement {
 
     .analog-clock {
       position: absolute;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Round : cadran plein écran, centré (cf. --_analog-size, 94% du
+       conteneur — la carte round est toujours carrée, un % y suffit). */
+    .card.round .analog-clock {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: var(--_analog-size);
       height: var(--_analog-size);
-      transition: opacity 0.4s ease;
+    }
+
+    /* Paysage : cadran plus petit, casé à droite plutôt que centré, pour
+       laisser la place à la météo/date à gauche (cf. .analog-weather/
+       .analog-date). --_analog-landscape-size en vh/vw (pas %, cf.
+       --_clock-size) : contrairement à la carte round, la carte large
+       n'est pas carrée — un % de sa largeur et un % de sa hauteur ne
+       donneraient pas la même valeur, ce qui déformerait le cadran en
+       ellipse. */
+    .card:not(.round) .analog-clock {
+      top: 50%;
+      right: 4%;
+      transform: translateY(-50%);
+      width: var(--_analog-landscape-size);
+      height: var(--_analog-landscape-size);
     }
 
     /* Couleurs et épaisseurs propres à chaque style (mono/aurore/clair/
@@ -1056,59 +1105,106 @@ class EchoHomeCard extends LitElement {
       }
     }
 
-    /* Météo + date, superposées discrètement au cadran analogique (cf.
-       _renderAnalogComplications) — même boîte que .analog-clock (donc
-       alignée sur le même disque), rendue AVANT lui dans le DOM pour que
-       les aiguilles/graduations restent toujours visibles par-dessus.
-       pointer-events: none : une pure décoration, qui ne doit pas voler
-       le tap destiné au bouton de bascule sous elle. Couleur/opacité
-       posées en style inline par style analogique (cf. comp dans
-       analog-styles.js), pas ici — pas de valeur commune à tous. */
+    /* Météo + date associées au cadran analogique (cf.
+       _renderAnalogComplications), rendues AVANT le <svg> des aiguilles
+       dans le DOM pour qu'elles restent toujours visibles par-dessus
+       (cf. commentaire sur cette méthode). pointer-events: none : une
+       pure décoration, qui ne doit pas voler le tap destiné au bouton de
+       bascule sous elle. Couleur/opacité posées en style inline par
+       style analogique (cf. comp dans analog-styles.js), pas ici — pas
+       de valeur commune à tous. */
     .analog-complications {
       position: absolute;
+      pointer-events: none;
+    }
+
+    /* Round : superposée au cadran (même boîte que .analog-clock, donc
+       alignée sur le même disque) — une complication discrète, comme un
+       guichet de date sur une montre mécanique. */
+    .card.round .analog-complications {
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: var(--_analog-size);
       height: var(--_analog-size);
-      pointer-events: none;
     }
 
-    /* Positions choisies pour rester dans la partie du cadran non
-       balayée par les chiffres (radius ~40-41 sur un viewBox 0-100, cf.
-       analog-styles.js) : la météo juste au-dessus du centre, la date
-       juste en dessous — symétriques sur l'axe midi-6h plutôt que la
-       météo calée à gauche, pour un rendu plus équilibré. Les aiguilles
-       peuvent passer dessus sans gêner la lecture, comme un guichet de
-       date sur une montre mécanique. */
+    /* Paysage : pas superposée au cadran (casé à droite, cf.
+       .analog-clock) mais positionnée sur toute la carte — la météo/date
+       occupent la colonne de gauche, pas un guichet discret mais un vrai
+       bloc d'info à part entière (cf. .analog-weather/.analog-date plus
+       bas). */
+    .card:not(.round) .analog-complications {
+      inset: 0;
+    }
+
     .analog-weather {
       position: absolute;
-      left: 50%;
-      top: 27%;
-      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
       gap: 0.3em;
     }
 
-    .analog-weather-icon {
+    /* Round : positions choisies pour rester dans la partie du cadran
+       non balayée par les chiffres (radius ~40-41 sur un viewBox 0-100,
+       cf. analog-styles.js) : la météo juste au-dessus du centre, la
+       date juste en dessous — symétriques sur l'axe midi-6h. Les
+       aiguilles peuvent passer dessus sans gêner la lecture. */
+    .card.round .analog-weather {
+      left: 50%;
+      top: 27%;
+      transform: translate(-50%, -50%);
+    }
+    .card.round .analog-weather-icon {
       width: var(--_analog-weather-icon-size);
       height: var(--_analog-weather-icon-size);
+    }
+    .card.round .analog-weather-temp {
+      font-size: var(--_analog-weather-temp-size);
+    }
+    .card.round .analog-date {
+      left: 50%;
+      top: 69%;
+      transform: translate(-50%, -50%);
+      font-size: var(--_analog-date-size);
+    }
+
+    /* Paysage : bloc météo/date centré sur le même axe horizontal que le
+       centre du cadran (symétrique, au-dessus/en dessous), dans la
+       colonne de gauche — mêmes tailles que le bloc météo/la date du
+       mode digital (--_weather-icon-size etc.) : ici, ce n'est plus une
+       complication discrète mais l'info principale de ce côté de
+       l'écran. */
+    .card:not(.round) .analog-weather {
+      left: 21%;
+      top: 41%;
+      transform: translate(-50%, -50%);
+    }
+    .card:not(.round) .analog-weather-icon {
+      width: var(--_weather-icon-size);
+      height: var(--_weather-icon-size);
+    }
+    .card:not(.round) .analog-weather-temp {
+      font-size: var(--_weather-temp-size);
+    }
+    .card:not(.round) .analog-date {
+      left: 21%;
+      top: 58%;
+      transform: translate(-50%, -50%);
+      font-size: var(--_date-size);
+    }
+
+    .analog-weather-icon {
       display: block;
     }
 
     .analog-weather-temp {
-      font-size: var(--_analog-weather-temp-size);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
 
     .analog-date {
       position: absolute;
-      left: 50%;
-      top: 69%;
-      transform: translate(-50%, -50%);
-      font-size: var(--_analog-date-size);
       white-space: nowrap;
     }
 

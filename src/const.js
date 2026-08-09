@@ -49,9 +49,10 @@ export const DEFAULT_CONFIG = {
   // satellite (des arrière-plans, comme la vue View Assist d'origine).
   layout: null, // null (paysage, Echo Show) ou "round" (écran circulaire,
   // Echo Spot 1ère gen 2017, 480x480)
-  clock_face: "digital", // "digital" ou "analog" — uniquement en mode
-  // round (l'Echo Spot d'origine avait une horloge analogique). Sert
-  // juste de valeur de départ : le petit bouton affiché en mode round
+  clock_face: "digital", // "digital" ou "analog" — disponible dans les
+  // deux mises en page (round : cadran plein écran ; large : cadran à
+  // droite, météo/date à gauche, cf. analog_background_photo). Sert
+  // juste de valeur de départ : le petit bouton affiché à l'écran
   // bascule l'affichage et retient le choix (localStorage) au-delà de
   // cette valeur de config.
   analog_style: "aurore", // habillage du cadran analogique — "aurore"
@@ -59,13 +60,23 @@ export const DEFAULT_CONFIG = {
   // "ardoise" (cf. src/analog-styles.js). Contrairement à clock_face, ce
   // n'est qu'un réglage YAML : pas de bouton pour en changer à l'écran,
   // pas de mémorisation localStorage — un seul style choisi une fois.
+  // Ignoré si analog_background_photo est actif (retombe sur "aurore").
   analog_background: null, // override CSS `background` complet pour le
   // mode ANALOGIQUE uniquement — sinon le dégradé par défaut du style
   // choisi (analog_style). Jamais de fond dynamique du satellite ici
-  // (l'écran analogique n'affiche pas de photo, cf. README) ; comme
-  // `background`, sans effet la nuit (le mode nuit retombe toujours sur
-  // son traitement habituel). --echo-home-analog-background (variable
-  // CSS, via card_mod) garde la priorité si les deux sont définis.
+  // (l'écran analogique n'affiche pas de photo par défaut, cf. README) ;
+  // comme `background`, sans effet la nuit (le mode nuit retombe
+  // toujours sur son traitement habituel). --echo-home-analog-background
+  // (variable CSS, via card_mod) garde la priorité si les deux sont
+  // définis. Sans effet si analog_background_photo est actif.
+  analog_background_photo: false, // mode analogique EN MISE EN PAGE
+  // LARGE uniquement (sans effet en round, où l'écran à part sur fond
+  // uni reproduit volontairement l'Echo Spot d'origine) : remplace le
+  // fond uni du style choisi par le fond dynamique du satellite (même
+  // mécanisme que `background` en digital, diaporama de
+  // satellite_entity) + un voile pour la lisibilité. analog_style est
+  // ignoré tant que cette option est active (retombe sur "aurore",
+  // blanc, lisible sur n'importe quelle photo).
   zoom: 1, // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
 };
