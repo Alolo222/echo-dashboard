@@ -146,9 +146,12 @@ icons:
                                  # (prime sur style si renseigné)
 
 # --- Apparence ---
-background: null                # override CSS `background` complet (couleur
-                                 # unie, dégradé, transparent...) — prioritaire
-                                 # sur l'image dynamique du satellite
+background: null                # override CSS `background` complet du mode
+                                 # DIGITAL (couleur unie, dégradé,
+                                 # transparent...) — prioritaire sur l'image
+                                 # dynamique du satellite. Sans effet en
+                                 # analogique (voir analog_background) : les
+                                 # deux présentations ont leur propre fond
 layout: null                    # null (paysage, Echo Show) ou "round"
                                  # (écran circulaire, Echo Spot 1ère gen 2017)
 clock_face: digital             # "digital" ou "analog" — mode round
@@ -163,6 +166,11 @@ analog_style: aurore            # habillage du cadran analogique : "aurore"
                                  # bas). Contrairement à clock_face, un seul
                                  # réglage YAML — pas de bouton pour en
                                  # changer à l'écran ni de mémorisation
+analog_background: null         # override CSS `background` complet du mode
+                                 # ANALOGIQUE — sinon le dégradé par défaut
+                                 # d'analog_style. Jamais de photo ici (le
+                                 # cadran analogique n'en affiche pas) ; comme
+                                 # background, sans effet la nuit
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
                                  # de rattrapage si le texte ne suit pas
                                  # correctement la taille de l'écran
@@ -224,9 +232,13 @@ config (pas de bouton pour celui-ci — un seul style par installation) :
 | `neon` | Bleu nuit profond, cyan lumineux avec halo, seconde magenta — plus gadget, plus spectaculaire. |
 | `ardoise` | Aiguilles rectangulaires plutôt que des traits, seule l'heure 12 est marquée — plus architectural. |
 
-Le fond par défaut de chaque style se personnalise via
-`--echo-home-analog-background` (n'importe quelle valeur CSS
-`background`, prioritaire sur le style choisi) :
+Le fond par défaut de chaque style se personnalise avec l'option
+`analog_background` (voir [Configuration
+complète](#configuration-complète)) — un simple champ YAML, indépendant
+de `background` qui ne concerne que le mode digital. Pour un réglage via
+`card_mod` plutôt que dans la config de la carte, la variable CSS
+`--echo-home-analog-background` fait la même chose et garde la priorité
+sur les deux si elle est définie :
 
 ```yaml
 card_mod:
@@ -281,6 +293,14 @@ Si le texte reste malgré tout trop petit (ou trop grand) sur un appareil
 donné, `zoom` permet un ajustement manuel (voir [Configuration
 complète](#configuration-complète) plus haut).
 
+Ce calcul se base sur la hauteur disponible (`vh`/`vmin`), pas sur le
+contenu réel de l'heure/la date — une heure à deux chiffres ("23:59"),
+un format 12h (qui ajoute "AM"/"PM") ou une abréviation de date plus
+longue dans certaines langues prennent plus de place qu'une heure à un
+chiffre. L'heure et la date se réduisent donc automatiquement (mesuré à
+l'affichage, pas deviné à l'avance) si leur taille normale déborderait
+de l'écran — sans jamais rétrécir inutilement le cas courant.
+
 ## Polices
 
 La carte n'embarque aucune police : elle hérite de `--primary-font-family`
@@ -316,6 +336,7 @@ rien à régler. À poser sur le sélecteur `:host` de la carte (via
 | `--echo-home-date-size` | Taille de la date (mise en page large) | `clamp(2rem, 15vh, 6rem)` |
 | `--echo-home-weather-icon-size` | Taille de l'icône météo (mise en page large) | `clamp(48px, 16vh, 130px)` |
 | `--echo-home-weather-temp-size` | Taille de la température (mise en page large) | `clamp(1.8rem, 15vh, 5rem)` |
+| `--echo-home-analog-background` | Fond du cadran analogique — prime sur `analog_background` (config) et sur le style choisi | dégradé du style (`analog_style`) |
 
 Le mode round a ses propres tailles ajustées, non exposées en variables
 CSS (comme dans echo-weather-card).

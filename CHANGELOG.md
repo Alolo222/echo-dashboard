@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.2.3
+
+- **`analog_background`** : nouvelle option pour régler le fond du mode
+  analogique indépendamment de `background` (qui ne concernait déjà que
+  le digital dans les faits, mais sans façon de le dire explicitement) —
+  sinon le dégradé par défaut du style choisi (`analog_style`). Simple
+  champ YAML, pas besoin de `card_mod`/`--echo-home-analog-background`
+  pour un réglage basique (la variable CSS reste disponible et garde la
+  priorité si les deux sont définis). Vérifié : `background` n'a aucun
+  effet en analogique et vice versa, dans les deux sens ; ni l'un ni
+  l'autre ne s'affiche la nuit (comportement déjà existant, inchangé).
+- **Correctif de débordement** : l'heure et la date en mode digital
+  débordaient de l'écran dans plusieurs cas — repéré en mesurant
+  (`getBoundingClientRect`), pas à l'œil : une heure à deux chiffres en
+  format 24h débordait déjà en mode round ("23:59", 552px de contenu sur
+  un disque de 480px), et le format 12h (qui ajoute "AM"/"PM") débordait
+  même en mode large ("11:59PM", 1098px sur 960px). La date, elle,
+  restait dans tous les cas testés (plusieurs langues) à une taille
+  raisonnable.
+  - Plutôt que deviner une largeur "sûre" par format/langue/mise en page
+    (jamais garanti pour une langue non testée), l'heure et la date se
+    mesurent maintenant après affichage (`scrollWidth`) et se réduisent
+    (`transform: scale()`, format `--_fit-scale`) seulement si leur
+    taille normale déborderait — le cas courant (heure à un chiffre,
+    date française standard) n'est jamais rétréci inutilement.
+  - Recalculé au redimensionnement de la carte (`ResizeObserver`), en
+    plus de chaque rendu — utile surtout en aperçu d'éditeur Lovelace,
+    la résolution d'un Echo Show/Spot réel ne changeant jamais après le
+    premier rendu.
+
 ## 1.2.2
 
 - Météo recentrée au-dessus du centre du cadran analogique (au lieu de

@@ -125,11 +125,63 @@ class EchoHomeCard extends LitElement {
         this.requestUpdate();
       }
     }, 30000);
+    // Recalcule le fit-scale (cf. _fitOverflowingText) si la carte
+    // change de taille — pas pour suivre le vh/vmin de l'horloge
+    // elle-même (déjà fluide via CSS), mais parce qu'un simple
+    // redimensionnement ne redéclenche pas `updated()` (aucune prop Lit
+    // ne change). Change surtout en aperçu d'éditeur Lovelace : sur un
+    // Echo Show/Spot en usage réel, la résolution ne bouge jamais après
+    // le premier rendu.
+    this._resizeObserver = new ResizeObserver(() => this._fitOverflowingText());
+    this._resizeObserver.observe(this);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     clearInterval(this._clockTimer);
+    this._resizeObserver?.disconnect();
+  }
+
+  updated(changedProperties) {
+    super.updated(changedProperties);
+    this._fitOverflowingText();
+  }
+
+  // Filet de rattrapage pour l'heure/la date en mode digital : leur
+  // taille de police (--_clock-size/--_date-size) est calculée à partir
+  // de la hauteur disponible (vh/vmin) sans jamais regarder la largeur
+  // réellement nécessaire, qui elle dépend du contenu — une heure à deux
+  // chiffres ("23:59" plutôt que "9:41"), un format 12h qui ajoute
+  // "AM"/"PM", ou une date dont l'abréviation est plus longue dans telle
+  // ou telle langue. Repéré par mesure (getBoundingClientRect), pas à
+  // l'œil : "23:59" en 24h déborde déjà en mode round (552px de contenu
+  // sur un disque de 480px), et "11:59PM" en 12h déborde même en mode
+  // large (1098px sur 960px).
+  //
+  // Plutôt que deviner une largeur "sûre" par format/langue/mise en page
+  // (quatre combinaisons à recalibrer à la main, et jamais garanti pour
+  // une langue non testée), on mesure le rendu réel de chaque élément et
+  // on le réduit seulement s'il dépasse — `scrollWidth` reflète toujours
+  // la largeur intrinsèque du contenu, `transform: scale()` (posé via
+  // --_fit-scale, cf. static styles) n'affecte que le rendu visuel, pas
+  // la mesure, donc pas besoin de réinitialiser avant de mesurer. Coût
+  // négligeable : quelques lectures de layout, au pire toutes les 30s
+  // (tick d'horloge) ou au redimensionnement, jamais par frame.
+  _fitOverflowingText() {
+    const root = this.shadowRoot;
+    const card = root?.querySelector(".card");
+    if (!card) return;
+    // 92% plutôt que 100% : une petite marge, le texte ne doit pas
+    // toucher pile le bord (clippé net par `.card { overflow:hidden }`
+    // sinon, ou par la courbe du cercle en mode round).
+    const available = card.getBoundingClientRect().width * 0.92;
+    for (const selector of [".clock", ".date"]) {
+      const el = root.querySelector(selector);
+      if (!el) continue;
+      const needed = el.scrollWidth;
+      const scale = needed > available ? available / needed : 1;
+      el.style.setProperty("--_fit-scale", scale);
+    }
   }
 
   set hass(hass) {
@@ -263,16 +315,21 @@ class EchoHomeCard extends LitElement {
       showAnalog && !isNightMode
         ? null
         : this._backgroundValue(satelliteState, isNightMode);
-    // Le fond par défaut du cadran analogique dépend du style choisi
-    // (cf. analog-styles.js) — passé en variable CSS plutôt qu'en
-    // `background` direct pour que --echo-home-analog-background (cf.
-    // README) garde la priorité si l'utilisateur la personnalise.
+    // Le fond par défaut du cadran analogique vient de `analog_background`
+    // si renseigné, sinon du style choisi (cf. analog-styles.js) — passé
+    // en variable CSS plutôt qu'en `background` direct pour que
+    // --echo-home-analog-background (CSS, cf. README) garde la priorité
+    // sur les deux si l'utilisateur la personnalise via card_mod.
+    // Indépendant de `background` (mode digital uniquement, cf. const.js)
+    // : les deux présentations ont leur propre fond.
     const analogStyle = showAnalog
       ? ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
       : null;
     const cardStyle = this._cardStyle(
       backgroundValue,
-      analogStyle ? `--_analog-default-bg:${analogStyle.background}` : null
+      analogStyle
+        ? `--_analog-default-bg:${cfg.analog_background ?? analogStyle.background}`
+        : null
     );
     // L'aiguille des secondes tourne en continu via une animation CSS
     // (cf. _renderAnalogClock) plutôt qu'un rafraîchissement JS par
@@ -786,7 +843,12 @@ class EchoHomeCard extends LitElement {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      /* --_fit-scale : 1 par défaut, réduit seulement si le contenu
+         réel déborde à la taille vh/vmin normale (cf.
+         _fitOverflowingText) — une heure à un chiffre ("9:41") n'est
+         donc jamais rétrécie inutilement, seule une heure large
+         ("23:59", ou "11:59PM" en 12h) l'est. */
+      transform: translate(-50%, -50%) scale(var(--_fit-scale, 1));
       font-size: var(--_clock-size);
       font-weight: 700;
       line-height: 1;
@@ -824,7 +886,14 @@ class EchoHomeCard extends LitElement {
          l'utilisateur une fois la symétrie de base en place. */
       top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.5315);
       left: 50%;
-      transform: translateX(-50%);
+      /* transform-origin: top (pas le centre par défaut) : si
+         --_fit-scale réduit le texte (cf. _fitOverflowingText, même
+         filet de rattrapage que .clock pour une date à l'abréviation
+         plus longue dans certaines langues), le bord haut ne doit pas
+         bouger — c'est lui que la propriété top positionne avec le
+         calcul d'encre ci-dessus, pas le centre de la boîte. */
+      transform: translateX(-50%) scale(var(--_fit-scale, 1));
+      transform-origin: top;
       line-height: 1;
       font-size: var(--_date-size);
       color: var(--_text-color);

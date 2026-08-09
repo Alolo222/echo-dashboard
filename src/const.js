@@ -40,9 +40,13 @@ export const DEFAULT_CONFIG = {
   },
 
   // --- Apparence ---
-  background: null, // override CSS `background` complet (couleur unie,
-  // dégradé, transparent...) — prioritaire sur l'image dynamique du
-  // satellite et sur le dégradé par défaut
+  background: null, // override CSS `background` complet pour le mode
+  // DIGITAL uniquement (couleur unie, dégradé, transparent...) —
+  // prioritaire sur l'image dynamique du satellite et sur le voile par
+  // défaut. Sans effet en mode analogique (cf. analog_background
+  // ci-dessous) : les deux présentations ont leur propre fond, réglable
+  // indépendamment, par défaut le digital garde le fond dynamique du
+  // satellite (des arrière-plans, comme la vue View Assist d'origine).
   layout: null, // null (paysage, Echo Show) ou "round" (écran circulaire,
   // Echo Spot 1ère gen 2017, 480x480)
   clock_face: "digital", // "digital" ou "analog" — uniquement en mode
@@ -55,6 +59,13 @@ export const DEFAULT_CONFIG = {
   // "ardoise" (cf. src/analog-styles.js). Contrairement à clock_face, ce
   // n'est qu'un réglage YAML : pas de bouton pour en changer à l'écran,
   // pas de mémorisation localStorage — un seul style choisi une fois.
+  analog_background: null, // override CSS `background` complet pour le
+  // mode ANALOGIQUE uniquement — sinon le dégradé par défaut du style
+  // choisi (analog_style). Jamais de fond dynamique du satellite ici
+  // (l'écran analogique n'affiche pas de photo, cf. README) ; comme
+  // `background`, sans effet la nuit (le mode nuit retombe toujours sur
+  // son traitement habituel). --echo-home-analog-background (variable
+  // CSS, via card_mod) garde la priorité si les deux sont définis.
   zoom: 1, // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
 };
