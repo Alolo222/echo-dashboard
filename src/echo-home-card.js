@@ -227,31 +227,43 @@ class EchoHomeCard extends LitElement {
     const weatherState = cfg.weather_entity
       ? this._hass.states[cfg.weather_entity]
       : undefined;
+    const isRound = cfg.layout === "round";
+    // L'horloge analogique n'a de sens que sur l'écran circulaire de
+    // l'Echo Spot — celui qui l'avait à l'origine sous Alexa. Sur
+    // l'Echo Show (paysage), toujours digitale, pas de bouton. C'est un
+    // véritable écran alternatif, pas juste une autre police d'horloge :
+    // comme sur l'Echo Spot d'origine, juste les aiguilles sur un fond
+    // uni — pas de photo de fond, pas de météo, pas de date.
+    const showAnalog = isRound && this._clockFace === "analog";
     // Le bloc météo n'a pas sa place la nuit : c'est justement ce que le
     // mode nuit cherche à éviter (lumière/information superflue sur un
     // écran de chevet). Entité absente/indisponible => bloc simplement
     // absent, pas d'erreur affichée (aucune entité n'est requise ici).
     const showWeather =
+      !showAnalog &&
       cfg.show_weather &&
       !isNightMode &&
       weatherState &&
       !["unavailable", "unknown"].includes(weatherState.state) &&
       weatherState.attributes.temperature != null;
 
-    const backgroundValue = this._backgroundValue(satelliteState, isNightMode);
+    // Pas de fond dynamique/dégradé habituel en analogique de jour : la
+    // couleur unie vient de la règle CSS .card.analog (cf. static
+    // styles) — un style à part, pas une variation du digital. La nuit,
+    // on retombe sur le traitement nuit habituel (fond masqué) malgré
+    // tout, cf. :host(.night) .card.analog qui reprend le dessus.
+    const backgroundValue =
+      showAnalog && !isNightMode
+        ? null
+        : this._backgroundValue(satelliteState, isNightMode);
     const cardStyle = this._cardStyle(backgroundValue);
-    const isRound = cfg.layout === "round";
-    // L'horloge analogique n'a de sens que sur l'écran circulaire de
-    // l'Echo Spot — celui qui l'avait à l'origine sous Alexa. Sur
-    // l'Echo Show (paysage), toujours digitale, pas de bouton.
-    const showAnalog = isRound && this._clockFace === "analog";
 
     return html`
       <div
         class="card ${isRound ? "round" : ""} ${showAnalog ? "analog" : ""}"
         style=${cardStyle}
       >
-        <div class="shader"></div>
+        ${showAnalog ? nothing : html`<div class="shader"></div>`}
         ${showWeather ? this._renderWeather(weatherState) : nothing}
         <div class="clockgroup">
           ${cfg.show_clock
@@ -259,7 +271,7 @@ class EchoHomeCard extends LitElement {
               ? this._renderAnalogClock(now, locale, timeFormat)
               : html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
             : nothing}
-          ${cfg.show_date && !isNightMode
+          ${cfg.show_date && !isNightMode && !showAnalog
             ? html`<div class="date">${formatShortDate(now, locale)}</div>`
             : nothing}
         </div>
@@ -291,12 +303,10 @@ class EchoHomeCard extends LitElement {
     // le cadran est pensé plein écran (cf. --_analog-size), pas un petit
     // médaillon au milieu — donc pas de marge à ménager entre les
     // graduations et le bord du cercle comme sur une version plus petite.
-    // Celles de midi (i=0) et 6h (i=6) sont omises : la météo et la date
-    // occupent déjà ces zones (haut/bas du cadran), la graduation s'y
-    // superposait de façon maladroite plutôt que de s'effacer derrière.
+    // Écran dédié, sans météo ni date superposées (cf. render()) : les
+    // 12 graduations sont toutes affichées, rien à éviter.
     const ticks = [];
     for (let i = 0; i < 12; i++) {
-      if (i === 0 || i === 6) continue;
       const major = i % 3 === 0;
       ticks.push(svg`
         <line
@@ -568,16 +578,29 @@ class EchoHomeCard extends LitElement {
       transform: translateX(-50%);
     }
 
-    /* Cadran analogique (mode round uniquement) : rappelle l'horloge
-       ronde de l'Echo Spot d'origine sous Alexa (avant LineageOS/View
-       Assist) — plein écran, pas un médaillon réduit au milieu (cf.
-       photo de référence du cadran "classic" trouvée en ligne : le
-       cadran occupe tout le disque visible). --_analog-size est donc un
-       pourcentage du conteneur (quasi 100%), pas un diamètre fixe en px
-       — cf. .card.round ci-dessous. Comme le cadran occupe désormais le
-       même disque que le reste (météo, date), sa position ne dicte plus
-       celle de la date : .date retombe sur le même calcul qu'en mode
-       digital (déjà pensé pour la courbe du cercle, cf. plus haut). */
+    /* Cadran analogique (mode round uniquement) : un écran à part, pas
+       une variante du digital — comme sur l'Echo Spot d'origine sous
+       Alexa (avant LineageOS/View Assist) : juste les aiguilles en plein
+       écran sur un fond uni, sans photo, météo ni date (masquées dans
+       render()). --_analog-size est un pourcentage du conteneur (quasi
+       100%, cf. .card.round plus bas), pas un diamètre fixe en px, pour
+       suivre la taille réelle de la carte. */
+    .card.analog {
+      background: var(
+        --echo-home-analog-background,
+        radial-gradient(130% 130% at 25% 15%, #2f6fb3 0%, #163c66 55%, #0a1f38 100%)
+      );
+    }
+
+    /* La nuit, même en analogique, on retombe sur le traitement nuit
+       habituel (fond quasi noir) plutôt que le bleu — l'objectif du mode
+       nuit (peu de lumière émise sur un écran de chevet) prime sur le
+       style du cadran. */
+    :host(.night) .card.analog {
+      background: var(--_default-bg);
+      background-color: #0a1424;
+    }
+
     .analog-clock {
       position: absolute;
       top: 50%;

@@ -59,10 +59,12 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
   dans un coin, qui serait sous le boîtier physique).
 - En mode round, **horloge analogique plein écran** en alternative au
   digital — un clin d'œil au cadran rond de l'Echo Spot sous Alexa,
-  avant LineageOS/View Assist (le cadran occupe tout le disque visible,
-  pas un petit médaillon au milieu). Un petit bouton discret (masqué la
-  nuit) bascule entre les deux ; le choix est retenu au-delà du
-  rechargement de la page. Voir [Mode round](#mode-round-echo-spot).
+  avant LineageOS/View Assist. Écran à part entière (pas une variante du
+  digital) : pas de photo de fond, pas de météo, pas de date, juste les
+  aiguilles sur un fond bleu uni personnalisable, comme sur l'appareil
+  d'origine. Un petit bouton discret (masqué la nuit) bascule entre les
+  deux ; le choix est retenu au-delà du rechargement de la page. Voir
+  [Mode round](#mode-round-echo-spot).
 - Aucune entité n'est requise : sans rien configurer, la carte reste une
   horloge plein écran sur fond dégradé.
 - Thème et tailles personnalisables via variables CSS, sans surcharge de
@@ -185,9 +187,12 @@ serait caché sous le boîtier sur un écran rond.
 ### Horloge analogique
 
 L'Echo Spot d'origine (sous Alexa, avant LineageOS/View Assist) affichait
-une horloge ronde à aiguilles. Un petit bouton discret (en bas du
-cadran, masqué la nuit comme le reste) permet de retrouver ce rendu en
-alternative au digital :
+une horloge ronde à aiguilles, plein écran, sur fond uni — pas de photo
+ni d'infos superposées. Un petit bouton discret (en bas du cadran,
+masqué la nuit comme le reste) permet de retrouver ce rendu en
+alternative au digital : c'est un véritable écran à part, pas juste une
+autre police d'horloge — pas de fond dynamique, pas de météo, pas de
+date, juste les aiguilles.
 
 | Digital | Analogique |
 |---|---|
@@ -196,6 +201,21 @@ alternative au digital :
 Le choix fait via ce bouton est retenu dans le navigateur (`localStorage`)
 au-delà d'un rechargement de page — `clock_face` dans la config ne sert
 que de valeur de départ, écrasée dès le premier tap sur le bouton.
+
+Le fond bleu par défaut se personnalise via `--echo-home-analog-background`
+(n'importe quelle valeur CSS `background`) :
+
+```yaml
+card_mod:
+  style: |
+    :host {
+      --echo-home-analog-background: #1a1a1a;
+    }
+```
+
+La nuit, ce fond n'est jamais utilisé — même en analogique, le mode nuit
+retombe sur son traitement habituel (fond quasi noir, peu de lumière
+émise).
 
 ![Aperçu du mode round à 480x480](docs/screenshot-round.png)
 

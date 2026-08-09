@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.2
+
+- Le mode analogique était jusque-là juste une autre présentation de
+  l'horloge, avec le fond photo/météo/date habituels autour — pas ce qui
+  était demandé. C'est maintenant un véritable écran à part, comme
+  l'Echo Spot d'origine sous Alexa : plus de photo de fond, plus de
+  météo, plus de date, juste les aiguilles sur un fond bleu uni
+  (dégradé radial, personnalisable via `--echo-home-analog-background`).
+  La nuit, ce fond bleu n'est jamais utilisé — retombe sur le
+  traitement nuit habituel (quasi noir), l'objectif de sobriété
+  lumineuse prime sur le style.
+- Les 12 graduations sont de nouveau toutes affichées (celles de midi/6h
+  avaient été omises en 1.1.1 pour éviter la météo/la date — devenu
+  inutile puisqu'elles ne s'affichent plus du tout en analogique).
+
 ## 1.1.1
 
 - Le cadran analogique de la 1.1.0 était un petit médaillon (~50% du
