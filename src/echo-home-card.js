@@ -841,6 +841,12 @@ class EchoHomeCard extends LitElement {
          inhabituellement étroit, une valeur purement basée sur la
          hauteur déborderait sur la colonne météo/date à gauche. */
       --_analog-landscape-size: min(80vh, 42vw);
+      /* Sensiblement plus petite que --_date-size (pensée pour le mode
+         digital, sous l'horloge géante) : à côté de la météo plutôt que
+         sous une horloge, --_date-size la ferait presque aussi grosse
+         que la température elle-même (--_weather-temp-size, quasi le
+         même facteur vh) — pas ce qu'on veut d'une info secondaire. */
+      --_analog-landscape-date-size: clamp(1.1rem, 8vh, 3rem);
       --_text-color: var(--echo-home-text-color, #ffffff);
       /* "red" tel quel par défaut (pas une teinte adoucie) : c'est
          volontairement discret/peu lumineux plutôt que joli — usage
@@ -1171,10 +1177,15 @@ class EchoHomeCard extends LitElement {
 
     /* Paysage : bloc météo/date centré sur le même axe horizontal que le
        centre du cadran (symétrique, au-dessus/en dessous), dans la
-       colonne de gauche — mêmes tailles que le bloc météo/la date du
-       mode digital (--_weather-icon-size etc.) : ici, ce n'est plus une
-       complication discrète mais l'info principale de ce côté de
-       l'écran. */
+       colonne de gauche — ici, ce n'est plus une complication discrète
+       mais l'info principale de ce côté de l'écran. Icône/température
+       reprennent la taille du bloc météo du mode digital
+       (--_weather-icon-size/--_weather-temp-size) ; la date a sa propre
+       taille (--_analog-landscape-date-size), plus petite, pour rester
+       secondaire par rapport à la météo au lieu de rivaliser avec elle
+       (--_date-size, pensée pour être lue sous l'horloge géante du
+       digital, est presque aussi grande que --_weather-temp-size — bien
+       trop pour une info secondaire une fois les deux côte à côte). */
     .card:not(.round) .analog-weather {
       left: 21%;
       top: 41%;
@@ -1191,7 +1202,7 @@ class EchoHomeCard extends LitElement {
       left: 21%;
       top: 58%;
       transform: translate(-50%, -50%);
-      font-size: var(--_date-size);
+      font-size: var(--_analog-landscape-date-size);
     }
 
     .analog-weather-icon {

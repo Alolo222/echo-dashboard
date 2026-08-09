@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.1
+
+- Corrigé : la date du cadran analogique en mode large rivalisait en
+  taille avec la température plutôt que de rester secondaire — les deux
+  utilisaient des tokens quasi identiques (`--_date-size` et
+  `--_weather-temp-size`, tous deux ~15vh), sans problème quand ils sont
+  loin l'un de l'autre (digital : date sous l'horloge géante, météo dans
+  un coin) mais visible dès qu'ils sont côte à côte dans la même
+  colonne. Nouveau token dédié `--_analog-landscape-date-size` (~8vh),
+  proportionné à la météo plutôt qu'à l'horloge digitale — même rapport
+  taille date/météo que dans les rendus présentés avant intégration
+  (~0,55).
+- Captures `docs/screenshot-landscape-analog.png` et
+  `docs/screenshot-landscape-analog-photo.png` régénérées.
+
 ## 1.3.0
 
 - **Horloge analogique en mode large (Echo Show)**, jusque-là round
