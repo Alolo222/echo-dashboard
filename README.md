@@ -145,12 +145,9 @@ icons:
                                  # (prime sur style si renseigné)
 
 # --- Apparence ---
-background: null                # override CSS `background` complet du mode
-                                 # DIGITAL (couleur unie, dégradé,
-                                 # transparent...) — prioritaire sur l'image
-                                 # dynamique du satellite. Sans effet en
-                                 # analogique (voir analog_background) : les
-                                 # deux présentations ont leur propre fond
+background: null                # fond du mode DIGITAL — voir "Arrière-plans"
+                                 # plus bas pour le détail (satellite, dossier
+                                 # local, web, uni/CSS)
 layout: null                    # null (paysage, Echo Show) ou "round"
                                  # (écran circulaire, Echo Spot 1ère gen 2017)
 clock_face: digital             # "digital" ou "analog" — disponible dans
@@ -165,23 +162,92 @@ analog_style: aurore            # habillage du cadran analogique : "aurore"
                                  # bas). Contrairement à clock_face, un seul
                                  # réglage YAML — pas de bouton pour en
                                  # changer à l'écran ni de mémorisation.
-                                 # Ignoré si analog_background_photo est actif
-analog_background: null         # override CSS `background` complet du mode
-                                 # ANALOGIQUE — sinon le dégradé par défaut
-                                 # d'analog_style. Pas de photo ici par
-                                 # défaut (voir analog_background_photo) ;
-                                 # comme background, sans effet la nuit
-analog_background_photo: false  # mode analogique EN MISE EN PAGE LARGE
-                                 # uniquement (sans effet en round) : fond
-                                 # dynamique du satellite (diaporama, comme
-                                 # `background` en digital) plutôt que le
-                                 # fond uni du style — qui est alors ignoré,
-                                 # les aiguilles repassent en blanc pour
-                                 # rester lisibles sur n'importe quelle photo
+                                 # Ignoré si analog_background a un type
+                                 # dynamique (voir "Arrière-plans")
+analog_background: null         # fond du mode ANALOGIQUE, indépendant de
+                                 # background — voir "Arrière-plans" plus bas
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
                                  # de rattrapage si le texte ne suit pas
                                  # correctement la taille de l'écran
 ```
+
+## Arrière-plans
+
+`background` (mode digital) et `analog_background` (mode analogique) —
+deux réglages indépendants, chaque présentation garde le sien — acceptent
+un objet `{type, ...}` précisant la source :
+
+| `type` | Rôle | Champs |
+|---|---|---|
+| `satellite` | Fond dynamique de `satellite_entity` (défaut en digital) — comme la vue View Assist d'origine | — |
+| `style` | Dégradé par défaut du style analogique choisi (défaut en analogique) | — |
+| `css` | N'importe quelle valeur CSS `background` (couleur unie, dégradé, transparent...) | `value` |
+| `url` | Une image web, ou plusieurs qui tournent en diaporama — indépendant de `satellite_entity` | `url` ou `urls`, `fit`, `interval` |
+| `media_folder` | Dossier d'images en local sur Home Assistant, parcouru automatiquement (Media Source) | `path`, `fit`, `interval` |
+
+```yaml
+# Une image fixe, hébergée ailleurs
+background:
+  type: url
+  url: https://example.com/photo.jpg
+
+# Plusieurs images qui tournent
+background:
+  type: url
+  urls:
+    - https://example.com/1.jpg
+    - https://example.com/2.jpg
+  fit: contain      # cover (défaut, remplit et rogne) / contain / fill (déforme)
+  interval: 600     # secondes entre deux images (défaut 300 = 5 min)
+
+# Dossier local (voir la section Media Source ci-dessous)
+analog_background:
+  type: media_folder
+  path: media-source://media_source/local/echo-photos
+  interval: 900
+
+# Couleur/dégradé personnalisé
+analog_background:
+  type: css
+  value: "#1a1a1a"
+```
+
+Une chaîne brute reste acceptée comme raccourci pour `type: css` (ex:
+`background: "#1a1a1a"`), pour rester compatible avec les configurations
+d'avant cette option.
+
+### Dossier local (`media_folder`)
+
+`path` doit être un chemin [Media
+Source](https://www.home-assistant.io/integrations/media_source/) HA —
+concrètement, un sous-dossier de `/config/media` (le dossier "Media"
+local intégré à HA), référencé sous la forme
+`media-source://media_source/local/<sous-dossier>`. La carte parcourt ce
+dossier via l'API Media Source à chaque changement de configuration (pas
+de récursion dans les sous-dossiers), garde les fichiers image, et les
+fait tourner comme `url` avec plusieurs `urls`. Ajouter ou retirer une
+photo dans le dossier suffit — pas besoin de retoucher la config.
+
+### Fond dynamique en mode round
+
+`analog_background` accepte les mêmes types qu'en mode large, à
+l'exception des types dynamiques (`satellite`/`url`/`media_folder`) :
+l'écran à part sur fond uni reproduit volontairement l'Echo Spot
+d'origine (voir "Horloge analogique" plus bas), donc jamais de photo
+là — un type dynamique configuré quand même retombe silencieusement
+(avec un avertissement en console) sur `style`.
+
+### Nuit et rétrocompatibilité
+
+À l'exception de `css` en digital (l'override manuel prime toujours,
+comme avant cette option), aucun type dynamique ne s'affiche la nuit —
+la sobriété nocturne prime sur le fond configuré, cf. [Mode
+nuit](#mode-nuit) plus bas.
+
+L'ancienne option `analog_background_photo: true` (introduite en 1.3.0)
+reste supportée, équivalente à `analog_background: { type: satellite }`
+— mais seulement si `analog_background` lui-même n'est pas défini (la
+forme objet, plus précise, prime toujours si les deux sont présents).
 
 ## Mode nuit
 
@@ -288,13 +354,13 @@ a la place, contrairement au mode round.
 ![Cadran analogique en mode large](docs/screenshot-landscape-analog.png)
 
 Par défaut, le fond reste uni (dégradé du style choisi, comme en round)
-— `analog_background_photo: true` bascule sur le fond dynamique du
-satellite (même mécanisme que `background` en digital, diaporama de
-`satellite_entity`) avec un voile pour la lisibilité, plutôt que le fond
-uni. `analog_style` est alors ignoré : les aiguilles/graduations
-repassent en blanc (comme `aurore`), pour rester lisibles sur n'importe
-quelle photo. Sans effet en mode round, où le fond uni sans photo
-reproduit volontairement l'Echo Spot d'origine.
+— `analog_background` avec un type dynamique (`satellite`, `url` ou
+`media_folder`, voir [Arrière-plans](#arrière-plans)) bascule sur une
+photo avec un voile pour la lisibilité, plutôt que le fond uni.
+`analog_style` est alors ignoré : les aiguilles/graduations repassent en
+blanc (comme `aurore`), pour rester lisibles sur n'importe quelle photo.
+Sans effet en mode round, où le fond uni sans photo reproduit
+volontairement l'Echo Spot d'origine.
 
 ![Cadran analogique avec fond diaporama](docs/screenshot-landscape-analog-photo.png)
 
@@ -304,7 +370,8 @@ satellite_entity: sensor.viewassist_salon
 weather_entity: weather.maison
 dashboard: dashboard-view-assist
 clock_face: analog
-analog_background_photo: true
+analog_background:
+  type: satellite
 ```
 
 ## Taille du texte

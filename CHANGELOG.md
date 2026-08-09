@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.4.0
+
+- **Types d'arrière-plan précis**, pour `background` (digital) et
+  `analog_background` (analogique, toujours indépendant de `background`)
+  — chacun un objet `{type, ...}` plutôt qu'une simple chaîne CSS :
+  - `satellite` (défaut en digital) et `style` (défaut en analogique) :
+    comportement déjà existant, inchangés.
+  - `css` : n'importe quelle valeur CSS `background` — une chaîne brute
+    (`background: "#1a1a1a"`) reste acceptée comme raccourci équivalent,
+    aucune config existante à retoucher.
+  - `url` : une image web fixe, ou plusieurs qui tournent en diaporama
+    (`urls` + `interval`), indépendant de `satellite_entity` — jusqu'ici
+    seule une chaîne CSS ou le fond dynamique du satellite étaient
+    possibles, pas d'image web personnalisée.
+  - `media_folder` : dossier d'images en local sur HA, parcouru
+    automatiquement via l'API Media Source (`media_source/browse_media`
+    + `resolve_media`, résolution à la volée à chaque image plutôt qu'à
+    l'avance — certains fournisseurs Media Source renvoient des URLs
+    signées à durée de vie limitée). Ajouter/retirer une photo dans le
+    dossier suffit, pas besoin de retoucher la config.
+  - `fit` (`cover`/`contain`/`fill`) pour `url` et `media_folder`.
+  - Nouveau module `src/background.js` (`BackgroundSource`, une instance
+    par présentation) : pilote résolution et rotation en tâche de fond,
+    `configure()` peut être appelée à chaque rendu sans effet de bord
+    (ne relance le travail que si la source demandée a changé depuis le
+    dernier appel).
+- `analog_background_photo: true` (1.3.0) reste supporté tel quel,
+  équivalent à `analog_background: { type: satellite }` — mais seulement
+  si `analog_background` lui-même n'est pas défini.
+- Jamais de type dynamique (`satellite`/`url`/`media_folder`) en mode
+  round pour `analog_background` : repli silencieux (avec avertissement
+  console) sur `style` — principe déjà établi pour
+  `analog_background_photo`, maintenant garanti à la validation plutôt
+  qu'au rendu.
+- Corrigé en cours de route : la première mesure d'un dossier Media
+  Source à durée de vie limitée introuvable/vide ne devait pas planter
+  le rendu — testé explicitement (dossier inexistant mocké), avertit et
+  retombe sur le fond par défaut plutôt que de casser la carte.
+- Vérifié par Playwright (`hass.callWS` mocké pour simuler l'API Media
+  Source) : parcours + résolution d'un dossier, rotation `url`/
+  `media_folder` (changement effectif après l'intervalle configuré),
+  filtrage des sous-dossiers/fichiers non-image, dossier introuvable,
+  type invalide, les trois modes de cadrage, rétrocompatibilité
+  (chaîne CSS brute, booléen `analog_background_photo`), et non-
+  régression complète du reste de la carte.
+
 ## 1.3.1
 
 - Corrigé : la date du cadran analogique en mode large rivalisait en

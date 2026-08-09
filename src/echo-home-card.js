@@ -3,6 +3,11 @@ import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import { formatShortDate, formatTime, localizeCondition } from "./format.js";
 import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE } from "./analog-styles.js";
+import {
+  BackgroundSource,
+  normalizeBackgroundConfig,
+  validateBackgroundConfig,
+} from "./background.js";
 
 // Choix digital/analogique retenu au-delà du rechargement de page — un
 // device (Echo Spot) ne montre en pratique qu'une seule instance de la
@@ -32,6 +37,19 @@ class EchoHomeCard extends LitElement {
     _config: { state: true },
     _clockFace: { state: true },
   };
+
+  // Une source par présentation (digital/analogique), chacune avec son
+  // propre réglage indépendant (background/analog_background, cf.
+  // const.js) — cf. src/background.js. onChange redéclenche un rendu
+  // Lit quand une résolution/rotation asynchrone (dossier Media Source,
+  // plusieurs URLs) change la valeur CSS courante ; render() n'attend
+  // jamais cette résolution, il lit juste le dernier résultat connu
+  // (`.cssValue`, synchrone).
+  constructor() {
+    super();
+    this._digitalBackground = new BackgroundSource(() => this.requestUpdate());
+    this._analogBackground = new BackgroundSource(() => this.requestUpdate());
+  }
 
   // Aucune entité n'est requise : sans rien configurer, la carte reste une
   // horloge plein écran sur fond dégradé — satellite_entity et
@@ -111,6 +129,51 @@ class EchoHomeCard extends LitElement {
         "[echo-home-card] \"dashboard\" est configuré mais ni \"navigate_device\" ni \"satellite_entity\" ne fournissent d'id à passer au service view_assist.navigate — le bloc météo ne sera pas cliquable."
       );
     }
+
+    // background/analog_background acceptent trois formes historiques
+    // (chaîne CSS, null, et pour analog_background_photo un booléen) en
+    // plus de la forme objet {type, ...} — normalizeBackgroundConfig les
+    // ramène toutes à cette dernière une fois pour toutes ici, le reste
+    // du composant (cf. render(), src/background.js) ne connaît que la
+    // forme objet. Message plus générique que `warn` ci-dessus (pas de
+    // valeur brute à afficher pour un champ imbriqué comme
+    // "background.fit").
+    const warnBg = (key, fallback) =>
+      console.warn(
+        `[echo-home-card] "${key}" invalide, valeur par défaut utilisée (${JSON.stringify(fallback)})`
+      );
+    merged.background = validateBackgroundConfig(
+      normalizeBackgroundConfig(merged.background, false, "satellite"),
+      ["satellite", "css", "url", "media_folder"],
+      "satellite",
+      "background",
+      warnBg
+    );
+    let analogBackground = validateBackgroundConfig(
+      normalizeBackgroundConfig(
+        merged.analog_background,
+        merged.analog_background_photo,
+        "style"
+      ),
+      ["style", "satellite", "css", "url", "media_folder"],
+      "style",
+      "analog_background",
+      warnBg
+    );
+    // Jamais de fond dynamique/photo en mode round, quel que soit
+    // analog_background : l'écran à part sur fond uni reproduit
+    // volontairement l'Echo Spot d'origine (cf. Horloge analogique,
+    // README), un principe plus ancien que cette option et pas remis en
+    // cause par elle.
+    if (
+      merged.layout === "round" &&
+      ["satellite", "url", "media_folder"].includes(analogBackground.type)
+    ) {
+      warnBg("analog_background.type", "style");
+      analogBackground = { type: "style" };
+    }
+    merged.analog_background = analogBackground;
+
     return merged;
   }
 
@@ -150,6 +213,8 @@ class EchoHomeCard extends LitElement {
     super.disconnectedCallback();
     clearInterval(this._clockTimer);
     this._resizeObserver?.disconnect();
+    this._digitalBackground.destroy();
+    this._analogBackground.destroy();
   }
 
   updated(changedProperties) {
@@ -261,19 +326,6 @@ class EchoHomeCard extends LitElement {
     return satelliteState?.attributes?.mode === "night";
   }
 
-  // Résout la valeur CSS `background` de la carte : l'option `background`
-  // prime toujours (override manuel, ex: couleur unie ou transparent),
-  // puis l'image dynamique fournie par l'attribut `background` du
-  // satellite, sinon le dégradé par défaut défini en CSS. En mode nuit,
-  // aucune image : la carte reste unie (peu de lumière émise, pas de
-  // fond chargé pour rien puisqu'invisible).
-  _backgroundValue(satelliteState, isNightMode) {
-    if (this._config.background != null) return this._config.background;
-    if (isNightMode) return null;
-    const url = satelliteState?.attributes?.background;
-    return url ? `center / cover no-repeat url("${url}")` : null;
-  }
-
   _cardStyle(backgroundValue, extra) {
     const parts = [];
     if (backgroundValue != null) parts.push(`background:${backgroundValue}`);
@@ -336,16 +388,35 @@ class EchoHomeCard extends LitElement {
     // _renderAnalogComplications et static styles), plutôt que la grosse
     // horloge digitale.
     const showAnalog = this._clockFace === "analog";
-    // Fond photo en analogique paysage uniquement (analog_background_photo)
-    // : jamais en round, où l'écran à part sur fond uni reproduit
-    // volontairement l'Echo Spot d'origine (cf. Horloge analogique,
-    // README) — un principe de longue date, pas remis en cause par cette
-    // option. Le style choisi (analog_style) est ignoré tant que cette
-    // option est active : ses couleurs ne sont pas garanties lisibles sur
-    // une photo quelconque, donc on retombe sur le blanc du style par
-    // défaut (aurore) comme sur le mode digital.
+
+    // Sources d'arrière-plan (une par présentation, cf. src/background.js
+    // et le constructeur) — configure() ne relance le travail (parcours
+    // Media Source, minuteur de rotation) que si la source demandée a
+    // changé depuis le dernier appel, donc appeler ça à chaque rendu ne
+    // coûte rien la plupart du temps.
+    const bgContext = {
+      isNightMode,
+      satelliteBackgroundUrl: satelliteState?.attributes?.background,
+    };
+    this._digitalBackground.configure(this._hass, cfg.background, bgContext);
+    this._analogBackground.configure(this._hass, cfg.analog_background, bgContext);
+
+    // Fond dynamique/photo en analogique paysage uniquement (type
+    // satellite/url/media_folder de analog_background) : jamais en
+    // round, où l'écran à part sur fond uni reproduit volontairement
+    // l'Echo Spot d'origine (cf. Horloge analogique, README) — un
+    // principe de longue date, pas remis en cause par cette option (et
+    // déjà exclu à la validation, cf. _validateConfig, donc le check
+    // isRound ici est une redondance défensive plutôt qu'un vrai
+    // second filtre). Le style choisi (analog_style) est ignoré tant
+    // qu'un fond dynamique est actif : ses couleurs ne sont pas
+    // garanties lisibles sur une photo quelconque, donc on retombe sur
+    // le blanc du style par défaut (aurore) comme sur le mode digital.
     const usePhotoBackground =
-      showAnalog && !isRound && !isNightMode && cfg.analog_background_photo;
+      showAnalog &&
+      !isRound &&
+      !isNightMode &&
+      ["satellite", "url", "media_folder"].includes(cfg.analog_background.type);
     // La météo n'a pas sa place la nuit : c'est justement ce que le mode
     // nuit cherche à éviter (lumière/information superflue sur un écran
     // de chevet). Entité absente/indisponible => bloc simplement absent,
@@ -365,30 +436,41 @@ class EchoHomeCard extends LitElement {
     // Pas de fond dynamique/dégradé habituel en analogique de jour : la
     // couleur unie vient de la règle CSS .card.analog (cf. static
     // styles) — un style à part, pas une variation du digital. Exception
-    // en paysage avec analog_background_photo (cf. plus haut), qui
-    // retombe sur le même fond dynamique que le digital. La nuit, on
-    // retombe sur le traitement nuit habituel (fond masqué) malgré tout,
-    // cf. :host(.night) .card.analog qui reprend le dessus.
-    const backgroundValue =
-      showAnalog && !isNightMode && !usePhotoBackground
-        ? null
-        : this._backgroundValue(satelliteState, isNightMode);
+    // avec un fond dynamique actif (usePhotoBackground), qui passe alors
+    // directement en `background` inline plutôt que par la variable CSS
+    // --_analog-default-bg (cf. plus bas) — même mécanisme que le mode
+    // digital. La nuit, toujours null ici : usePhotoBackground est déjà
+    // à false (cf. plus haut), et le type "css" (qui prime habituellement
+    // sur tout, cf. --_analog-default-bg) n'est volontairement pas une
+    // exception pour l'analogique — la sobriété nocturne prime sur tout
+    // fond personnalisé, cf. :host(.night) .card.analog qui reprend le
+    // dessus dans tous les cas.
+    const backgroundValue = showAnalog
+      ? usePhotoBackground
+        ? this._analogBackground.cssValue
+        : null
+      : this._digitalBackground.cssValue;
     // Le fond par défaut du cadran analogique vient de `analog_background`
-    // si renseigné, sinon du style choisi (cf. analog-styles.js) — passé
-    // en variable CSS plutôt qu'en `background` direct pour que
-    // --echo-home-analog-background (CSS, cf. README) garde la priorité
-    // sur les deux si l'utilisateur la personnalise via card_mod.
-    // Indépendant de `background` (mode digital uniquement, cf. const.js)
-    // : les deux présentations ont leur propre fond.
+    // si renseigné (type "css"), sinon du style choisi (cf.
+    // analog-styles.js) — passé en variable CSS plutôt qu'en
+    // `background` direct pour que --echo-home-analog-background (CSS,
+    // cf. README) garde la priorité sur les deux si l'utilisateur la
+    // personnalise via card_mod. Indépendant de `background` (mode
+    // digital uniquement, cf. const.js) : les deux présentations ont
+    // leur propre fond.
     const analogStyle = showAnalog
       ? usePhotoBackground
         ? ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
         : ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
       : null;
+    const analogDefaultBg =
+      cfg.analog_background.type === "css"
+        ? cfg.analog_background.value
+        : analogStyle?.background;
     const cardStyle = this._cardStyle(
       backgroundValue,
       analogStyle && !usePhotoBackground
-        ? `--_analog-default-bg:${cfg.analog_background ?? analogStyle.background}`
+        ? `--_analog-default-bg:${analogDefaultBg}`
         : null
     );
     // L'aiguille des secondes tourne en continu via une animation CSS
