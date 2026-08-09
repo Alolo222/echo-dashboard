@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.5
+
+- Espace horloge→date désormais égal à l'espace date→bas d'écran (18px
+  de chaque côté sur 960x480, vérifié par mesure exacte) — la date
+  était trop basse par rapport à l'horloge. Calculé via `--_clock-size`
+  et `--_date-size` plutôt qu'une valeur fixe, donc correct aussi en
+  mode round.
+- Bloc météo davantage en retrait du coin haut-gauche (paysage) / du
+  bord haut (round).
+
 ## 1.0.4
 
 - La 1.0.3 centrait le *groupe* horloge+date (flex column), pas

@@ -48,7 +48,7 @@ const ye = (r) => new ue(typeof r == "string" ? r : r + "", void 0, F), be = (r,
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Ae, defineProperty: Ee, getOwnPropertyDescriptor: xe, getOwnPropertyNames: Se, getOwnPropertySymbols: ke, getPrototypeOf: Ce } = Object, f = globalThis, G = f.trustedTypes, ze = G ? G.emptyScript : "", D = f.reactiveElementPolyfillSupport, S = (r, e) => r, W = { toAttribute(r, e) {
+const { is: Ae, defineProperty: Ee, getOwnPropertyDescriptor: xe, getOwnPropertyNames: Se, getOwnPropertySymbols: Ce, getPrototypeOf: ke } = Object, f = globalThis, G = f.trustedTypes, ze = G ? G.emptyScript : "", D = f.reactiveElementPolyfillSupport, S = (r, e) => r, W = { toAttribute(r, e) {
   switch (e) {
     case Boolean:
       r = r ? ze : null;
@@ -111,13 +111,13 @@ let w = class extends HTMLElement {
   }
   static _$Ei() {
     if (this.hasOwnProperty(S("elementProperties"))) return;
-    const e = Ce(this);
+    const e = ke(this);
     e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
   }
   static finalize() {
     if (this.hasOwnProperty(S("finalized"))) return;
     if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(S("properties"))) {
-      const t = this.properties, s = [...Se(t), ...ke(t)];
+      const t = this.properties, s = [...Se(t), ...Ce(t)];
       for (const i of s) this.createProperty(i, t[i]);
     }
     const e = this[Symbol.metadata];
@@ -294,7 +294,7 @@ w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[S("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const k = globalThis, Q = (r) => r, M = k.trustedTypes, Y = M ? M.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", I = `[ 	
+const C = globalThis, Q = (r) => r, M = C.trustedTypes, Y = M ? M.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", I = `[ 	
 \f\r]`, x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ee = /-->/g, te = />/g, $ = RegExp(`>|${I}(?:([^\\s"'>=/]+)(${I}*=${I}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), se = /'/g, ie = /"/g, me = /^(?:script|style|textarea|title)$/i, Te = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), N = Te(1), A = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), re = /* @__PURE__ */ new WeakMap(), g = y.createTreeWalker(y, 129);
 function fe(r, e) {
@@ -517,9 +517,9 @@ class qe {
     E(this, e);
   }
 }
-const j = k.litHtmlPolyfillSupport;
+const L = C.litHtmlPolyfillSupport;
 var le;
-j == null || j(U, T), ((le = k.litHtmlVersions) != null ? le : k.litHtmlVersions = []).push("3.3.3");
+L == null || L(U, T), ((le = C.litHtmlVersions) != null ? le : C.litHtmlVersions = []).push("3.3.3");
 const De = (r, e, t) => {
   var n, o;
   const s = (n = t == null ? void 0 : t.renderBefore) != null ? n : e;
@@ -536,7 +536,7 @@ const De = (r, e, t) => {
  * SPDX-License-Identifier: BSD-3-Clause
  */
 const v = globalThis;
-class C extends w {
+class k extends w {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -562,9 +562,9 @@ class C extends w {
   }
 }
 var ce;
-C._$litElement$ = !0, C.finalized = !0, (ce = v.litElementHydrateSupport) == null || ce.call(v, { LitElement: C });
-const L = v.litElementPolyfillSupport;
-L == null || L({ LitElement: C });
+k._$litElement$ = !0, k.finalized = !0, (ce = v.litElementHydrateSupport) == null || ce.call(v, { LitElement: k });
+const j = v.litElementPolyfillSupport;
+j == null || j({ LitElement: k });
 var he;
 ((he = v.litElementVersions) != null ? he : v.litElementVersions = []).push("4.2.2");
 const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg", b = {
@@ -614,7 +614,7 @@ const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   zoom: 1
   // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
-}, je = {
+}, Le = {
   "clear-night": "clear-night",
   cloudy: "cloudy",
   exceptional: "not-available",
@@ -630,8 +630,8 @@ const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   windy: "wind",
   "windy-variant": "wind"
 };
-function Le(r, e) {
-  return r === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : r === "sunny" && e ? "clear-night" : je[r] || "not-available";
+function je(r, e) {
+  return r === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : r === "sunny" && e ? "clear-night" : Le[r] || "not-available";
 }
 function We(r, e) {
   if (e != null && e.base_url)
@@ -659,7 +659,7 @@ function Fe(r, e) {
     `component.weather.entity_component._.state.${e}`
   ) || e;
 }
-class V extends C {
+class V extends k {
   // Aucune entité n'est requise : sans rien configurer, la carte reste une
   // horloge plein écran sur fond dégradé — satellite_entity et
   // weather_entity ajoutent respectivement le fond dynamique/mode nuit et
@@ -773,7 +773,7 @@ class V extends C {
     `;
   }
   _renderWeather(e) {
-    const t = Le(e.state, this._isDarkOutside()), s = We(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), n = e.attributes.temperature_unit || "°C", o = Fe(this._hass, e.state), l = this._weatherClickable();
+    const t = je(e.state, this._isDarkOutside()), s = We(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), n = e.attributes.temperature_unit || "°C", o = Fe(this._hass, e.state), l = this._weatherClickable();
     return N`
       <div
         class="weather ${l ? "clickable" : ""}"
@@ -912,16 +912,22 @@ q(V, "properties", {
 
     .date {
       position: absolute;
-      top: 50%;
+      /* Calée pour que l'espace horloge→date soit égal à l'espace
+         date→bas d'écran, quelle que soit la taille de l'horloge/date
+         (donc correct aussi en mode round où elles sont redéfinies).
+         Avec H la hauteur de la carte (100%, d'où le calc en % — top
+         est relatif au conteneur, contrairement à transform), C
+         --_clock-size et D --_date-size : le bas de l'horloge est à
+         H/2 + C/2, on veut top_date + D + gap = H avec
+         top_date = H/2 + C/2 + gap, ce qui donne
+         top_date = 3H/4 + C/4 - D/2. */
+      top: calc(75% + var(--_clock-size) / 4 - var(--_date-size) / 2);
       left: 50%;
-      /* line-height: 1 est nécessaire ici, pas que par cohérence avec
-         .clock : le line-height par défaut du navigateur (~1.2) ajoutait
-         un espace vide sous le texte assez grand pour pousser la date
-         hors de l'écran (repéré par mesure exacte du rendu, pas à l'œil
-         — le débordement se clippe silencieusement via overflow:hidden
-         sur .card, sans erreur visible). */
+      transform: translateX(-50%);
+      /* line-height: 1 : le line-height par défaut du navigateur (~1.2)
+         fausserait le calcul ci-dessus (basé sur --_date-size comme
+         hauteur réelle de la boîte). */
       line-height: 1;
-      transform: translate(-50%, calc(var(--_clock-size) * 0.5 + 0.3em));
       font-size: var(--_date-size);
       color: var(--_text-color);
       opacity: 0.85;
@@ -930,8 +936,8 @@ q(V, "properties", {
 
     .weather {
       position: absolute;
-      top: clamp(12px, 4vh, 28px);
-      left: clamp(12px, 5%, 32px);
+      top: clamp(20px, 6vh, 40px);
+      left: clamp(20px, 7%, 44px);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -943,7 +949,7 @@ q(V, "properties", {
        en haut à la place. */
     .card.round .weather {
       left: 50%;
-      top: clamp(28px, 15%, 56px);
+      top: clamp(36px, 18%, 64px);
       transform: translateX(-50%);
     }
 

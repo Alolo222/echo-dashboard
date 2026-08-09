@@ -364,16 +364,22 @@ class EchoHomeCard extends LitElement {
 
     .date {
       position: absolute;
-      top: 50%;
+      /* Calée pour que l'espace horloge→date soit égal à l'espace
+         date→bas d'écran, quelle que soit la taille de l'horloge/date
+         (donc correct aussi en mode round où elles sont redéfinies).
+         Avec H la hauteur de la carte (100%, d'où le calc en % — top
+         est relatif au conteneur, contrairement à transform), C
+         --_clock-size et D --_date-size : le bas de l'horloge est à
+         H/2 + C/2, on veut top_date + D + gap = H avec
+         top_date = H/2 + C/2 + gap, ce qui donne
+         top_date = 3H/4 + C/4 - D/2. */
+      top: calc(75% + var(--_clock-size) / 4 - var(--_date-size) / 2);
       left: 50%;
-      /* line-height: 1 est nécessaire ici, pas que par cohérence avec
-         .clock : le line-height par défaut du navigateur (~1.2) ajoutait
-         un espace vide sous le texte assez grand pour pousser la date
-         hors de l'écran (repéré par mesure exacte du rendu, pas à l'œil
-         — le débordement se clippe silencieusement via overflow:hidden
-         sur .card, sans erreur visible). */
+      transform: translateX(-50%);
+      /* line-height: 1 : le line-height par défaut du navigateur (~1.2)
+         fausserait le calcul ci-dessus (basé sur --_date-size comme
+         hauteur réelle de la boîte). */
       line-height: 1;
-      transform: translate(-50%, calc(var(--_clock-size) * 0.5 + 0.3em));
       font-size: var(--_date-size);
       color: var(--_text-color);
       opacity: 0.85;
@@ -382,8 +388,8 @@ class EchoHomeCard extends LitElement {
 
     .weather {
       position: absolute;
-      top: clamp(12px, 4vh, 28px);
-      left: clamp(12px, 5%, 32px);
+      top: clamp(20px, 6vh, 40px);
+      left: clamp(20px, 7%, 44px);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -395,7 +401,7 @@ class EchoHomeCard extends LitElement {
        en haut à la place. */
     .card.round .weather {
       left: 50%;
-      top: clamp(28px, 15%, 56px);
+      top: clamp(36px, 18%, 64px);
       transform: translateX(-50%);
     }
 
