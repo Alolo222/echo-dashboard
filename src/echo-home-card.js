@@ -453,10 +453,10 @@ class EchoHomeCard extends LitElement {
        overrides directs de .clock/.date/...) pour que le calc() du
        décalage de la date (cf. .date ci-dessus) reste juste ici aussi. */
     .card.round {
-      --_clock-size: clamp(3.6rem, 48vmin, 11rem);
-      --_date-size: clamp(1.4rem, 12vmin, 3.2rem);
-      --_weather-icon-size: clamp(36px, 13vmin, 72px);
-      --_weather-temp-size: clamp(1.4rem, 12vmin, 2.8rem);
+      --_clock-size: clamp(4rem, 50vmin, 13rem);
+      --_date-size: clamp(1.6rem, 13vmin, 3.6rem);
+      --_weather-icon-size: clamp(40px, 14vmin, 84px);
+      --_weather-temp-size: clamp(1.6rem, 13vmin, 3.2rem);
     }
   `;
 }

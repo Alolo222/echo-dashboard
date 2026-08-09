@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.10
+
+- Capture `docs/screenshot-round.png` de la 1.0.9 livrée par erreur avec
+  la règle de mesure en pixels encore visible dessus (script de nettoyage
+  qui n'a pas retiré l'overlay) — régénérée proprement.
+- Polices du mode round agrandies (Echo Spot : écran plus petit,
+  bénéficie de tailles plus généreuses) : horloge ~176px→208px, date
+  ~51px→58px, icône météo ~62px→67px, température météo ~45px→51px sur
+  un écran 480x480. Repositionnement de la date (1.0.9) toujours correct
+  après coup (vérifié) puisque basé sur des coefficients relatifs, pas
+  des valeurs fixes.
+
 ## 1.0.9
 
 - Mode round : position de la date revue spécifiquement pour l'écran
