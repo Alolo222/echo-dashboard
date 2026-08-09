@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.4
+
+- Corrigé : l'heure et la date changeaient de taille visible selon le
+  nombre de chiffres affichés — signalé par l'utilisateur, confirmé par
+  mesure : en mode round/24h, "9:41" (un chiffre à l'heure) s'affichait à
+  pleine taille (échelle 1, cf. filet anti-débordement de la 1.2.3) alors
+  que "23:59" (deux chiffres) était réduite (échelle ~0.8) — un
+  changement de taille visible au passage de 9h à 10h, puis retour à la
+  normale à minuit. La taille se base maintenant sur un texte "pire cas"
+  fixe (heure et jour à deux chiffres, jamais affiché réellement) plutôt
+  que sur l'heure/la date du moment : l'échelle ne dépend donc plus de
+  quels chiffres sont affichés, seulement du format/de la langue/de la
+  mise en page. Vérifié par mesure de la hauteur réellement rendue :
+  identique pour une heure à un et à deux chiffres (166px en round/24h,
+  212px en large/12h, 58px pour la date au 3 comme au 27 du mois).
+- Corrigé en cours de route : la première implémentation mesurait en
+  écrivant temporairement le texte pire-cas dans `.clock`/`.date`
+  elles-mêmes avant de restaurer le texte réel — invisible à l'écran
+  (échange synchrone) mais casse le suivi interne de Lit sur le nœud
+  texte qu'il gère pour sa liaison `${...}` (`el.textContent =` le
+  remplace par un nouveau nœud à chaque fois), provoquant une erreur au
+  rendu suivant (`Cannot set properties of null`). Mesuré sur un clone
+  détaché à la place — non suivi par Lit, rien à casser.
+
 ## 1.2.3
 
 - **`analog_background`** : nouvelle option pour régler le fond du mode

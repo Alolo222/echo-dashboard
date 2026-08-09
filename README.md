@@ -297,9 +297,13 @@ Ce calcul se base sur la hauteur disponible (`vh`/`vmin`), pas sur le
 contenu réel de l'heure/la date — une heure à deux chiffres ("23:59"),
 un format 12h (qui ajoute "AM"/"PM") ou une abréviation de date plus
 longue dans certaines langues prennent plus de place qu'une heure à un
-chiffre. L'heure et la date se réduisent donc automatiquement (mesuré à
-l'affichage, pas deviné à l'avance) si leur taille normale déborderait
-de l'écran — sans jamais rétrécir inutilement le cas courant.
+chiffre. L'heure et la date se réduisent donc automatiquement si leur
+taille normale déborderait de l'écran, mesuré sur un texte "pire cas"
+(heure et jour à deux chiffres) plutôt que sur l'heure/la date
+réellement affichées à cet instant — sinon la taille changerait
+visiblement selon le nombre de chiffres à l'écran (par exemple entre
+9h59 et 10h00). Une heure à un chiffre et à deux chiffres s'affichent
+donc toujours à la même taille.
 
 ## Polices
 

@@ -10,6 +10,16 @@ import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE } from "./analog-styles.js";
 // entité/config).
 const CLOCK_FACE_STORAGE_KEY = "echo-home-card-clock-face";
 
+// Repère "pire cas" pour la largeur de l'heure/la date (cf.
+// _fitOverflowingText) — jamais utilisé pour l'affichage réel. Heure et
+// jour à deux chiffres : 27/01/2000 12:59. 12 convient aux deux formats
+// (rendu "12" aussi bien en 12h qu'en 24h, contrairement à un jour comme
+// le 1er qui ne couvrirait que le cas à un chiffre) ; 27 couvre le jour
+// du mois à deux chiffres, la principale source de variation de largeur
+// de la date (l'abréviation du jour/du mois varie aussi selon la
+// langue, mais dans une bien moindre mesure qu'un chiffre en plus).
+const CLOCK_FIT_PROBE_DATE = new Date(2000, 0, 27, 12, 59);
+
 // Réplique en vraie carte Lit de l'écran d'accueil (horloge + météo
 // compacte) fourni par le template View Assist par défaut (button-card
 // "variable_template" + "responsive_base" + "body_template"), version
@@ -158,27 +168,61 @@ class EchoHomeCard extends LitElement {
   // sur un disque de 480px), et "11:59PM" en 12h déborde même en mode
   // large (1098px sur 960px).
   //
+  // Mesuré sur un texte "pire cas" fixe (CLOCK_FIT_PROBE_DATE), jamais
+  // sur l'heure/la date réellement affichées : mesurer le contenu réel
+  // donnerait une échelle différente selon qu'il s'affiche "9:41" (tient
+  // sans réduire) ou "23:59" (déborde, donc réduit) — la taille de la
+  // police changerait alors visiblement au passage de 9h à 10h, puis
+  // reviendrait à la normale à minuit. En se calant toujours sur le pire
+  // cas, l'échelle ne dépend plus de l'heure du moment : une heure à un
+  // chiffre et une heure à deux chiffres s'affichent à l'identique.
+  //
   // Plutôt que deviner une largeur "sûre" par format/langue/mise en page
   // (quatre combinaisons à recalibrer à la main, et jamais garanti pour
-  // une langue non testée), on mesure le rendu réel de chaque élément et
-  // on le réduit seulement s'il dépasse — `scrollWidth` reflète toujours
-  // la largeur intrinsèque du contenu, `transform: scale()` (posé via
-  // --_fit-scale, cf. static styles) n'affecte que le rendu visuel, pas
-  // la mesure, donc pas besoin de réinitialiser avant de mesurer. Coût
-  // négligeable : quelques lectures de layout, au pire toutes les 30s
-  // (tick d'horloge) ou au redimensionnement, jamais par frame.
+  // une langue non testée), on mesure le rendu réel du pire cas et on
+  // réduit seulement s'il dépasse — `scrollWidth` reflète la largeur
+  // intrinsèque du contenu, `transform: scale()` (posé via --_fit-scale,
+  // cf. static styles) n'affecte que le rendu visuel, pas la mesure.
+  //
+  // Mesuré sur un clone détaché plutôt qu'en écrivant temporairement le
+  // texte pire-cas dans .clock/.date elles-mêmes puis en le restaurant :
+  // Lit garde une référence interne vers le nœud texte qu'il a créé pour
+  // sa liaison `${...}` ; passer par `el.textContent = ...` en remplace
+  // le contenu par un *nouveau* nœud texte à chaque fois (comportement
+  // du setter DOM), ce qui rend cette référence obsolète — la prochaine
+  // mise à jour de Lit plante alors (`Cannot set properties of null
+  // (setting 'data')`, vu en testant ce changement). Un clone n'est pas
+  // suivi par Lit, donc rien à casser. Coût négligeable : un clone + une
+  // lecture de layout par élément, au pire toutes les 30s (tick
+  // d'horloge) ou au redimensionnement — jamais par frame.
   _fitOverflowingText() {
     const root = this.shadowRoot;
     const card = root?.querySelector(".card");
-    if (!card) return;
+    const cfg = this._config;
+    if (!card || !cfg) return;
+    const locale = cfg.language || this._hass?.locale?.language || "en";
+    const timeFormat =
+      cfg.time_format || this._hass?.locale?.time_format || "24";
     // 92% plutôt que 100% : une petite marge, le texte ne doit pas
     // toucher pile le bord (clippé net par `.card { overflow:hidden }`
     // sinon, ou par la courbe du cercle en mode round).
     const available = card.getBoundingClientRect().width * 0.92;
-    for (const selector of [".clock", ".date"]) {
+    const probes = {
+      ".clock": formatTime(CLOCK_FIT_PROBE_DATE, locale, timeFormat),
+      ".date": formatShortDate(CLOCK_FIT_PROBE_DATE, locale),
+    };
+    for (const [selector, probeText] of Object.entries(probes)) {
       const el = root.querySelector(selector);
       if (!el) continue;
-      const needed = el.scrollWidth;
+      const clone = el.cloneNode(false);
+      clone.textContent = probeText;
+      clone.style.position = "absolute";
+      clone.style.visibility = "hidden";
+      clone.style.left = "-9999px";
+      clone.style.removeProperty("--_fit-scale"); // mesure à l'échelle 1, pas celle d'un cycle précédent
+      el.parentNode.appendChild(clone);
+      const needed = clone.scrollWidth;
+      clone.remove();
       const scale = needed > available ? available / needed : 1;
       el.style.setProperty("--_fit-scale", scale);
     }
