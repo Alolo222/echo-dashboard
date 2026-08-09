@@ -50,6 +50,11 @@ export const DEFAULT_CONFIG = {
   // juste de valeur de départ : le petit bouton affiché en mode round
   // bascule l'affichage et retient le choix (localStorage) au-delà de
   // cette valeur de config.
+  analog_style: "aurore", // habillage du cadran analogique — "aurore"
+  // (défaut, dégradé turquoise/bleu/violet), "mono", "clair", "neon" ou
+  // "ardoise" (cf. src/analog-styles.js). Contrairement à clock_face, ce
+  // n'est qu'un réglage YAML : pas de bouton pour en changer à l'écran,
+  // pas de mémorisation localStorage — un seul style choisi une fois.
   zoom: 1, // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
 };

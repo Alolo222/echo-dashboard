@@ -157,6 +157,12 @@ clock_face: digital             # "digital" ou "analog" — mode round
                                  # le choix de l'utilisateur au-delà (voir
                                  # "Mode round" plus bas), qui prime sur
                                  # cette option une fois qu'il a tapé dessus
+analog_style: aurore            # habillage du cadran analogique : "aurore"
+                                 # (défaut), "mono", "clair", "neon" ou
+                                 # "ardoise" (voir "Horloge analogique" plus
+                                 # bas). Contrairement à clock_face, un seul
+                                 # réglage YAML — pas de bouton pour en
+                                 # changer à l'écran ni de mémorisation
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
                                  # de rattrapage si le texte ne suit pas
                                  # correctement la taille de l'écran
@@ -194,7 +200,8 @@ alternative au digital : c'est un véritable écran à part, pas juste une
 autre police d'horloge — pas de fond dynamique, pas de météo, pas de
 date, juste les aiguilles (heure, minute et seconde — celle-ci avance en
 continu via une animation CSS, pas un recalcul JS chaque seconde, plus
-léger sur du matériel modeste) et des chiffres à 12/3/6/9.
+léger sur du matériel modeste) et, selon le style choisi, quelques
+graduations ou chiffres.
 
 | Digital | Analogique |
 |---|---|
@@ -204,8 +211,22 @@ Le choix fait via ce bouton est retenu dans le navigateur (`localStorage`)
 au-delà d'un rechargement de page — `clock_face` dans la config ne sert
 que de valeur de départ, écrasée dès le premier tap sur le bouton.
 
-Le fond bleu par défaut se personnalise via `--echo-home-analog-background`
-(n'importe quelle valeur CSS `background`) :
+Cinq habillages du cadran lui-même, choisis via `analog_style` dans la
+config (pas de bouton pour celui-ci — un seul style par installation) :
+
+![Les cinq styles du cadran analogique](docs/screenshot-round-analog-styles.png)
+
+| Style | |
+|---|---|
+| `aurore` (défaut) | Dégradé turquoise → bleu → violet, chiffres à 12/3/6/9, fines graduations sur les autres heures. |
+| `mono` | Fond quasi noir, aiguilles blanches, seconde corail — l'esprit d'une montre de sport minimaliste. |
+| `clair` | Fond clair, aiguilles encre plates, quatre points cardinaux — sobre, presque scandinave. |
+| `neon` | Bleu nuit profond, cyan lumineux avec halo, seconde magenta — plus gadget, plus spectaculaire. |
+| `ardoise` | Aiguilles rectangulaires plutôt que des traits, seule l'heure 12 est marquée — plus architectural. |
+
+Le fond par défaut de chaque style se personnalise via
+`--echo-home-analog-background` (n'importe quelle valeur CSS
+`background`, prioritaire sur le style choisi) :
 
 ```yaml
 card_mod:

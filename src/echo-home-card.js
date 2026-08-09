@@ -2,6 +2,7 @@ import { LitElement, html, svg, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import { formatShortDate, formatTime, localizeCondition } from "./format.js";
+import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE } from "./analog-styles.js";
 
 // Choix digital/analogique retenu au-delà du rechargement de page — un
 // device (Echo Spot) ne montre en pratique qu'une seule instance de la
@@ -79,6 +80,10 @@ class EchoHomeCard extends LitElement {
     if (!["digital", "analog"].includes(merged.clock_face)) {
       warn("clock_face", DEFAULT_CONFIG.clock_face);
       merged.clock_face = DEFAULT_CONFIG.clock_face;
+    }
+    if (!Object.keys(ANALOG_STYLES).includes(merged.analog_style)) {
+      warn("analog_style", DEFAULT_CONFIG.analog_style);
+      merged.analog_style = DEFAULT_CONFIG.analog_style;
     }
     if (
       typeof merged.zoom !== "number" ||
@@ -173,12 +178,13 @@ class EchoHomeCard extends LitElement {
     return url ? `center / cover no-repeat url("${url}")` : null;
   }
 
-  _cardStyle(backgroundValue) {
+  _cardStyle(backgroundValue, extra) {
     const parts = [];
     if (backgroundValue != null) parts.push(`background:${backgroundValue}`);
     if (this._config.zoom != null && this._config.zoom !== 1) {
       parts.push(`zoom:${this._config.zoom}`);
     }
+    if (extra) parts.push(extra);
     return parts.join(";");
   }
 
@@ -256,7 +262,17 @@ class EchoHomeCard extends LitElement {
       showAnalog && !isNightMode
         ? null
         : this._backgroundValue(satelliteState, isNightMode);
-    const cardStyle = this._cardStyle(backgroundValue);
+    // Le fond par défaut du cadran analogique dépend du style choisi
+    // (cf. analog-styles.js) — passé en variable CSS plutôt qu'en
+    // `background` direct pour que --echo-home-analog-background (cf.
+    // README) garde la priorité si l'utilisateur la personnalise.
+    const analogStyle = showAnalog
+      ? ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
+      : null;
+    const cardStyle = this._cardStyle(
+      backgroundValue,
+      analogStyle ? `--_analog-default-bg:${analogStyle.background}` : null
+    );
     // L'aiguille des secondes tourne en continu via une animation CSS
     // (cf. _renderAnalogClock) plutôt qu'un rafraîchissement JS par
     // seconde — invalidée dès qu'on quitte l'analogique, pour être
@@ -274,7 +290,7 @@ class EchoHomeCard extends LitElement {
         <div class="clockgroup">
           ${cfg.show_clock
             ? showAnalog
-              ? this._renderAnalogClock(now, locale, timeFormat)
+              ? this._renderAnalogClock(now, locale, timeFormat, analogStyle)
               : html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
             : nothing}
           ${cfg.show_date && !isNightMode && !showAnalog
@@ -291,78 +307,49 @@ class EchoHomeCard extends LitElement {
   // au digital. Diamètre indépendant de --_clock-size (qui pilote une
   // taille de police, pas un diamètre) — cf. --_analog-size et
   // .card.round.analog .date, qui a donc sa propre position plutôt que
-  // de réutiliser le calcul basé sur --_clock-size.
+  // de réutiliser le calcul basé sur --_clock-size. Cinq habillages
+  // possibles (cf. src/analog-styles.js, choisis via `analog_style`) :
+  // mêmes primitives (graduations, chiffres, aiguilles), paramètres
+  // différents — sauf "ardoise", seul style à aiguilles rectangulaires
+  // plutôt que des traits (cf. _renderRectHands).
   //
-  // Tout est construit avec le tag `svg` de Lit (pas `html`), y compris
-  // les graduations générées en boucle : un sous-template `html` séparé
-  // pour un élément SVG (ex: chaque <line> de graduation dans son propre
-  // `html\`...\`` avant d'être inséré dans le <svg> englobant) atterrit
-  // dans le mauvais espace de noms (xhtml, pas svg) et ne s'affiche pas
-  // — piège classique de Lit avec du SVG composé/généré dynamiquement,
-  // repéré ici en inspectant `line.namespaceURI` sur le rendu réel.
-  _renderAnalogClock(now, locale, timeFormat) {
+  // Tout sous-template SVG (graduations, chiffres, aiguilles — construits
+  // ici dans des méthodes séparées, donc interpolés dans le <svg>
+  // englobant plutôt qu'écrits littéralement dedans) doit utiliser le tag
+  // `svg` de Lit, jamais `html` : un sous-template `html` pour un élément
+  // SVG atterrit dans le mauvais espace de noms (xhtml, pas svg) et ne
+  // s'affiche pas — piège repéré en 1.1.0 en inspectant
+  // `element.namespaceURI` sur le rendu réel. Seul le <svg> racine,
+  // littéral dans CE template (pas construit à part), peut rester sous
+  // `html`.
+  _renderAnalogClock(now, locale, timeFormat, style) {
     const hours = now.getHours() % 12;
     const minutes = now.getMinutes();
     const hourAngle = hours * 30 + minutes * 0.5;
     const minuteAngle = minutes * 6;
-    // Graduations proches du bord (rayon max ~49 sur un viewBox de 50) :
-    // le cadran est pensé plein écran (cf. --_analog-size), pas un petit
-    // médaillon au milieu — donc pas de marge à ménager entre les
-    // graduations et le bord du cercle comme sur une version plus petite.
-    // Chiffres à 12/3/6/9 (cf. NUMERAL_ANGLES plus bas) plutôt qu'une
-    // graduation, comme sur le cadran d'origine de l'Echo Spot (repéré
-    // sur une vraie photo de l'appareil) — juste des graduations fines
-    // sur les 8 autres heures.
-    const ticks = [];
-    for (let i = 0; i < 12; i++) {
-      if (i % 3 === 0) continue;
-      ticks.push(svg`
-        <line
-          class="tick"
-          x1="50"
-          y1="5"
-          x2="50"
-          y2="9"
-          transform="rotate(${i * 30} 50 50)"
-        />
-      `);
-    }
-    const numerals = [12, 3, 6, 9].map((n, i) => {
-      const angle = i * 90 * (Math.PI / 180);
-      // Même rayon que les graduations (radius = distance du bord
-      // interne des ticks, y1=5/y2=9) : les chiffres doivent être sur le
-      // même cercle qu'elles, pas ramenés vers le centre — sinon ils
-      // paraissent "flotter" au milieu du cadran au lieu de marquer
-      // l'heure à la même distance du bord que les autres graduations.
-      const radius = 41;
-      // sin/cos plutôt que 4 positions écrites en dur : évite de se
-      // tromper de signe pour l'une des quatre (cf. angle depuis midi,
-      // sens horaire — x = sin, y = -cos).
-      const x = 50 + radius * Math.sin(angle);
-      const y = 50 - radius * Math.cos(angle);
-      return svg`
-        <text
-          class="numeral"
-          x=${x}
-          y=${y}
-          font-size="11"
-          text-anchor="middle"
-          dominant-baseline="central"
-        >${n}</text>
-      `;
-    });
-    // Aiguille des secondes : tourne en continu via une animation CSS
-    // (@keyframes, cf. static styles) plutôt qu'un recalcul JS par
-    // seconde — un seul transform animé, composité par le GPU, coûte
-    // bien moins cher qu'un re-rendu Lit chaque seconde sur du matériel
-    // modeste (cf. gotchas Echo Show/Spot). --_second-hand-delay décale
-    // l'animation pour qu'elle démarre déjà à la bonne position (calculé
-    // une fois par entrée en mode analogique, cf. render()) plutôt que
-    // de repartir de midi à chaque fois.
+    const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+    // Angle statique, recalculé à chaque rendu (au fil du tick d'horloge,
+    // toutes les 30s) : sert de repli quand l'animation ci-dessous est
+    // coupée (`prefers-reduced-motion`), sinon simplement écrasé par elle
+    // pendant qu'elle tourne.
+    const secondAngle = seconds * 6;
+
+    // Tourne en continu via une animation CSS (@keyframes, cf. static
+    // styles) plutôt qu'un recalcul JS par seconde — un seul transform
+    // animé, composité par le GPU, coûte bien moins cher qu'un re-rendu
+    // Lit chaque seconde sur du matériel modeste (cf. gotchas Echo
+    // Show/Spot). --_second-hand-delay décale l'animation pour qu'elle
+    // démarre déjà à la bonne position (calculé une fois par entrée en
+    // mode analogique) plutôt que de repartir de midi à chaque fois.
     if (this._secondHandDelay === undefined) {
-      const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
       this._secondHandDelay = `-${seconds}s`;
     }
+
+    const hands =
+      style.shape === "rect"
+        ? this._renderRectHands(style, hourAngle, minuteAngle, secondAngle)
+        : this._renderLineHands(style, hourAngle, minuteAngle, secondAngle);
+
     return html`
       <svg
         class="analog-clock"
@@ -370,34 +357,223 @@ class EchoHomeCard extends LitElement {
         role="img"
         aria-label=${formatTime(now, locale, timeFormat)}
       >
-        <g class="ticks">${ticks}</g>
-        <g class="numerals">${numerals}</g>
-        <line
-          class="hand hand-hour"
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="27"
-          transform="rotate(${hourAngle} 50 50)"
-        />
-        <line
-          class="hand hand-minute"
-          x1="50"
-          y1="50"
-          x2="50"
-          y2="15"
-          transform="rotate(${minuteAngle} 50 50)"
-        />
-        <line
-          class="hand hand-second"
-          x1="50"
-          y1="58"
-          x2="50"
-          y2="8"
-          style="animation-delay: ${this._secondHandDelay}"
-        />
-        <circle class="hand-center" cx="50" cy="50" r="2" />
+        ${style.glow ? this._renderGlowFilter() : nothing}
+        ${this._renderTicks(style.ticks, style.glow)}
+        ${this._renderNumerals(style.numerals)}
+        ${hands}
       </svg>
+    `;
+  }
+
+  // Filtre de halo (mode "neon" uniquement). filterUnits="userSpaceOnUse"
+  // avec une région exprimée en coordonnées du viewBox, pas en % de la
+  // bounding box (valeur par défaut) : les aiguilles sont des <line>
+  // verticales avant rotation (x1 === x2), donc leur bounding box a une
+  // largeur nulle — en unités objectBoundingBox la région du filtre
+  // s'écrase à zéro et Chrome n'affiche rien du tout (repéré ici :
+  // aiguilles absentes du rendu alors que les graduations, elles,
+  // s'affichaient).
+  _renderGlowFilter() {
+    return svg`
+      <defs>
+        <filter id="echo-home-analog-glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140">
+          <feGaussianBlur stdDeviation="1.1" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+    `;
+  }
+
+  // Graduations : soit un trait fin proche du bord (style "aurore"
+  // d'origine), soit un simple point (les 4 autres styles) — sur les 12
+  // heures ("all"), les 8 non cardinales ("minor", pour laisser la place
+  // aux chiffres) ou les 4 cardinales seulement ("cardinal").
+  _renderTicks(cfg, glow) {
+    if (!cfg) return nothing;
+    const glowAttr = glow ? "url(#echo-home-analog-glow)" : undefined;
+    const ticks = [];
+    for (let i = 0; i < 12; i++) {
+      const isCardinal = i % 3 === 0;
+      if (cfg.mode === "minor" && isCardinal) continue;
+      if (cfg.mode === "cardinal" && !isCardinal) continue;
+      if (cfg.skip?.includes(i)) continue;
+      const angle = i * 30;
+      if (cfg.shape === "line") {
+        ticks.push(svg`
+          <line
+            class="tick hand"
+            x1="50"
+            y1=${cfg.y1}
+            x2="50"
+            y2=${cfg.y2}
+            stroke=${cfg.color}
+            stroke-width=${cfg.width}
+            opacity=${cfg.opacity}
+            filter=${glowAttr ?? nothing}
+            transform="rotate(${angle} 50 50)"
+          />
+        `);
+      } else {
+        const p = this._polar(cfg.radius, angle);
+        const r = isCardinal ? cfg.cardinalR : cfg.minorR;
+        const o = isCardinal ? cfg.cardinalOpacity : cfg.minorOpacity;
+        ticks.push(svg`
+          <circle class="tick hand" cx=${p.x} cy=${p.y} r=${r} fill=${cfg.color} opacity=${o} filter=${glowAttr ?? nothing} />
+        `);
+      }
+    }
+    return svg`<g class="ticks">${ticks}</g>`;
+  }
+
+  // Chiffres : "quad" (12/3/6/9, style "aurore") ou "single" (12
+  // seulement, style "ardoise"). Même rayon que les graduations à chaque
+  // fois — les chiffres doivent être sur le même cercle qu'elles, pas
+  // ramenés vers le centre, sinon ils paraissent "flotter" au milieu du
+  // cadran au lieu de marquer l'heure à la même distance du bord
+  // (corrigé en 1.1.4 pour "aurore", appliqué d'emblée ici aux autres).
+  _renderNumerals(cfg) {
+    if (!cfg) return nothing;
+    const positions =
+      cfg.mode === "single"
+        ? [["12", 0]]
+        : [["12", 0], ["3", 1], ["6", 2], ["9", 3]];
+    const numerals = positions.map(([n, i]) => {
+      const p = this._polar(cfg.radius, i * 90);
+      return svg`
+        <text
+          class="numeral hand"
+          x=${p.x}
+          y=${p.y}
+          font-size=${cfg.size}
+          font-weight=${cfg.weight}
+          opacity=${cfg.opacity}
+          fill=${cfg.color}
+          text-anchor="middle"
+          dominant-baseline="central"
+        >${n}</text>
+      `;
+    });
+    return svg`<g class="numerals">${numerals}</g>`;
+  }
+
+  // sin/cos plutôt que des positions écrites en dur pour chaque heure :
+  // évite de se tromper de signe pour l'une d'elles (angle depuis midi,
+  // sens horaire — x = sin, y = -cos).
+  _polar(radius, angleDeg) {
+    const a = (angleDeg * Math.PI) / 180;
+    return { x: 50 + radius * Math.sin(a), y: 50 - radius * Math.cos(a) };
+  }
+
+  // Aiguilles "classiques" (tous les styles sauf "ardoise") : un simple
+  // trait par aiguille, couleur/épaisseur/forme de bout définies par le
+  // style. La seconde peut avoir une petite queue derrière le pivot et un
+  // point à la pointe (styles "mono"/"neon").
+  _renderLineHands(style, hourAngle, minuteAngle, secondAngle) {
+    const glowAttr = style.glow ? "url(#echo-home-analog-glow)" : undefined;
+    const hour = svg`
+      <line
+        class="hand hand-hour"
+        x1="50" y1="50" x2="50" y2=${50 - style.hour.len}
+        stroke=${style.hour.color}
+        stroke-width=${style.hour.width}
+        stroke-linecap=${style.hour.cap}
+        filter=${glowAttr ?? nothing}
+        transform="rotate(${hourAngle} 50 50)"
+      />
+    `;
+    const minute = svg`
+      <line
+        class="hand hand-minute"
+        x1="50" y1="50" x2="50" y2=${50 - style.minute.len}
+        stroke=${style.minute.color}
+        stroke-width=${style.minute.width}
+        stroke-linecap=${style.minute.cap}
+        filter=${glowAttr ?? nothing}
+        transform="rotate(${minuteAngle} 50 50)"
+      />
+    `;
+    // La trotteuse et son éventuel point en pointe (styles "mono"/"neon")
+    // sont groupés : c'est le groupe entier qui tourne via l'animation
+    // CSS (cf. .hand-second dans static styles), pas juste le trait —
+    // sinon le point resterait fixe pendant que le trait balaie le
+    // cadran en dessous.
+    const s = style.second;
+    const tip = s.tipDot
+      ? svg`<circle class="hand" cx="50" cy=${50 - s.len} r=${s.tipDot.r} fill=${s.tipDot.fill} filter=${glowAttr ?? nothing} />`
+      : nothing;
+    const second = svg`
+      <g
+        class="hand-second"
+        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${secondAngle}deg)"
+      >
+        <line
+          class="hand"
+          x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len}
+          stroke=${s.color}
+          stroke-width=${s.width}
+          stroke-linecap=${s.cap}
+          opacity=${s.opacity}
+          filter=${glowAttr ?? nothing}
+        />
+        ${tip}
+      </g>
+    `;
+    const center = style.center;
+    const ring = center.ring
+      ? svg`
+          <circle
+            class="hand"
+            cx="50" cy="50" r=${center.ring.r} fill="none"
+            stroke=${center.ring.color} stroke-width=${center.ring.width}
+          />
+        `
+      : nothing;
+    return svg`
+      ${hour}${minute}${second}
+      ${ring}
+      <circle class="hand" cx="50" cy="50" r=${center.r} fill=${center.color} />
+    `;
+  }
+
+  // Aiguilles "géométriques" (style "ardoise" uniquement) : des
+  // rectangles plutôt que des traits, plus un contrepoids derrière le
+  // pivot pour la seconde (elle est animée via le même mécanisme —
+  // rotation continue sur le <g> englobant, cf. .hand-second dans static
+  // styles, qui s'applique aussi bien à un <line> qu'à un <g>).
+  _renderRectHands(style, hourAngle, minuteAngle, secondAngle) {
+    const h = style.hour;
+    const m = style.minute;
+    const s = style.second;
+    const c = style.center;
+    return svg`
+      <rect
+        class="hand hand-hour"
+        x=${50 - h.w / 2} y=${50 - h.len} width=${h.w} height=${h.len}
+        fill=${h.color}
+        transform="rotate(${hourAngle} 50 50)"
+      />
+      <rect
+        class="hand hand-minute"
+        x=${50 - m.w / 2} y=${50 - m.len} width=${m.w} height=${m.len}
+        fill=${m.color}
+        transform="rotate(${minuteAngle} 50 50)"
+      />
+      <g
+        class="hand-second"
+        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${secondAngle}deg)"
+      >
+        <rect class="hand" x=${50 - s.w / 2} y=${50 - s.len} width=${s.w} height=${s.len} fill=${s.color} />
+        <rect class="hand" x=${50 - s.w / 2} y="50" width=${s.w} height=${s.tail} fill=${s.color} />
+      </g>
+      <rect
+        class="hand"
+        x=${50 - c.size / 2} y=${50 - c.size / 2} width=${c.size} height=${c.size}
+        fill=${c.color}
+        transform="rotate(45 50 50)"
+      />
     `;
   }
 
@@ -636,18 +812,18 @@ class EchoHomeCard extends LitElement {
        écran sur un fond uni, sans photo, météo ni date (masquées dans
        render()). --_analog-size est un pourcentage du conteneur (quasi
        100%, cf. .card.round plus bas), pas un diamètre fixe en px, pour
-       suivre la taille réelle de la carte. */
+       suivre la taille réelle de la carte. --_analog-default-bg vient du
+       style choisi (analog_style, cf. analog-styles.js et render()) —
+       --echo-home-analog-background (personnalisation utilisateur, cf.
+       README) garde la priorité dessus. */
     .card.analog {
-      background: var(
-        --echo-home-analog-background,
-        linear-gradient(160deg, #1aa19b 0%, #2f6fb3 45%, #4a3d82 100%)
-      );
+      background: var(--echo-home-analog-background, var(--_analog-default-bg));
     }
 
     /* La nuit, même en analogique, on retombe sur le traitement nuit
-       habituel (fond quasi noir) plutôt que le bleu — l'objectif du mode
-       nuit (peu de lumière émise sur un écran de chevet) prime sur le
-       style du cadran. */
+       habituel (fond quasi noir) plutôt que le style choisi — l'objectif
+       du mode nuit (peu de lumière émise sur un écran de chevet) prime
+       sur l'esthétique. */
     :host(.night) .card.analog {
       background: var(--_default-bg);
       background-color: #0a1424;
@@ -660,52 +836,45 @@ class EchoHomeCard extends LitElement {
       transform: translate(-50%, -50%);
       width: var(--_analog-size);
       height: var(--_analog-size);
-      color: var(--_text-color);
-      transition: color 0.4s ease, opacity 0.4s ease;
+      transition: opacity 0.4s ease;
     }
 
+    /* Couleurs et épaisseurs propres à chaque style (mono/aurore/clair/
+       neon/ardoise) posées directement en attributs SVG par
+       _renderLineHands/_renderRectHands/_renderTicks/_renderNumerals,
+       pas ici : contrairement à la version à un seul style (< 1.2.0), il
+       n'y a plus de couleur "currentColor" commune à surcharger. La
+       nuit, .hand regroupe toutes les aiguilles/graduations/chiffres
+       (cf. classes posées dans le JS) et retombe uniformément sur le
+       rouge très atténué habituel, quel que soit le style de jour. */
     :host(.night) .analog-clock {
-      color: var(--_night-color);
       opacity: var(--_night-opacity);
     }
 
-    .analog-clock .tick {
-      stroke: currentColor;
-      stroke-width: 1;
-      opacity: 0.75;
-    }
-
-    .analog-clock .numeral {
-      fill: currentColor;
-      font-weight: 300;
-      opacity: 0.9;
-    }
-
-    .analog-clock .hand {
-      stroke: currentColor;
-      stroke-linecap: round;
-    }
-
-    .analog-clock .hand-hour {
-      stroke-width: 4;
-    }
-
-    .analog-clock .hand-minute {
-      stroke-width: 2.6;
+    :host(.night) .analog-clock .hand {
+      fill: var(--_night-color);
+      stroke: var(--_night-color);
     }
 
     /* Tourne en continu via une animation CSS plutôt qu'un recalcul JS
        par seconde (cf. commentaire sur --_second-hand-delay dans
        _renderAnalogClock) — un seul transform animé, composité par le
-       GPU, sans repeindre le reste du cadran à chaque frame.
-       transform-origin en unités du viewBox (50px 50px = le centre du
-       cadran, pas le centre de la boîte englobante du trait lui-même,
-       qui serait décalé à cause de la petite queue derrière le pivot). */
+       GPU, sans repeindre le reste du cadran à chaque frame. S'applique
+       au groupe englobant la trotteuse (<g class="hand-second">, cf.
+       _renderLineHands/_renderRectHands), pas à un unique trait : la
+       queue/le contrepoids et l'éventuel point en pointe doivent tourner
+       ensemble avec elle. transform-origin en unités du viewBox (50px
+       50px = le centre du cadran, pas le centre de la boîte englobante
+       du groupe lui-même, qui serait décalé à cause de la queue derrière
+       le pivot). */
     .analog-clock .hand-second {
-      stroke-width: 1;
-      opacity: 0.85;
       transform-origin: 50px 50px;
-      animation: spin-second-hand 60s linear infinite;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .analog-clock .hand-second {
+        animation: spin-second-hand 60s linear infinite;
+      }
     }
 
     @keyframes spin-second-hand {
@@ -715,10 +884,6 @@ class EchoHomeCard extends LitElement {
       to {
         transform: rotate(360deg);
       }
-    }
-
-    .analog-clock .hand-center {
-      fill: currentColor;
     }
 
     /* Bouton discret pour basculer digital ↔ analogique — masqué la nuit

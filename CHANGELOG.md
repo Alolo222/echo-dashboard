@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.2.0
+
+- **Quatre nouveaux styles pour le cadran analogique** (mode round), en
+  plus du dégradé d'origine devenu `aurore` : `mono` (fond noir,
+  aiguilles blanches, seconde corail), `clair` (fond clair, aiguilles
+  encre, sobre), `neon` (bleu nuit, cyan lumineux avec halo, seconde
+  magenta) et `ardoise` (aiguilles rectangulaires plutôt que des traits,
+  seule l'heure 12 est marquée). Choisi via la nouvelle option
+  `analog_style` — un seul réglage YAML par installation, pas de bouton
+  pour en changer à l'écran (contrairement à `clock_face`, qui bascule
+  digital ↔ analogique). Partis d'une planche de 5 propositions
+  présentée avant intégration ; `aurore` reste la valeur par défaut, donc
+  aucun changement de rendu pour une config existante qui ne précise pas
+  `analog_style`.
+- Refactor : couleurs/épaisseurs/formes du cadran posées en attributs SVG
+  par style (`src/analog-styles.js`) plutôt qu'en `currentColor` unique —
+  nécessaire dès qu'un style a plusieurs couleurs à la fois (aiguilles
+  d'une teinte, seconde d'une autre). Le mode nuit ignore ces couleurs et
+  repasse tout en rouge très atténué quel que soit le style choisi, via
+  une seule règle CSS ciblant une classe `.hand` commune à tous les
+  éléments colorés (graduations, chiffres, aiguilles) plutôt que du
+  `currentColor` hérité.
+- Corrigé en cours de route (style `neon`) : le filtre de halo SVG
+  (`feGaussianBlur`) rendait les aiguilles complètement invisibles. En
+  cause : `filterUnits` par défaut (`objectBoundingBox`) calcule la
+  région du filtre sur la boîte englobante de l'élément filtré — or les
+  aiguilles sont des `<line>` verticales avant rotation (`x1 === x2`),
+  donc une largeur de boîte nulle, qui écrase la région à rien. Fixé en
+  passant `filterUnits="userSpaceOnUse"` avec une région en coordonnées
+  du viewBox, indépendante de la géométrie de chaque élément filtré.
+- La trotteuse respecte désormais `prefers-reduced-motion` : sans
+  animation, elle affiche un angle statique recalculé au fil du tick
+  d'horloge (30s) plutôt que de rester figée sur midi.
+- Nouvelle capture `docs/screenshot-round-analog-styles.png` (les 5
+  styles côte à côte).
+
 ## 1.1.4
 
 - Chiffres (12/3/6/9) trop ramenés vers le centre du cadran (rayon 34)
