@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.4.2
+
+- Bouton de bascule digital ↔ analogique repensé, signalé peu adapté à
+  l'Echo Spot :
+  - **Icône** : affiche maintenant le cadran ACTUEL plutôt que celui
+    vers lequel on bascule (`clock-outline` en analogique, `clock-
+    digital` en digital) — un repère d'état lisible au premier coup
+    d'œil, plus utile ici qu'une convention façon bouton d'action
+    classique. `clock-digital` se lisait mal une fois affiché en tout
+    petit sur le cadran analogique lui-même.
+  - **Position (round uniquement)** : décalé en bas à droite plutôt que
+    centré en bas. Centré, le bouton finissait soit dans la pointe basse
+    du cercle où la largeur disponible se rétrécit vite (position
+    d'origine), soit — en le remontant pour corriger ça — à chevaucher
+    le contenu déjà centré à cette hauteur (la date en digital, le
+    chiffre "6" en analogique, repéré à l'écran en testant ce
+    déplacement). En diagonale, il reste dans une zone large du disque
+    sans entrer en concurrence avec ce contenu.
+  - Cible tactile agrandie (40px → 44px) et un peu plus visible par
+    défaut (opacité 0.5 → 0.55).
+- Mode large inchangé (bas centré, jamais concerné par le problème de
+  géométrie circulaire).
+
 ## 1.4.1
 
 - **Deux nouveaux types d'arrière-plan** (`background`/`analog_background`,

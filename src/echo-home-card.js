@@ -841,10 +841,13 @@ class EchoHomeCard extends LitElement {
   // Petit bouton discret (round et large, masqué la nuit comme le reste
   // — pas de lumière/info superflue sur un écran de chevet) pour
   // basculer digital ↔ analogique. L'icône affichée est celle du cadran
-  // vers lequel on bascule (convention usuelle pour un bouton toggle),
-  // pas celle du cadran actuel.
+  // ACTUEL (pas celle vers laquelle on bascule) : un repère d'état
+  // lisible au premier coup d'œil ("je suis en mode X"), plus utile ici
+  // qu'une convention façon bouton d'action classique — clock-outline
+  // (cadran rond) se lit mieux comme "horloge" que clock-digital une
+  // fois affiché en tout petit sur le cadran analogique lui-même.
   _renderClockToggle(showAnalog) {
-    const icon = showAnalog ? "mdi:clock-digital" : "mdi:clock-outline";
+    const icon = showAnalog ? "mdi:clock-outline" : "mdi:clock-digital";
     const label = showAnalog
       ? "Afficher l'horloge digitale"
       : "Afficher l'horloge analogique";
@@ -1317,17 +1320,34 @@ class EchoHomeCard extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       padding: 0;
       border: none;
       border-radius: 50%;
       background: transparent;
       color: var(--_text-color);
-      opacity: 0.5;
+      opacity: 0.55;
       cursor: pointer;
       transition: opacity 0.2s ease;
-      --mdc-icon-size: 20px;
+      --mdc-icon-size: 22px;
+    }
+
+    /* Round : décalé en bas à droite plutôt que centré comme en mode
+       large (left/bottom/transform ci-dessus, pensés pour un écran
+       rectangulaire) — pile en bas d'un cercle, la largeur disponible se
+       rétrécit vite (cf. commentaire sur .card.round .date plus haut,
+       même souci de géométrie) ET c'est là que vit déjà du contenu
+       centré (la date en digital, le chiffre "6" en analogique) : un
+       bouton remonté mais toujours centré finit par les chevaucher
+       (repéré à l'écran, pas juste en théorie). En diagonale, il reste
+       dans une zone large du disque sans entrer en concurrence avec ce
+       contenu centré. */
+    .card.round .clock-toggle {
+      left: auto;
+      right: 12%;
+      bottom: 12%;
+      transform: none;
     }
 
     .clock-toggle:hover,
