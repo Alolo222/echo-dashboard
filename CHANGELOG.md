@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.7
+
+- **Bloc météo** : retour au retrait d'origine (1.0.4). Les 1.0.5/1.0.6
+  étaient parties dans le mauvais sens/la mauvaise ampleur — signalé par
+  l'utilisateur ("c'est pire, encore plus éloignée du bord").
+- **Date toujours pas centrée sous l'horloge**, cette fois corrigé pour
+  de bon : le calcul précédent égalisait les *boîtes* CSS
+  (line-height:1), pas l'*encre* réellement visible du texte. Mesuré
+  précisément via Canvas `measureText` (métriques de police réelles,
+  pas la boîte de ligne) : la police (Nunito) laisse ~11-15% de vide
+  sous les chiffres de l'horloge et ~6-15% sous la date, de façon
+  asymétrique — d'où l'écart malgré des boîtes CSS égales. Nouveau
+  calcul basé sur ces mesures réelles (coefficients empiriques propres
+  à Nunito) : écart horloge→date et date→bas d'écran mesurés à 45.7px
+  et 45.3px (0.4px d'écart, contre 62px/29px avant).
+- Vérifié cette fois avec une règle en pixels superposée sur une
+  capture à fond uni, en plus des mesures — pas seulement à l'œil sur
+  la capture finale.
+
 ## 1.0.6
 
 - Le retrait météo de la 1.0.5 était trop subtil pour être perceptible

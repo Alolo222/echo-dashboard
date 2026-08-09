@@ -294,8 +294,8 @@ w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[S("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const C = globalThis, Q = (r) => r, M = C.trustedTypes, Y = M ? M.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", I = `[ 	
-\f\r]`, x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ee = /-->/g, te = />/g, $ = RegExp(`>|${I}(?:([^\\s"'>=/]+)(${I}*=${I}*(?:[^ 	
+const C = globalThis, Q = (r) => r, M = C.trustedTypes, Y = M ? M.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", j = `[ 	
+\f\r]`, x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ee = /-->/g, te = />/g, $ = RegExp(`>|${j}(?:([^\\s"'>=/]+)(${j}*=${j}*(?:[^ 	
 \f\r"'\`<>=]|("|')|))|$)`, "g"), se = /'/g, ie = /"/g, me = /^(?:script|style|textarea|title)$/i, Te = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), N = Te(1), A = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), re = /* @__PURE__ */ new WeakMap(), g = y.createTreeWalker(y, 129);
 function fe(r, e) {
   if (!J(r) || !r.hasOwnProperty("raw")) throw Error("invalid template strings array");
@@ -517,9 +517,9 @@ class qe {
     E(this, e);
   }
 }
-const L = C.litHtmlPolyfillSupport;
+const I = C.litHtmlPolyfillSupport;
 var le;
-L == null || L(U, T), ((le = C.litHtmlVersions) != null ? le : C.litHtmlVersions = []).push("3.3.3");
+I == null || I(U, T), ((le = C.litHtmlVersions) != null ? le : C.litHtmlVersions = []).push("3.3.3");
 const De = (r, e, t) => {
   var n, o;
   const s = (n = t == null ? void 0 : t.renderBefore) != null ? n : e;
@@ -563,11 +563,11 @@ class k extends w {
 }
 var ce;
 k._$litElement$ = !0, k.finalized = !0, (ce = v.litElementHydrateSupport) == null || ce.call(v, { LitElement: k });
-const j = v.litElementPolyfillSupport;
-j == null || j({ LitElement: k });
+const L = v.litElementPolyfillSupport;
+L == null || L({ LitElement: k });
 var he;
 ((he = v.litElementVersions) != null ? he : v.litElementVersions = []).push("4.2.2");
-const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg", b = {
+const $e = "echo-home-card", je = "https://cdn.jsdelivr.net/npm/@meteocons/svg", b = {
   // --- Entités (aucune n'est requise — la carte fonctionne comme simple
   // horloge sans rien configurer du tout) ---
   satellite_entity: null,
@@ -614,7 +614,7 @@ const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   zoom: 1
   // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
-}, Le = {
+}, Ie = {
   "clear-night": "clear-night",
   cloudy: "cloudy",
   exceptional: "not-available",
@@ -630,14 +630,14 @@ const $e = "echo-home-card", Ie = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   windy: "wind",
   "windy-variant": "wind"
 };
-function je(r, e) {
-  return r === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : r === "sunny" && e ? "clear-night" : Le[r] || "not-available";
+function Le(r, e) {
+  return r === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : r === "sunny" && e ? "clear-night" : Ie[r] || "not-available";
 }
 function We(r, e) {
   if (e != null && e.base_url)
     return `${e.base_url.replace(/\/$/, "")}/${r}.svg`;
   const t = (e == null ? void 0 : e.style) || "fill";
-  return `${Ie}/${t}/${r}.svg`;
+  return `${je}/${t}/${r}.svg`;
 }
 function Ve(r, e, t) {
   return new Intl.DateTimeFormat(e, {
@@ -773,7 +773,7 @@ class V extends k {
     `;
   }
   _renderWeather(e) {
-    const t = je(e.state, this._isDarkOutside()), s = We(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), n = e.attributes.temperature_unit || "°C", o = Fe(this._hass, e.state), l = this._weatherClickable();
+    const t = Le(e.state, this._isDarkOutside()), s = We(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), n = e.attributes.temperature_unit || "°C", o = Fe(this._hass, e.state), l = this._weatherClickable();
     return N`
       <div
         class="weather ${l ? "clickable" : ""}"
@@ -912,21 +912,25 @@ q(V, "properties", {
 
     .date {
       position: absolute;
-      /* Calée pour que l'espace horloge→date soit égal à l'espace
-         date→bas d'écran, quelle que soit la taille de l'horloge/date
-         (donc correct aussi en mode round où elles sont redéfinies).
-         Avec H la hauteur de la carte (100%, d'où le calc en % — top
-         est relatif au conteneur, contrairement à transform), C
-         --_clock-size et D --_date-size : le bas de l'horloge est à
-         H/2 + C/2, on veut top_date + D + gap = H avec
-         top_date = H/2 + C/2 + gap, ce qui donne
-         top_date = 3H/4 + C/4 - D/2. */
-      top: calc(75% + var(--_clock-size) / 4 - var(--_date-size) / 2);
+      /* La version précédente égalisait les *boîtes* CSS horloge/date
+         (line-height:1), pas l'encre visible du texte — repéré avec une
+         règle en pixels superposée sur une capture : la police (Nunito)
+         réserve nettement plus d'espace vide sous le texte que dessus
+         dans sa boîte de ligne (métriques mesurées via Canvas
+         measureText : ~11% de la hauteur de l'horloge inutilisée en
+         haut, ~15% en bas ; ~6% en haut / ~15% en bas pour la date —
+         cf. les chiffres n'atteignent jamais la hauteur d'ascendante
+         complète, contrairement à "Dim." avec sa majuscule). D'où
+         l'écart visuel malgré des boîtes CSS symétriques. Coefficients
+         ci-dessous ajustés à partir de ces mesures réelles (pas
+         théoriques) pour que l'*encre* visible soit centrée dans
+         l'espace sous l'horloge, pas la boîte. Toujours basé sur
+         --_clock-size/--_date-size (donc correct en mode round aussi),
+         mais avec des coefficients propres à Nunito — à réajuster si la
+         police change (voir --echo-home-font-family). */
+      top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.4515);
       left: 50%;
       transform: translateX(-50%);
-      /* line-height: 1 : le line-height par défaut du navigateur (~1.2)
-         fausserait le calcul ci-dessus (basé sur --_date-size comme
-         hauteur réelle de la boîte). */
       line-height: 1;
       font-size: var(--_date-size);
       color: var(--_text-color);
@@ -936,8 +940,8 @@ q(V, "properties", {
 
     .weather {
       position: absolute;
-      top: clamp(36px, 9vh, 70px);
-      left: clamp(40px, 10%, 90px);
+      top: clamp(12px, 4vh, 28px);
+      left: clamp(12px, 5%, 32px);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -949,7 +953,7 @@ q(V, "properties", {
        en haut à la place. */
     .card.round .weather {
       left: 50%;
-      top: clamp(44px, 22%, 80px);
+      top: clamp(28px, 15%, 56px);
       transform: translateX(-50%);
     }
 
