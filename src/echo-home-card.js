@@ -236,22 +236,23 @@ class EchoHomeCard extends LitElement {
     const isRound = cfg.layout === "round";
     // L'horloge analogique n'a de sens que sur l'écran circulaire de
     // l'Echo Spot — celui qui l'avait à l'origine sous Alexa. Sur
-    // l'Echo Show (paysage), toujours digitale, pas de bouton. C'est un
-    // véritable écran alternatif, pas juste une autre police d'horloge :
-    // comme sur l'Echo Spot d'origine, juste les aiguilles sur un fond
-    // uni — pas de photo de fond, pas de météo, pas de date.
+    // l'Echo Show (paysage), toujours digitale, pas de bouton.
     const showAnalog = isRound && this._clockFace === "analog";
-    // Le bloc météo n'a pas sa place la nuit : c'est justement ce que le
-    // mode nuit cherche à éviter (lumière/information superflue sur un
-    // écran de chevet). Entité absente/indisponible => bloc simplement
-    // absent, pas d'erreur affichée (aucune entité n'est requise ici).
-    const showWeather =
-      !showAnalog &&
+    // La météo n'a pas sa place la nuit : c'est justement ce que le mode
+    // nuit cherche à éviter (lumière/information superflue sur un écran
+    // de chevet). Entité absente/indisponible => bloc simplement absent,
+    // pas d'erreur affichée (aucune entité n'est requise ici). Valable
+    // pour les deux présentations (digitale ou complication discrète sur
+    // le cadran analogique, cf. _renderAnalogComplications) — seule la
+    // façon de l'afficher change avec showAnalog, pas si elle s'affiche.
+    const weatherAvailable =
       cfg.show_weather &&
       !isNightMode &&
       weatherState &&
       !["unavailable", "unknown"].includes(weatherState.state) &&
       weatherState.attributes.temperature != null;
+    const showWeather = weatherAvailable && !showAnalog;
+    const showDateText = cfg.show_date && !isNightMode;
 
     // Pas de fond dynamique/dégradé habituel en analogique de jour : la
     // couleur unie vient de la règle CSS .card.analog (cf. static
@@ -290,14 +291,70 @@ class EchoHomeCard extends LitElement {
         <div class="clockgroup">
           ${cfg.show_clock
             ? showAnalog
-              ? this._renderAnalogClock(now, locale, timeFormat, analogStyle)
+              ? html`
+                  ${this._renderAnalogComplications(
+                    analogStyle,
+                    weatherAvailable ? weatherState : null,
+                    showDateText,
+                    now,
+                    locale
+                  )}
+                  ${this._renderAnalogClock(now, locale, timeFormat, analogStyle)}
+                `
               : html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
             : nothing}
-          ${cfg.show_date && !isNightMode && !showAnalog
+          ${showDateText && !showAnalog
             ? html`<div class="date">${formatShortDate(now, locale)}</div>`
             : nothing}
         </div>
         ${isRound && !isNightMode ? this._renderClockToggle(showAnalog) : nothing}
+      </div>
+    `;
+  }
+
+  // Météo + date, discrètes, superposées au cadran analogique — mêmes
+  // données et mêmes conditions d'affichage que la vue digitale
+  // (show_weather/show_date, masquées la nuit, cf. render()), juste
+  // repositionnées et réduites façon guichet de date de montre
+  // mécanique. Icône via <img> (comme _renderWeather) plutôt qu'un
+  // glyphe dessiné à la main ou un <image> SVG : c'est le mécanisme déjà
+  // utilisé pour la météo en digital, dont on sait qu'il garde les
+  // icônes Meteocons animées (SMIL) — un <image> SVG référençant un SVG
+  // externe ne le garantit pas selon les moteurs.
+  //
+  // Rendu AVANT le <svg class="analog-clock"> dans le DOM (cf. appel
+  // dans render()), jamais dedans : les deux sont position:absolute
+  // superposés au même endroit, donc l'ordre du DOM suffit à garantir
+  // que les aiguilles/graduations restent toujours visibles par-dessus
+  // (le <svg> n'a pas de fond, seul ce qu'il dessine réellement masque
+  // ce qu'il y a dessous) — pas besoin de <foreignObject> ni de z-index.
+  _renderAnalogComplications(style, weatherState, showDate, now, locale) {
+    if (!weatherState && !showDate) return nothing;
+    let weather = nothing;
+    if (weatherState) {
+      const slug = conditionToIconSlug(weatherState.state, this._isDarkOutside());
+      const url = iconUrl(slug, this._config.icons);
+      const temp = Number(weatherState.attributes.temperature).toFixed(1);
+      const tempUnit = weatherState.attributes.temperature_unit || "°C";
+      weather = html`
+        <div class="analog-weather">
+          <img
+            class="analog-weather-icon"
+            src=${url}
+            alt=""
+            style="filter:${style.comp.iconFilter || "none"}"
+          />
+          <span class="analog-weather-temp">${temp}${tempUnit}</span>
+        </div>
+      `;
+    }
+    return html`
+      <div
+        class="analog-complications"
+        style="color:${style.comp.color};opacity:${style.comp.opacity}"
+      >
+        ${weather}
+        ${showDate ? html`<div class="analog-date">${formatShortDate(now, locale)}</div>` : nothing}
       </div>
     `;
   }
@@ -886,6 +943,61 @@ class EchoHomeCard extends LitElement {
       }
     }
 
+    /* Météo + date, superposées discrètement au cadran analogique (cf.
+       _renderAnalogComplications) — même boîte que .analog-clock (donc
+       alignée sur le même disque), rendue AVANT lui dans le DOM pour que
+       les aiguilles/graduations restent toujours visibles par-dessus.
+       pointer-events: none : une pure décoration, qui ne doit pas voler
+       le tap destiné au bouton de bascule sous elle. Couleur/opacité
+       posées en style inline par style analogique (cf. comp dans
+       analog-styles.js), pas ici — pas de valeur commune à tous. */
+    .analog-complications {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--_analog-size);
+      height: var(--_analog-size);
+      pointer-events: none;
+    }
+
+    /* Positions choisies pour rester dans la partie du cadran non
+       balayée par les chiffres (radius ~40-41 sur un viewBox 0-100, cf.
+       analog-styles.js) : la météo se love entre 10h et 11h, la date
+       juste sous le centre — les aiguilles peuvent passer dessus sans
+       gêner la lecture, comme un guichet de date sur une montre
+       mécanique. */
+    .analog-weather {
+      position: absolute;
+      left: 22%;
+      top: 32%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+
+    .analog-weather-icon {
+      width: var(--_analog-weather-icon-size);
+      height: var(--_analog-weather-icon-size);
+      display: block;
+    }
+
+    .analog-weather-temp {
+      font-size: var(--_analog-weather-temp-size);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .analog-date {
+      position: absolute;
+      left: 50%;
+      top: 69%;
+      transform: translate(-50%, -50%);
+      font-size: var(--_analog-date-size);
+      white-space: nowrap;
+    }
+
     /* Bouton discret pour basculer digital ↔ analogique — masqué la nuit
        (cf. render(), même logique que la météo/la date : pas de lumière
        ni d'info superflue sur un écran de chevet). Docké près du bas :
@@ -965,6 +1077,13 @@ class EchoHomeCard extends LitElement {
          clippé en cercle (évite un rendu "coupé net" à l'anticrénelage
          près). */
       --_analog-size: 94%;
+      /* Sensiblement plus petites que --_weather-icon-size/--_weather-
+         temp-size/--_date-size ci-dessus : une complication doit rester
+         discrète à côté d'aiguilles qui occupent tout l'écran, pas
+         reproduire le poids visuel du bloc météo/date du mode digital. */
+      --_analog-weather-icon-size: clamp(14px, 5vmin, 30px);
+      --_analog-weather-temp-size: clamp(0.65rem, 4.6vmin, 1.15rem);
+      --_analog-date-size: clamp(0.6rem, 4vmin, 1rem);
     }
   `;
 }

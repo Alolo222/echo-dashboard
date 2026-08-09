@@ -34,6 +34,7 @@ export const ANALOG_STYLES = {
     minute: { len: 35, color: "#ffffff", width: 2.6, cap: "round" },
     second: { len: 42, tail: 8, color: "#ffffff", width: 1, cap: "round", opacity: 0.85 },
     center: { r: 2, color: "#ffffff" },
+    comp: { color: "#ffffff", opacity: 0.85 },
   },
 
   mono: {
@@ -64,6 +65,7 @@ export const ANALOG_STYLES = {
       tipDot: { r: 1.4, fill: "#ff5a4e" },
     },
     center: { r: 1.8, color: "#f5f6f7", ring: { r: 3.4, width: 1, color: "#ff5a4e" } },
+    comp: { color: "#f5f6f7", opacity: 0.6 },
   },
 
   clair: {
@@ -84,6 +86,12 @@ export const ANALOG_STYLES = {
     minute: { len: 36, color: "#22262b", width: 2.4, cap: "butt" },
     second: { len: 42, tail: 0, color: "#3f6b4e", width: 1, cap: "round", opacity: 0.9 },
     center: { r: 2.2, color: "#22262b" },
+    // Les icônes Meteocons (style "fill", cf. icons.js) sont surtout
+    // blanches/claires — illisibles sur ce fond clair par défaut,
+    // repéré en testant les 5 styles (invisible à côté des aiguilles
+    // sombres). iconFilter les repasse en silhouette encre, cohérent
+    // avec le reste du style (aucune autre couleur que l'encre ici).
+    comp: { color: "#22262b", opacity: 0.6, iconFilter: "brightness(0)" },
   },
 
   neon: {
@@ -115,6 +123,7 @@ export const ANALOG_STYLES = {
       tipDot: { r: 1.3, fill: "#ff6ec9" },
     },
     center: { r: 1.8, color: "#5eead4", ring: { r: 3.2, width: 1, color: "#ff6ec9" } },
+    comp: { color: "#5eead4", opacity: 0.65 },
   },
 
   ardoise: {
@@ -139,5 +148,6 @@ export const ANALOG_STYLES = {
     minute: { w: 3, len: 38, color: "rgba(237, 238, 240, .92)" },
     second: { w: 1.2, len: 44, tail: 8, color: "#b7e778" },
     center: { size: 4, color: "#b7e778" },
+    comp: { color: "#edeef0", opacity: 0.6 },
   },
 };

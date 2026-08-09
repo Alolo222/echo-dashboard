@@ -194,14 +194,14 @@ serait caché sous le boîtier sur un écran rond.
 
 L'Echo Spot d'origine (sous Alexa, avant LineageOS/View Assist) affichait
 une horloge ronde à aiguilles, plein écran, sur fond uni — pas de photo
-ni d'infos superposées. Un petit bouton discret (en bas du cadran,
-masqué la nuit comme le reste) permet de retrouver ce rendu en
-alternative au digital : c'est un véritable écran à part, pas juste une
-autre police d'horloge — pas de fond dynamique, pas de météo, pas de
-date, juste les aiguilles (heure, minute et seconde — celle-ci avance en
-continu via une animation CSS, pas un recalcul JS chaque seconde, plus
-léger sur du matériel modeste) et, selon le style choisi, quelques
-graduations ou chiffres.
+de fond superposée. Un petit bouton discret (en bas du cadran, masqué la
+nuit comme le reste) permet de retrouver ce rendu en alternative au
+digital : c'est un véritable écran à part, pas juste une autre police
+d'horloge — pas de fond dynamique, juste les aiguilles (heure, minute et
+seconde — celle-ci avance en continu via une animation CSS, pas un
+recalcul JS chaque seconde, plus léger sur du matériel modeste), selon
+le style choisi quelques graduations ou chiffres, et, discrètement, la
+météo et la date (voir plus bas).
 
 | Digital | Analogique |
 |---|---|
@@ -239,6 +239,22 @@ card_mod:
 La nuit, ce fond n'est jamais utilisé — même en analogique, le mode nuit
 retombe sur son traitement habituel (fond quasi noir, peu de lumière
 émise).
+
+#### Météo et date sur le cadran
+
+Comme en digital, `show_weather`/`show_date` affichent la météo (icône +
+température de `weather_entity`) et la date sur le cadran analogique — en
+plus discret, à la manière d'un guichet de date sur une montre
+mécanique : la météo se love entre 10h et 11h, la date juste sous le
+centre, chacune dans la couleur du style choisi.
+
+![Météo et date sur les cinq styles](docs/screenshot-round-analog-complications.png)
+
+Les aiguilles (et les graduations/chiffres) restent toujours visibles
+par-dessus, comme sur une vraie montre à guichet : une aiguille peut
+passer devant la météo ou la date sans gêner la lecture, ni de l'une ni
+de l'autre. Comme en digital, ni la météo ni la date ne s'affichent la
+nuit.
 
 ![Aperçu du mode round à 480x480](docs/screenshot-round.png)
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.2.1
+
+- **Météo et date sur le cadran analogique**, en complication discrète
+  plutôt qu'absentes comme jusqu'ici : icône + température en haut à
+  gauche du centre, date juste en dessous, dans la couleur propre à
+  chaque style (`comp` dans `analog-styles.js`). Pilotées par les mêmes
+  `show_weather`/`show_date` qu'en digital, avec les mêmes conditions
+  (masquées la nuit, météo absente si l'entité est indisponible) — pas
+  de nouvelle option de config.
+- Icône réutilisée telle quelle de `_renderWeather` (même `<img>`, même
+  résolution d'URL) plutôt qu'un glyphe redessiné ou un `<image>` SVG :
+  c'est le seul mécanisme dont on sait qu'il garde les icônes Meteocons
+  animées (SMIL) sur ce genre d'appareil.
+- Les aiguilles (et graduations/chiffres) restent toujours visibles
+  par-dessus la météo/date, comme le guichet de date d'une montre
+  mécanique : la complication est un calque HTML séparé, positionné
+  *avant* le `<svg>` du cadran dans le DOM plutôt que dedans — le SVG
+  n'ayant pas de fond propre, l'ordre du DOM suffit à garantir l'ordre
+  d'affichage sans z-index ni `<foreignObject>`.
+- Corrigé en cours de route (style `clair`) : l'icône météo (blanche par
+  défaut) était quasi invisible sur son fond clair. `iconFilter:
+  "brightness(0)"` la repasse en silhouette encre pour ce style
+  uniquement, cohérent avec le reste de son habillage (aucune autre
+  couleur que l'encre).
+- Nouvelle capture `docs/screenshot-round-analog-complications.png`.
+
 ## 1.2.0
 
 - **Quatre nouveaux styles pour le cadran analogique** (mode round), en
