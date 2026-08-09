@@ -828,7 +828,7 @@ class W extends q {
         />
       `);
     const c = [12, 3, 6, 9].map((h, u) => {
-      const p = u * 90 * (Math.PI / 180), m = 34, _ = 50 + m * Math.sin(p), we = 50 - m * Math.cos(p);
+      const p = u * 90 * (Math.PI / 180), m = 41, _ = 50 + m * Math.sin(p), we = 50 - m * Math.cos(p);
       return oe`
         <text
           class="numeral"

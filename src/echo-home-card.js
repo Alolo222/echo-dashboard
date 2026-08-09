@@ -329,7 +329,12 @@ class EchoHomeCard extends LitElement {
     }
     const numerals = [12, 3, 6, 9].map((n, i) => {
       const angle = i * 90 * (Math.PI / 180);
-      const radius = 34;
+      // Même rayon que les graduations (radius = distance du bord
+      // interne des ticks, y1=5/y2=9) : les chiffres doivent être sur le
+      // même cercle qu'elles, pas ramenés vers le centre — sinon ils
+      // paraissent "flotter" au milieu du cadran au lieu de marquer
+      // l'heure à la même distance du bord que les autres graduations.
+      const radius = 41;
       // sin/cos plutôt que 4 positions écrites en dur : évite de se
       // tromper de signe pour l'une des quatre (cf. angle depuis midi,
       // sens horaire — x = sin, y = -cos).

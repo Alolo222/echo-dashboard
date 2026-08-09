@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.4
+
+- Chiffres (12/3/6/9) trop ramenés vers le centre du cadran (rayon 34)
+  par rapport aux graduations des autres heures (rayon 41-45) — ils
+  paraissaient flotter au milieu plutôt que marquer l'heure au même
+  niveau que le reste des graduations. Repositionnés au rayon 41, sur
+  le même cercle que le bord interne des graduations.
+
 ## 1.1.3
 
 - Ajout d'une **aiguille des secondes** qui avance en continu, via une
