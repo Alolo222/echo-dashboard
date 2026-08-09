@@ -380,7 +380,10 @@ class EchoHomeCard extends LitElement {
          --_clock-size/--_date-size (donc correct en mode round aussi),
          mais avec des coefficients propres à Nunito — à réajuster si la
          police change (voir --echo-home-font-family). */
-      top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.4515);
+      /* +0.08*D par rapport au calage "encre parfaitement centrée"
+         ci-dessus : léger rapprochement de l'horloge, demandé par
+         l'utilisateur une fois la symétrie de base en place. */
+      top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.5315);
       left: 50%;
       transform: translateX(-50%);
       line-height: 1;
@@ -392,8 +395,8 @@ class EchoHomeCard extends LitElement {
 
     .weather {
       position: absolute;
-      top: clamp(12px, 4vh, 28px);
-      left: clamp(12px, 5%, 32px);
+      top: clamp(8px, 3vh, 20px);
+      left: clamp(8px, 3.5%, 22px);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -405,7 +408,7 @@ class EchoHomeCard extends LitElement {
        en haut à la place. */
     .card.round .weather {
       left: 50%;
-      top: clamp(28px, 15%, 56px);
+      top: clamp(20px, 11%, 40px);
       transform: translateX(-50%);
     }
 

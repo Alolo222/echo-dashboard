@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+- Ajustements fins demandés après la 1.0.7 : météo un peu plus dans le
+  coin (top/left réduits d'environ un tiers), date légèrement remontée
+  (~6px, coefficient du calcul d'encre ajusté de 0.4515 à 0.5315×D).
+
 ## 1.0.7
 
 - **Bloc météo** : retour au retrait d'origine (1.0.4). Les 1.0.5/1.0.6
