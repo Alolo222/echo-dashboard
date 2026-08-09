@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.4.1
+
+- **Deux nouveaux types d'arrière-plan** (`background`/`analog_background`,
+  cf. 1.4.0) pour des photos aléatoires :
+  - `picsum` : [Lorem Picsum](https://picsum.photos), aucune clé requise
+    mais aucun filtrage par thème possible non plus — en creusant la
+    question ("comment View Assist fait pour piocher au hasard sur
+    Unsplash sans aucun réglage ?"), il s'avère que son option "Download
+    random image from Unsplash" appelle en réalité `unsplash.it`, un
+    ancien domaine qui redirige aujourd'hui vers ce même service Picsum
+    — ce qui explique à la fois l'absence de réglage et le côté "vraiment
+    aléatoire" observés. `width`/`height` suivent la taille réelle de
+    l'écran par défaut (`window.innerWidth`/`innerHeight`), pas la peine
+    de les préciser sauf pour économiser de la bande passante.
+  - `unsplash` : la vraie API Unsplash, avec un vrai filtrage par
+    mot-clé (`query`) et/ou orientation — clé API gratuite requise
+    (`access_key`, compte développeur sur unsplash.com/developers,
+    palier "Demo" 50 requêtes/heure). Nouvel appel `fetch()` direct
+    (pas `hass.callWS`, service tiers) à chaque rotation ; une clé
+    invalide, un quota dépassé ou une coupure réseau n'interrompent
+    jamais l'affichage — avertit en console et garde la dernière photo
+    chargée avec succès plutôt que de planter ou vider l'écran.
+- Les deux jamais en mode round pour `analog_background` (même principe
+  que les autres types dynamiques depuis 1.4.0) ; jamais la nuit.
+- Corrigé en cours de route : passer d'un type à un autre (ex. satellite
+  → unsplash) pouvait laisser affichée l'ancienne image le temps du
+  premier chargement, ou pour de bon si ce premier chargement échouait
+  (clé invalide dès le départ) — `media_folder` avait la même faille.
+  Les deux effacent maintenant la valeur précédente avant de charger la
+  nouvelle, un repli franc vers le dégradé par défaut valant mieux
+  qu'une image d'un tout autre type qui n'a plus de rapport avec la
+  config actuelle.
+- Vérifié par Playwright (`window.fetch` mocké pour simuler l'API
+  Unsplash) : succès, clé manquante (repli à la validation), erreur API
+  (401), orientation invalide, rotation Picsum (nouveau tirage après
+  l'intervalle), taille par défaut vs personnalisée, refus en mode
+  round, non-régression complète.
+
 ## 1.4.0
 
 - **Types d'arrière-plan précis**, pour `background` (digital) et

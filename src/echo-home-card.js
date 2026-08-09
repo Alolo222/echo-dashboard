@@ -5,6 +5,7 @@ import { formatShortDate, formatTime, localizeCondition } from "./format.js";
 import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE } from "./analog-styles.js";
 import {
   BackgroundSource,
+  DYNAMIC_BACKGROUND_TYPES,
   normalizeBackgroundConfig,
   validateBackgroundConfig,
 } from "./background.js";
@@ -144,7 +145,7 @@ class EchoHomeCard extends LitElement {
       );
     merged.background = validateBackgroundConfig(
       normalizeBackgroundConfig(merged.background, false, "satellite"),
-      ["satellite", "css", "url", "media_folder"],
+      ["css", ...DYNAMIC_BACKGROUND_TYPES],
       "satellite",
       "background",
       warnBg
@@ -155,7 +156,7 @@ class EchoHomeCard extends LitElement {
         merged.analog_background_photo,
         "style"
       ),
-      ["style", "satellite", "css", "url", "media_folder"],
+      ["style", "css", ...DYNAMIC_BACKGROUND_TYPES],
       "style",
       "analog_background",
       warnBg
@@ -167,7 +168,7 @@ class EchoHomeCard extends LitElement {
     // cause par elle.
     if (
       merged.layout === "round" &&
-      ["satellite", "url", "media_folder"].includes(analogBackground.type)
+      DYNAMIC_BACKGROUND_TYPES.includes(analogBackground.type)
     ) {
       warnBg("analog_background.type", "style");
       analogBackground = { type: "style" };
@@ -416,7 +417,7 @@ class EchoHomeCard extends LitElement {
       showAnalog &&
       !isRound &&
       !isNightMode &&
-      ["satellite", "url", "media_folder"].includes(cfg.analog_background.type);
+      DYNAMIC_BACKGROUND_TYPES.includes(cfg.analog_background.type);
     // La météo n'a pas sa place la nuit : c'est justement ce que le mode
     // nuit cherche à éviter (lumière/information superflue sur un écran
     // de chevet). Entité absente/indisponible => bloc simplement absent,

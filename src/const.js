@@ -62,10 +62,15 @@ export const DEFAULT_CONFIG = {
   //   - "media_folder" : { type: "media_folder", path: "media-source://..." }
   //     — dossier local HA (Media Source), parcouru automatiquement ;
   //     mêmes fit/interval que "url".
-  // Jamais de fond dynamique/photo (satellite/url/media_folder) en mode
-  // round pour analog_background : l'écran à part sur fond uni
-  // reproduit volontairement l'Echo Spot d'origine (cf. README) —
-  // retombe sur "style" si configuré quand même.
+  //   - "picsum" : photo vraiment aléatoire (Lorem Picsum), aucune clé
+  //     requise mais aucun filtrage par thème possible. width/height
+  //     optionnels (sinon la taille réelle de l'écran).
+  //   - "unsplash" : photo aléatoire filtrable (query/orientation), clé
+  //     API gratuite requise (access_key, cf. unsplash.com/developers).
+  // Jamais de fond dynamique/photo (satellite/url/media_folder/picsum/
+  // unsplash) en mode round pour analog_background : l'écran à part sur
+  // fond uni reproduit volontairement l'Echo Spot d'origine (cf.
+  // README) — retombe sur "style" si configuré quand même.
   background: null,
   analog_background: null,
   analog_background_photo: false, // ANCIEN réglage (1.3.0), toujours

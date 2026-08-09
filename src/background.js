@@ -2,16 +2,28 @@
 // réglage indépendant — cf. background/analog_background dans const.js) :
 // une image ou un dossier d'images en local sur Home Assistant (Media
 // Source, parcouru automatiquement), une source web (URL fixe ou
-// plusieurs avec rotation, indépendante de satellite_entity), le fond
-// dynamique de satellite_entity comme avant ("satellite"), un fond
-// CSS uni/dégradé personnalisé ("css"), ou — analogique uniquement — le
-// dégradé par défaut du style choisi ("style").
+// plusieurs avec rotation, indépendante de satellite_entity), une photo
+// aléatoire (Lorem Picsum, sans clé — ou Unsplash, avec recherche par
+// mot-clé, clé API requise), le fond dynamique de satellite_entity comme
+// avant ("satellite"), un fond CSS uni/dégradé personnalisé ("css"), ou
+// — analogique uniquement — le dégradé par défaut du style choisi
+// ("style").
 
 const VALID_FITS = ["cover", "contain", "fill"];
 const DEFAULT_FIT = "cover";
 const DEFAULT_INTERVAL = 300; // secondes — un diaporama photo classique
 // change toutes les quelques minutes, pas toutes les secondes ni une
-// fois par heure.
+// fois par heure. Suffisamment long pour rester très en dessous du
+// quota Unsplash (50 requêtes/heure en accès "Demo" gratuit) : à 300s,
+// 12 requêtes/heure au pire.
+const VALID_ORIENTATIONS = ["landscape", "portrait", "squarish"];
+
+// Types "photo" — jamais en mode round pour analog_background (écran à
+// part sur fond uni, cf. echo-home-card.js) et jamais la nuit, à la
+// différence de "css"/"style" — exporté pour rester la seule liste à
+// tenir à jour (echo-home-card.js la réutilise telle quelle plutôt que
+// de la dupliquer).
+export const DYNAMIC_BACKGROUND_TYPES = ["satellite", "url", "media_folder", "picsum", "unsplash"];
 
 function backgroundSizeFor(fit) {
   if (fit === "contain") return "contain";
@@ -68,6 +80,14 @@ export function validateBackgroundConfig(parsed, validTypes, defaultType, label,
   if (result.type === "media_folder" && !result.path) {
     warn(`${label}.path`, "satellite");
     result.type = "satellite";
+  }
+  if (result.type === "unsplash" && !result.access_key) {
+    warn(`${label}.access_key`, "satellite");
+    result.type = "satellite";
+  }
+  if (result.orientation != null && !VALID_ORIENTATIONS.includes(result.orientation)) {
+    warn(`${label}.orientation`, "aucune");
+    delete result.orientation;
   }
   return result;
 }
@@ -167,7 +187,7 @@ export class BackgroundSource {
         const urls = parsed.urls?.length ? parsed.urls : [parsed.url];
         this._images = urls;
         this.cssValue = cssUrlBackground(urls[0], parsed.fit || DEFAULT_FIT);
-        this._startRotation(hass, parsed, token, (url) => url);
+        this._startRotation(hass, parsed, token);
         return;
       }
       case "media_folder": {
@@ -175,11 +195,101 @@ export class BackgroundSource {
           this.cssValue = null;
           return;
         }
+        // Efface une éventuelle valeur d'un type précédent (satellite,
+        // url...) le temps du parcours/de la résolution : sinon cette
+        // valeur périmée resterait affichée telle quelle en cas d'échec
+        // du tout premier chargement (repéré en testant "unsplash",
+        // même souci) — un repli vers le dégradé par défaut, plus
+        // franc, vaut mieux qu'une image d'un tout autre type qui n'a
+        // plus de rapport avec la config actuelle.
+        this.cssValue = null;
         this._loadMediaFolder(hass, parsed, token);
+        return;
+      }
+      case "picsum": {
+        if (context.isNightMode) {
+          this.cssValue = null;
+          return;
+        }
+        this._setPicsumUrl(parsed);
+        // Contrairement à "url"/"media_folder" (qui ne tournent que s'il
+        // y a plusieurs images à faire alterner), "picsum" tourne
+        // toujours : chaque image y est par nature un tirage différent,
+        // pas une parmi une liste fixe.
+        this._timer = setInterval(() => {
+          if (token !== this._token) return;
+          this._setPicsumUrl(parsed);
+          this._onChange();
+        }, (parsed.interval || DEFAULT_INTERVAL) * 1000);
+        return;
+      }
+      case "unsplash": {
+        if (context.isNightMode) {
+          this.cssValue = null;
+          return;
+        }
+        // Cf. commentaire équivalent sur "media_folder" ci-dessus.
+        this.cssValue = null;
+        this._loadUnsplash(parsed, token);
+        this._timer = setInterval(() => {
+          if (token !== this._token) return;
+          this._loadUnsplash(parsed, token);
+        }, (parsed.interval || DEFAULT_INTERVAL) * 1000);
         return;
       }
       default:
         this.cssValue = null;
+    }
+  }
+
+  // Lorem Picsum (picsum.photos) : aucune clé requise, mais aucun
+  // filtrage par thème/mot-clé possible non plus — une photo vraiment
+  // quelconque à chaque tirage (cf. RANDOM_IMAGE_URL de View Assist,
+  // qui utilise ce même service via l'ancien domaine unsplash.it). La
+  // taille de l'image demandée suit le viewport réel (fenêtre = écran
+  // sur un Echo Show/Spot en usage normal, cf. gotchas matériel) sauf
+  // si width/height sont précisés — ?random=<horodatage changeant>
+  // pour forcer une image différente à chaque appel malgré le cache du
+  // navigateur (une URL identique reste sinon mise en cache).
+  _setPicsumUrl(parsed) {
+    const width = parsed.width || Math.round(window.innerWidth) || 960;
+    const height = parsed.height || Math.round(window.innerHeight) || 480;
+    const url = `https://picsum.photos/${width}/${height}?random=${Date.now()}`;
+    this.cssValue = cssUrlBackground(url, parsed.fit || DEFAULT_FIT);
+  }
+
+  // API Unsplash officielle (contrairement à "picsum" ci-dessus) :
+  // filtrage par mot-clé (query) et/ou orientation possible, mais
+  // access_key requis (compte développeur gratuit sur
+  // unsplash.com/developers — palier "Demo" plafonné à 50 requêtes/
+  // heure, cf. DEFAULT_INTERVAL). Pas de suivi des téléchargements
+  // (download_location, recommandé par les règles d'usage de l'API pour
+  // un usage à grande échelle) : hors de propos pour un cadre photo
+  // personnel, mais à garder en tête pour un usage plus large.
+  async _loadUnsplash(parsed, token) {
+    try {
+      const params = new URLSearchParams({ client_id: parsed.access_key });
+      if (parsed.query) params.set("query", parsed.query);
+      if (parsed.orientation) params.set("orientation", parsed.orientation);
+      if (parsed.collections) params.set("collections", parsed.collections);
+      const response = await fetch(`https://api.unsplash.com/photos/random?${params}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (token !== this._token) return; // reconfigurée entre-temps
+      const url = data?.urls?.regular || data?.urls?.full;
+      if (!url) throw new Error("réponse Unsplash sans URL d'image exploitable");
+      this.cssValue = cssUrlBackground(url, parsed.fit || DEFAULT_FIT);
+      this._onChange();
+    } catch (err) {
+      if (token !== this._token) return;
+      // Ne casse jamais le rendu (clé invalide, quota dépassé, hors
+      // ligne...) : garde la dernière image affichée plutôt que de la
+      // vider, et retente naturellement au prochain intervalle plutôt
+      // que de s'acharner.
+      console.warn(
+        "[echo-home-card] impossible de récupérer une photo Unsplash (clé invalide, quota dépassé, ou hors-ligne ?)",
+        err
+      );
     }
   }
 
@@ -197,7 +307,7 @@ export class BackgroundSource {
         return;
       }
       await this._showMediaAt(hass, parsed, token, 0);
-      this._startRotation(hass, parsed, token, (id) => resolveMedia(hass, id));
+      this._startRotation(hass, parsed, token);
     } catch (err) {
       if (token !== this._token) return;
       console.warn(
@@ -228,7 +338,7 @@ export class BackgroundSource {
   // "media_folder" (résolution à chaque image, cf. _showMediaAt) —
   // seulement démarrée si plusieurs images (une source à une seule image
   // n'a pas besoin de minuteur).
-  _startRotation(hass, parsed, token, resolve) {
+  _startRotation(hass, parsed, token) {
     if (this._images.length <= 1) return;
     const intervalMs = (parsed.interval || DEFAULT_INTERVAL) * 1000;
     this._timer = setInterval(async () => {

@@ -184,6 +184,8 @@ un objet `{type, ...}` précisant la source :
 | `css` | N'importe quelle valeur CSS `background` (couleur unie, dégradé, transparent...) | `value` |
 | `url` | Une image web, ou plusieurs qui tournent en diaporama — indépendant de `satellite_entity` | `url` ou `urls`, `fit`, `interval` |
 | `media_folder` | Dossier d'images en local sur Home Assistant, parcouru automatiquement (Media Source) | `path`, `fit`, `interval` |
+| `picsum` | Photo vraiment aléatoire ([Lorem Picsum](https://picsum.photos)), aucune clé requise — mais aucun filtrage par thème possible non plus | `width`, `height`, `fit`, `interval` |
+| `unsplash` | Photo aléatoire [Unsplash](https://unsplash.com), filtrable par mot-clé/orientation — clé API gratuite requise | `access_key`, `query`, `orientation`, `fit`, `interval` |
 
 ```yaml
 # Une image fixe, hébergée ailleurs
@@ -205,6 +207,17 @@ analog_background:
   type: media_folder
   path: media-source://media_source/local/echo-photos
   interval: 900
+
+# Photo aléatoire, sans filtrage possible (voir la section Picsum/Unsplash)
+background:
+  type: picsum
+
+# Photo aléatoire filtrée par thème (voir la section Picsum/Unsplash)
+background:
+  type: unsplash
+  access_key: VOTRE_CLE_UNSPLASH
+  query: scandinavian landscape
+  orientation: landscape   # landscape / portrait / squarish
 
 # Couleur/dégradé personnalisé
 analog_background:
@@ -228,14 +241,50 @@ de récursion dans les sous-dossiers), garde les fichiers image, et les
 fait tourner comme `url` avec plusieurs `urls`. Ajouter ou retirer une
 photo dans le dossier suffit — pas besoin de retoucher la config.
 
+### Photo aléatoire (`picsum` / `unsplash`)
+
+Deux services externes, pour deux besoins différents :
+
+- **`picsum`** — [Lorem Picsum](https://picsum.photos) sert une photo
+  vraiment quelconque à chaque tirage, sans clé ni compte. C'est ce
+  qu'utilise en réalité l'option "Download random image from Unsplash"
+  de View Assist elle-même : malgré son nom, elle appelle
+  `unsplash.it`, un ancien domaine qui redirige aujourd'hui vers Picsum
+  — d'où l'absence de réglage de thème là-bas aussi. `width`/`height`
+  suivent la taille réelle de l'écran par défaut (pas la peine de les
+  préciser sauf pour économiser de la bande passante, ex. `width: 480`
+  en mode round).
+- **`unsplash`** — la vraie [API
+  Unsplash](https://unsplash.com/documentation), qui permet de filtrer
+  par mot-clé (`query`, ex. `scandinavian landscape`) et/ou orientation
+  (`orientation`). Demande une clé d'accès gratuite : créer un compte
+  développeur sur [unsplash.com/developers](https://unsplash.com/developers),
+  créer une application, copier sa "Access Key" dans `access_key`. Le
+  palier gratuit ("Demo") est plafonné à 50 requêtes/heure — largement
+  suffisant à l'intervalle par défaut (300s ⇒ 12 requêtes/heure).
+
+```yaml
+background:
+  type: unsplash
+  access_key: !secret unsplash_access_key   # via secrets.yaml, pas en clair
+  query: scandinavian landscape
+  orientation: landscape
+  interval: 1800   # toutes les 30 min, large marge sous le quota
+```
+
+Une clé invalide, un quota dépassé, ou une simple coupure réseau
+n'interrompent jamais l'affichage : la carte avertit en console et
+garde la dernière photo chargée avec succès plutôt que de planter ou
+d'afficher un écran vide.
+
 ### Fond dynamique en mode round
 
 `analog_background` accepte les mêmes types qu'en mode large, à
-l'exception des types dynamiques (`satellite`/`url`/`media_folder`) :
-l'écran à part sur fond uni reproduit volontairement l'Echo Spot
-d'origine (voir "Horloge analogique" plus bas), donc jamais de photo
-là — un type dynamique configuré quand même retombe silencieusement
-(avec un avertissement en console) sur `style`.
+l'exception des types dynamiques (`satellite`/`url`/`media_folder`/
+`picsum`/`unsplash`) : l'écran à part sur fond uni reproduit
+volontairement l'Echo Spot d'origine (voir "Horloge analogique" plus
+bas), donc jamais de photo là — un type dynamique configuré quand même
+retombe silencieusement (avec un avertissement en console) sur `style`.
 
 ### Nuit et rétrocompatibilité
 
