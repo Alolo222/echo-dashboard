@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.3
+
+- Ajout d'une **aiguille des secondes** qui avance en continu, via une
+  animation CSS (`@keyframes` + `animation-delay` négatif calé sur
+  l'instant d'entrée en mode analogique) plutôt qu'un recalcul JS par
+  seconde — un seul `transform` animé, composité par le GPU, pas de
+  re-rendu Lit ni de repaint du reste du cadran à chaque frame. Vérifié :
+  l'angle de l'aiguille avance de 6°/s (soit 360° en 60s), comme attendu.
+- Chiffres à 12/3/6/9 (plutôt qu'une graduation) sur les positions
+  correspondantes, comme sur une vraie photo du cadran de l'Echo Spot
+  d'origine trouvée en ligne — le reste des heures garde de simples
+  graduations fines.
+- Dégradé de fond par défaut affiné pour se rapprocher de cette même
+  photo (turquoise en haut, bleu-violet en bas), toujours personnalisable
+  via `--echo-home-analog-background`.
+
 ## 1.1.2
 
 - Le mode analogique était jusque-là juste une autre présentation de

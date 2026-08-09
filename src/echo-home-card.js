@@ -257,6 +257,12 @@ class EchoHomeCard extends LitElement {
         ? null
         : this._backgroundValue(satelliteState, isNightMode);
     const cardStyle = this._cardStyle(backgroundValue);
+    // L'aiguille des secondes tourne en continu via une animation CSS
+    // (cf. _renderAnalogClock) plutôt qu'un rafraîchissement JS par
+    // seconde — invalidée dès qu'on quitte l'analogique, pour être
+    // recalculée sur le bon instant la prochaine fois qu'on y rentre
+    // (l'élément SVG est recréé à chaque bascule, cf. plus bas).
+    if (!showAnalog) this._secondHandDelay = undefined;
 
     return html`
       <div
@@ -303,22 +309,54 @@ class EchoHomeCard extends LitElement {
     // le cadran est pensé plein écran (cf. --_analog-size), pas un petit
     // médaillon au milieu — donc pas de marge à ménager entre les
     // graduations et le bord du cercle comme sur une version plus petite.
-    // Écran dédié, sans météo ni date superposées (cf. render()) : les
-    // 12 graduations sont toutes affichées, rien à éviter.
+    // Chiffres à 12/3/6/9 (cf. NUMERAL_ANGLES plus bas) plutôt qu'une
+    // graduation, comme sur le cadran d'origine de l'Echo Spot (repéré
+    // sur une vraie photo de l'appareil) — juste des graduations fines
+    // sur les 8 autres heures.
     const ticks = [];
     for (let i = 0; i < 12; i++) {
-      const major = i % 3 === 0;
+      if (i % 3 === 0) continue;
       ticks.push(svg`
         <line
           class="tick"
           x1="50"
-          y1=${major ? 3 : 5}
+          y1="5"
           x2="50"
-          y2=${major ? 12 : 9}
-          stroke-width=${major ? 2 : 1}
+          y2="9"
           transform="rotate(${i * 30} 50 50)"
         />
       `);
+    }
+    const numerals = [12, 3, 6, 9].map((n, i) => {
+      const angle = i * 90 * (Math.PI / 180);
+      const radius = 34;
+      // sin/cos plutôt que 4 positions écrites en dur : évite de se
+      // tromper de signe pour l'une des quatre (cf. angle depuis midi,
+      // sens horaire — x = sin, y = -cos).
+      const x = 50 + radius * Math.sin(angle);
+      const y = 50 - radius * Math.cos(angle);
+      return svg`
+        <text
+          class="numeral"
+          x=${x}
+          y=${y}
+          font-size="11"
+          text-anchor="middle"
+          dominant-baseline="central"
+        >${n}</text>
+      `;
+    });
+    // Aiguille des secondes : tourne en continu via une animation CSS
+    // (@keyframes, cf. static styles) plutôt qu'un recalcul JS par
+    // seconde — un seul transform animé, composité par le GPU, coûte
+    // bien moins cher qu'un re-rendu Lit chaque seconde sur du matériel
+    // modeste (cf. gotchas Echo Show/Spot). --_second-hand-delay décale
+    // l'animation pour qu'elle démarre déjà à la bonne position (calculé
+    // une fois par entrée en mode analogique, cf. render()) plutôt que
+    // de repartir de midi à chaque fois.
+    if (this._secondHandDelay === undefined) {
+      const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+      this._secondHandDelay = `-${seconds}s`;
     }
     return html`
       <svg
@@ -328,6 +366,7 @@ class EchoHomeCard extends LitElement {
         aria-label=${formatTime(now, locale, timeFormat)}
       >
         <g class="ticks">${ticks}</g>
+        <g class="numerals">${numerals}</g>
         <line
           class="hand hand-hour"
           x1="50"
@@ -343,6 +382,14 @@ class EchoHomeCard extends LitElement {
           x2="50"
           y2="15"
           transform="rotate(${minuteAngle} 50 50)"
+        />
+        <line
+          class="hand hand-second"
+          x1="50"
+          y1="58"
+          x2="50"
+          y2="8"
+          style="animation-delay: ${this._secondHandDelay}"
         />
         <circle class="hand-center" cx="50" cy="50" r="2" />
       </svg>
@@ -588,7 +635,7 @@ class EchoHomeCard extends LitElement {
     .card.analog {
       background: var(
         --echo-home-analog-background,
-        radial-gradient(130% 130% at 25% 15%, #2f6fb3 0%, #163c66 55%, #0a1f38 100%)
+        linear-gradient(160deg, #1aa19b 0%, #2f6fb3 45%, #4a3d82 100%)
       );
     }
 
@@ -619,7 +666,14 @@ class EchoHomeCard extends LitElement {
 
     .analog-clock .tick {
       stroke: currentColor;
+      stroke-width: 1;
       opacity: 0.75;
+    }
+
+    .analog-clock .numeral {
+      fill: currentColor;
+      font-weight: 300;
+      opacity: 0.9;
     }
 
     .analog-clock .hand {
@@ -633,6 +687,29 @@ class EchoHomeCard extends LitElement {
 
     .analog-clock .hand-minute {
       stroke-width: 2.6;
+    }
+
+    /* Tourne en continu via une animation CSS plutôt qu'un recalcul JS
+       par seconde (cf. commentaire sur --_second-hand-delay dans
+       _renderAnalogClock) — un seul transform animé, composité par le
+       GPU, sans repeindre le reste du cadran à chaque frame.
+       transform-origin en unités du viewBox (50px 50px = le centre du
+       cadran, pas le centre de la boîte englobante du trait lui-même,
+       qui serait décalé à cause de la petite queue derrière le pivot). */
+    .analog-clock .hand-second {
+      stroke-width: 1;
+      opacity: 0.85;
+      transform-origin: 50px 50px;
+      animation: spin-second-hand 60s linear infinite;
+    }
+
+    @keyframes spin-second-hand {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .analog-clock .hand-center {

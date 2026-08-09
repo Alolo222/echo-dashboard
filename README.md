@@ -192,7 +192,9 @@ ni d'infos superposées. Un petit bouton discret (en bas du cadran,
 masqué la nuit comme le reste) permet de retrouver ce rendu en
 alternative au digital : c'est un véritable écran à part, pas juste une
 autre police d'horloge — pas de fond dynamique, pas de météo, pas de
-date, juste les aiguilles.
+date, juste les aiguilles (heure, minute et seconde — celle-ci avance en
+continu via une animation CSS, pas un recalcul JS chaque seconde, plus
+léger sur du matériel modeste) et des chiffres à 12/3/6/9.
 
 | Digital | Analogique |
 |---|---|
