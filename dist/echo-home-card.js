@@ -1,12 +1,12 @@
-var ge = Object.defineProperty;
-var ve = (r, e, t) => e in r ? ge(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
-var q = (r, e, t) => ve(r, typeof e != "symbol" ? e + "" : e, t);
+var $e = Object.defineProperty;
+var ve = (r, e, t) => e in r ? $e(r, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[e] = t;
+var R = (r, e, t) => ve(r, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const H = globalThis, B = H.ShadowRoot && (H.ShadyCSS === void 0 || H.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, F = Symbol(), K = /* @__PURE__ */ new WeakMap();
+const q = globalThis, B = q.ShadowRoot && (q.ShadyCSS === void 0 || q.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, F = Symbol(), K = /* @__PURE__ */ new WeakMap();
 let ue = class {
   constructor(e, t, s) {
     if (this._$cssResult$ = !0, s !== F) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -35,7 +35,7 @@ const ye = (r) => new ue(typeof r == "string" ? r : r + "", void 0, F), be = (r,
 }, we = (r, e) => {
   if (B) r.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
-    const s = document.createElement("style"), i = H.litNonce;
+    const s = document.createElement("style"), i = q.litNonce;
     i !== void 0 && s.setAttribute("nonce", i), s.textContent = t.cssText, r.appendChild(s);
   }
 }, Z = B ? (r) => r : (r) => r instanceof CSSStyleSheet ? ((e) => {
@@ -294,9 +294,9 @@ w.elementStyles = [], w.shadowRootOptions = { mode: "open" }, w[S("elementProper
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const C = globalThis, Q = (r) => r, M = C.trustedTypes, Y = M ? M.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", j = `[ 	
-\f\r]`, x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ee = /-->/g, te = />/g, $ = RegExp(`>|${j}(?:([^\\s"'>=/]+)(${j}*=${j}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), se = /'/g, ie = /"/g, me = /^(?:script|style|textarea|title)$/i, Te = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), N = Te(1), A = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), re = /* @__PURE__ */ new WeakMap(), g = y.createTreeWalker(y, 129);
+const C = globalThis, Q = (r) => r, H = C.trustedTypes, Y = H ? H.createPolicy("lit-html", { createHTML: (r) => r }) : void 0, pe = "$lit$", m = `lit$${Math.random().toFixed(9).slice(2)}$`, _e = "?" + m, Pe = `<${_e}>`, y = document, z = () => y.createComment(""), P = (r) => r === null || typeof r != "object" && typeof r != "function", J = Array.isArray, Ue = (r) => J(r) || typeof (r == null ? void 0 : r[Symbol.iterator]) == "function", j = `[ 	
+\f\r]`, x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ee = /-->/g, te = />/g, g = RegExp(`>|${j}(?:([^\\s"'>=/]+)(${j}*=${j}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), se = /'/g, ie = /"/g, me = /^(?:script|style|textarea|title)$/i, Te = (r) => (e, ...t) => ({ _$litType$: r, strings: e, values: t }), N = Te(1), A = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), re = /* @__PURE__ */ new WeakMap(), $ = y.createTreeWalker(y, 129);
 function fe(r, e) {
   if (!J(r) || !r.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return Y !== void 0 ? Y.createHTML(e) : e;
@@ -307,8 +307,8 @@ const Oe = (r, e) => {
   for (let l = 0; l < t; l++) {
     const a = r[l];
     let c, h, u = -1, p = 0;
-    for (; p < a.length && (o.lastIndex = p, h = o.exec(a), h !== null); ) p = o.lastIndex, o === x ? h[1] === "!--" ? o = ee : h[1] !== void 0 ? o = te : h[2] !== void 0 ? (me.test(h[2]) && (i = RegExp("</" + h[2], "g")), o = $) : h[3] !== void 0 && (o = $) : o === $ ? h[0] === ">" ? (o = i != null ? i : x, u = -1) : h[1] === void 0 ? u = -2 : (u = o.lastIndex - h[2].length, c = h[1], o = h[3] === void 0 ? $ : h[3] === '"' ? ie : se) : o === ie || o === se ? o = $ : o === ee || o === te ? o = x : (o = $, i = void 0);
-    const _ = o === $ && r[l + 1].startsWith("/>") ? " " : "";
+    for (; p < a.length && (o.lastIndex = p, h = o.exec(a), h !== null); ) p = o.lastIndex, o === x ? h[1] === "!--" ? o = ee : h[1] !== void 0 ? o = te : h[2] !== void 0 ? (me.test(h[2]) && (i = RegExp("</" + h[2], "g")), o = g) : h[3] !== void 0 && (o = g) : o === g ? h[0] === ">" ? (o = i != null ? i : x, u = -1) : h[1] === void 0 ? u = -2 : (u = o.lastIndex - h[2].length, c = h[1], o = h[3] === void 0 ? g : h[3] === '"' ? ie : se) : o === ie || o === se ? o = g : o === ee || o === te ? o = x : (o = g, i = void 0);
+    const _ = o === g && r[l + 1].startsWith("/>") ? " " : "";
     n += o === x ? a + Pe : u >= 0 ? (s.push(c), a.slice(0, u) + pe + a.slice(u) + m + _) : a + m + (u === -2 ? l : _);
   }
   return [fe(r, n + (r[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), s];
@@ -319,21 +319,21 @@ class U {
     this.parts = [];
     let n = 0, o = 0;
     const l = e.length - 1, a = this.parts, [c, h] = Oe(e, t);
-    if (this.el = U.createElement(c, s), g.currentNode = this.el.content, t === 2 || t === 3) {
+    if (this.el = U.createElement(c, s), $.currentNode = this.el.content, t === 2 || t === 3) {
       const u = this.el.content.firstChild;
       u.replaceWith(...u.childNodes);
     }
-    for (; (i = g.nextNode()) !== null && a.length < l; ) {
+    for (; (i = $.nextNode()) !== null && a.length < l; ) {
       if (i.nodeType === 1) {
         if (i.hasAttributes()) for (const u of i.getAttributeNames()) if (u.endsWith(pe)) {
           const p = h[o++], _ = i.getAttribute(u).split(m), O = /([.?@])?(.*)/.exec(p);
-          a.push({ type: 1, index: n, name: O[2], strings: _, ctor: O[1] === "." ? He : O[1] === "?" ? Me : O[1] === "@" ? Re : R }), i.removeAttribute(u);
+          a.push({ type: 1, index: n, name: O[2], strings: _, ctor: O[1] === "." ? qe : O[1] === "?" ? He : O[1] === "@" ? Me : M }), i.removeAttribute(u);
         } else u.startsWith(m) && (a.push({ type: 6, index: n }), i.removeAttribute(u));
         if (me.test(i.tagName)) {
           const u = i.textContent.split(m), p = u.length - 1;
           if (p > 0) {
-            i.textContent = M ? M.emptyScript : "";
-            for (let _ = 0; _ < p; _++) i.append(u[_], z()), g.nextNode(), a.push({ type: 2, index: ++n });
+            i.textContent = H ? H.emptyScript : "";
+            for (let _ = 0; _ < p; _++) i.append(u[_], z()), $.nextNode(), a.push({ type: 2, index: ++n });
             i.append(u[p], z());
           }
         }
@@ -370,16 +370,16 @@ class Ne {
   u(e) {
     var c;
     const { el: { content: t }, parts: s } = this._$AD, i = ((c = e == null ? void 0 : e.creationScope) != null ? c : y).importNode(t, !0);
-    g.currentNode = i;
-    let n = g.nextNode(), o = 0, l = 0, a = s[0];
+    $.currentNode = i;
+    let n = $.nextNode(), o = 0, l = 0, a = s[0];
     for (; a !== void 0; ) {
       if (o === a.index) {
         let h;
-        a.type === 2 ? h = new T(n, n.nextSibling, this, e) : a.type === 1 ? h = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (h = new qe(n, this, e)), this._$AV.push(h), a = s[++l];
+        a.type === 2 ? h = new T(n, n.nextSibling, this, e) : a.type === 1 ? h = new a.ctor(n, a.name, a.strings, this, e) : a.type === 6 && (h = new Re(n, this, e)), this._$AV.push(h), a = s[++l];
       }
-      o !== (a == null ? void 0 : a.index) && (n = g.nextNode(), o++);
+      o !== (a == null ? void 0 : a.index) && (n = $.nextNode(), o++);
     }
-    return g.currentNode = y, i;
+    return $.currentNode = y, i;
   }
   p(e) {
     let t = 0;
@@ -450,7 +450,7 @@ class T {
     this._$AM === void 0 && (this._$Cv = e, (t = this._$AP) == null || t.call(this, e));
   }
 }
-class R {
+class M {
   get tagName() {
     return this.element.tagName;
   }
@@ -475,7 +475,7 @@ class R {
     e === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e != null ? e : "");
   }
 }
-class He extends R {
+class qe extends M {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -483,7 +483,7 @@ class He extends R {
     this.element[this.name] = e === d ? void 0 : e;
   }
 }
-class Me extends R {
+class He extends M {
   constructor() {
     super(...arguments), this.type = 4;
   }
@@ -491,7 +491,7 @@ class Me extends R {
     this.element.toggleAttribute(this.name, !!e && e !== d);
   }
 }
-class Re extends R {
+class Me extends M {
   constructor(e, t, s, i, n) {
     super(e, t, s, i, n), this.type = 5;
   }
@@ -506,7 +506,7 @@ class Re extends R {
     typeof this._$AH == "function" ? this._$AH.call((s = (t = this.options) == null ? void 0 : t.host) != null ? s : this.element, e) : this._$AH.handleEvent(e);
   }
 }
-class qe {
+class Re {
   constructor(e, t, s) {
     this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = s;
   }
@@ -567,7 +567,7 @@ const L = v.litElementPolyfillSupport;
 L == null || L({ LitElement: k });
 var he;
 ((he = v.litElementVersions) != null ? he : v.litElementVersions = []).push("4.2.2");
-const $e = "echo-home-card", je = "https://cdn.jsdelivr.net/npm/@meteocons/svg", b = {
+const ge = "echo-home-card", je = "https://cdn.jsdelivr.net/npm/@meteocons/svg", b = {
   // --- Entités (aucune n'est requise — la carte fonctionne comme simple
   // horloge sans rien configurer du tout) ---
   satellite_entity: null,
@@ -789,9 +789,9 @@ class V extends k {
     `;
   }
 }
-q(V, "properties", {
+R(V, "properties", {
   _config: { state: !0 }
-}), q(V, "styles", be`
+}), R(V, "styles", be`
     /* Contrairement à echo-weather-card, pas besoin ici de la mécanique
        clamp()+cqw / repli vw (container queries, Chromium 105+ — cf.
        gotchas WebView embarqué) : cette carte est pensée pour occuper
@@ -951,6 +951,18 @@ q(V, "properties", {
       gap: clamp(6px, 1.2vw, 14px);
     }
 
+    /* En mode round, l'espace disponible sous la date se rétrécit vite
+       (courbe du cercle) — le calage "encre centrée dans l'espace
+       jusqu'au bas de la carte" utilisé en paysage (cf. .date ci-dessus)
+       n'a pas de sens ici : il n'y a pas de vrai "bas d'écran" plat,
+       juste une courbe qui grignote progressivement la largeur
+       disponible. Remontée par rapport au calcul paysage pour rester
+       dans la partie encore confortablement large du cercle plutôt que
+       de s'approcher de la pointe basse. */
+    .card.round .date {
+      top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.86);
+    }
+
     /* En mode round, un bloc météo calé à gauche tomberait sous le
        boîtier physique (coin clippé) — cf. gotchas écran rond. Centré
        en haut à la place. */
@@ -995,10 +1007,10 @@ q(V, "properties", {
       --_weather-temp-size: clamp(1.4rem, 12vmin, 2.8rem);
     }
   `);
-customElements.define($e, V);
+customElements.define(ge, V);
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: $e,
+  type: ge,
   name: "Echo Home Card",
   description: "Écran d'accueil horloge + météo compacte pour smart displays (Echo Show 5, View Assist)."
 });

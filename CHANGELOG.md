@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.9
+
+- Mode round : position de la date revue spécifiquement pour l'écran
+  circulaire, plutôt que de réutiliser telle quelle la formule pensée
+  pour un écran rectangulaire (paysage). Cette dernière centre l'encre
+  dans l'espace jusqu'au "bas d'écran" — une notion qui n'existe pas
+  vraiment sur un cercle, où la largeur disponible se rétrécit
+  progressivement vers le bas plutôt que de s'arrêter net sur un bord
+  plat. La date sied désormais plus haut, dans la partie du cercle
+  encore confortablement large (marge horizontale disponible à hauteur
+  du bas du texte : ~375px contre ~345px avant, mesuré).
+
 ## 1.0.8
 
 - Ajustements fins demandés après la 1.0.7 : météo un peu plus dans le

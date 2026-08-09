@@ -403,6 +403,18 @@ class EchoHomeCard extends LitElement {
       gap: clamp(6px, 1.2vw, 14px);
     }
 
+    /* En mode round, l'espace disponible sous la date se rétrécit vite
+       (courbe du cercle) — le calage "encre centrée dans l'espace
+       jusqu'au bas de la carte" utilisé en paysage (cf. .date ci-dessus)
+       n'a pas de sens ici : il n'y a pas de vrai "bas d'écran" plat,
+       juste une courbe qui grignote progressivement la largeur
+       disponible. Remontée par rapport au calcul paysage pour rester
+       dans la partie encore confortablement large du cercle plutôt que
+       de s'approcher de la pointe basse. */
+    .card.round .date {
+      top: calc(75% + var(--_clock-size) * 0.175 - var(--_date-size) * 0.86);
+    }
+
     /* En mode round, un bloc météo calé à gauche tomberait sous le
        boîtier physique (coin clippé) — cf. gotchas écran rond. Centré
        en haut à la place. */
