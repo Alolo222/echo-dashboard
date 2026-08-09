@@ -245,8 +245,9 @@ retombe sur son traitement habituel (fond quasi noir, peu de lumière
 Comme en digital, `show_weather`/`show_date` affichent la météo (icône +
 température de `weather_entity`) et la date sur le cadran analogique — en
 plus discret, à la manière d'un guichet de date sur une montre
-mécanique : la météo se love entre 10h et 11h, la date juste sous le
-centre, chacune dans la couleur du style choisi.
+mécanique : la météo juste au-dessus du centre, la date juste en
+dessous, symétriques sur l'axe midi-6h, chacune dans la couleur du style
+choisi.
 
 ![Météo et date sur les cinq styles](docs/screenshot-round-analog-complications.png)
 

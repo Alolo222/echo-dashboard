@@ -567,7 +567,7 @@ const I = A.litElementPolyfillSupport;
 I == null || I({ LitElement: O });
 var ve;
 ((ve = A.litElementVersions) != null ? ve : A.litElementVersions = []).push("4.2.2");
-const Ee = "echo-home-card", Ye = "https://cdn.jsdelivr.net/npm/@meteocons/svg", _ = {
+const Ee = "echo-home-card", Xe = "https://cdn.jsdelivr.net/npm/@meteocons/svg", _ = {
   // --- Entités (aucune n'est requise — la carte fonctionne comme simple
   // horloge sans rien configurer du tout) ---
   satellite_entity: null,
@@ -626,7 +626,7 @@ const Ee = "echo-home-card", Ye = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   zoom: 1
   // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
-}, Xe = {
+}, Ye = {
   "clear-night": "clear-night",
   cloudy: "cloudy",
   exceptional: "not-available",
@@ -643,13 +643,13 @@ const Ee = "echo-home-card", Ye = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   "windy-variant": "wind"
 };
 function ce(n, e) {
-  return n === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : n === "sunny" && e ? "clear-night" : Xe[n] || "not-available";
+  return n === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : n === "sunny" && e ? "clear-night" : Ye[n] || "not-available";
 }
 function ue(n, e) {
   if (e != null && e.base_url)
     return `${e.base_url.replace(/\/$/, "")}/${n}.svg`;
   const t = (e == null ? void 0 : e.style) || "fill";
-  return `${Ye}/${t}/${n}.svg`;
+  return `${Xe}/${t}/${n}.svg`;
 }
 function de(n, e, t) {
   return new Intl.DateTimeFormat(e, {
@@ -916,11 +916,11 @@ class V extends O {
     (e.key === "Enter" || e.key === " ") && (e.preventDefault(), this._navigateToWeather());
   }
   render() {
-    var Y, X;
+    var X, Y;
     if (!this._config || !this._hass) return u;
     const e = this._config, t = e.satellite_entity ? this._hass.states[e.satellite_entity] : void 0, s = this._isNightMode(t);
     this.classList.toggle("night", s);
-    const i = e.language || ((Y = this._hass.locale) == null ? void 0 : Y.language) || "en", r = e.time_format || ((X = this._hass.locale) == null ? void 0 : X.time_format) || "24", o = /* @__PURE__ */ new Date(), l = e.weather_entity ? this._hass.states[e.weather_entity] : void 0, a = e.layout === "round", c = a && this._clockFace === "analog", d = e.show_weather && !s && l && !["unavailable", "unknown"].includes(l.state) && l.attributes.temperature != null, h = d && !c, p = e.show_date && !s, g = c && !s ? null : this._backgroundValue(t, s), $ = c ? W[e.analog_style] || W[Qe] : null, Ce = this._cardStyle(
+    const i = e.language || ((X = this._hass.locale) == null ? void 0 : X.language) || "en", r = e.time_format || ((Y = this._hass.locale) == null ? void 0 : Y.time_format) || "24", o = /* @__PURE__ */ new Date(), l = e.weather_entity ? this._hass.states[e.weather_entity] : void 0, a = e.layout === "round", c = a && this._clockFace === "analog", d = e.show_weather && !s && l && !["unavailable", "unknown"].includes(l.state) && l.attributes.temperature != null, h = d && !c, p = e.show_date && !s, g = c && !s ? null : this._backgroundValue(t, s), $ = c ? W[e.analog_style] || W[Qe] : null, Ce = this._cardStyle(
       g,
       $ ? `--_analog-default-bg:${$.background}` : null
     );
@@ -1528,15 +1528,16 @@ D(V, "properties", {
 
     /* Positions choisies pour rester dans la partie du cadran non
        balayée par les chiffres (radius ~40-41 sur un viewBox 0-100, cf.
-       analog-styles.js) : la météo se love entre 10h et 11h, la date
-       juste sous le centre — les aiguilles peuvent passer dessus sans
-       gêner la lecture, comme un guichet de date sur une montre
-       mécanique. */
+       analog-styles.js) : la météo juste au-dessus du centre, la date
+       juste en dessous — symétriques sur l'axe midi-6h plutôt que la
+       météo calée à gauche, pour un rendu plus équilibré. Les aiguilles
+       peuvent passer dessus sans gêner la lecture, comme un guichet de
+       date sur une montre mécanique. */
     .analog-weather {
       position: absolute;
-      left: 22%;
-      top: 32%;
-      transform: translateY(-50%);
+      left: 50%;
+      top: 27%;
+      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
       gap: 0.3em;

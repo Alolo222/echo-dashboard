@@ -963,15 +963,16 @@ class EchoHomeCard extends LitElement {
 
     /* Positions choisies pour rester dans la partie du cadran non
        balayée par les chiffres (radius ~40-41 sur un viewBox 0-100, cf.
-       analog-styles.js) : la météo se love entre 10h et 11h, la date
-       juste sous le centre — les aiguilles peuvent passer dessus sans
-       gêner la lecture, comme un guichet de date sur une montre
-       mécanique. */
+       analog-styles.js) : la météo juste au-dessus du centre, la date
+       juste en dessous — symétriques sur l'axe midi-6h plutôt que la
+       météo calée à gauche, pour un rendu plus équilibré. Les aiguilles
+       peuvent passer dessus sans gêner la lecture, comme un guichet de
+       date sur une montre mécanique. */
     .analog-weather {
       position: absolute;
-      left: 22%;
-      top: 32%;
-      transform: translateY(-50%);
+      left: 50%;
+      top: 27%;
+      transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
       gap: 0.3em;

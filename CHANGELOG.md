@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.2
+
+- Météo recentrée au-dessus du centre du cadran analogique (au lieu de
+  calée à gauche en 1.2.1) — symétrique avec la date en dessous, sur
+  l'axe midi-6h : rendu plus équilibré, moins comme une info plaquée
+  dans un coin. Position choisie après retour en conditions réelles
+  ("dans le navigateur") plutôt qu'en aperçu statique.
+
 ## 1.2.1
 
 - **Météo et date sur le cadran analogique**, en complication discrète
