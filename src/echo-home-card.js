@@ -1,7 +1,13 @@
-import { LitElement, html, css, nothing } from "lit";
+import { LitElement, html, svg, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import { formatShortDate, formatTime, localizeCondition } from "./format.js";
+
+// Choix digital/analogique retenu au-delà du rechargement de page — un
+// device (Echo Spot) ne montre en pratique qu'une seule instance de la
+// carte à la fois, une clé fixe suffit (pas besoin de la scoper par
+// entité/config).
+const CLOCK_FACE_STORAGE_KEY = "echo-home-card-clock-face";
 
 // Réplique en vraie carte Lit de l'écran d'accueil (horloge + météo
 // compacte) fourni par le template View Assist par défaut (button-card
@@ -13,6 +19,7 @@ import { formatShortDate, formatTime, localizeCondition } from "./format.js";
 class EchoHomeCard extends LitElement {
   static properties = {
     _config: { state: true },
+    _clockFace: { state: true },
   };
 
   // Aucune entité n'est requise : sans rien configurer, la carte reste une
@@ -26,6 +33,35 @@ class EchoHomeCard extends LitElement {
       icons: { ...DEFAULT_CONFIG.icons, ...(config?.icons || {}) },
     };
     this._config = this._validateConfig(merged, config || {});
+    // Seulement au tout premier setConfig : Lovelace peut rappeler
+    // setConfig plusieurs fois (édition live du YAML) et on ne veut pas
+    // écraser un choix déjà fait par l'utilisateur via le bouton.
+    if (this._clockFace === undefined) {
+      this._clockFace = this._initClockFace();
+    }
+  }
+
+  // Le choix retenu en localStorage prime sur clock_face (valeur de
+  // config, juste un point de départ) — cf. _toggleClockFace.
+  _initClockFace() {
+    try {
+      const saved = localStorage.getItem(CLOCK_FACE_STORAGE_KEY);
+      if (saved === "digital" || saved === "analog") return saved;
+    } catch {
+      // localStorage indisponible (mode privé, restrictions WebView) :
+      // repli silencieux sur la config, pas de mémorisation possible.
+    }
+    return this._config.clock_face;
+  }
+
+  _toggleClockFace() {
+    this._clockFace = this._clockFace === "analog" ? "digital" : "analog";
+    try {
+      localStorage.setItem(CLOCK_FACE_STORAGE_KEY, this._clockFace);
+    } catch {
+      // Pas grave si ça ne persiste pas : le bouton reste utilisable
+      // pour la session en cours.
+    }
   }
 
   // Validation légère : avertit dans la console et retombe sur la valeur
@@ -39,6 +75,10 @@ class EchoHomeCard extends LitElement {
     if (merged.layout !== null && merged.layout !== "round") {
       warn("layout", DEFAULT_CONFIG.layout);
       merged.layout = DEFAULT_CONFIG.layout;
+    }
+    if (!["digital", "analog"].includes(merged.clock_face)) {
+      warn("clock_face", DEFAULT_CONFIG.clock_face);
+      merged.clock_face = DEFAULT_CONFIG.clock_face;
     }
     if (
       typeof merged.zoom !== "number" ||
@@ -201,20 +241,116 @@ class EchoHomeCard extends LitElement {
     const backgroundValue = this._backgroundValue(satelliteState, isNightMode);
     const cardStyle = this._cardStyle(backgroundValue);
     const isRound = cfg.layout === "round";
+    // L'horloge analogique n'a de sens que sur l'écran circulaire de
+    // l'Echo Spot — celui qui l'avait à l'origine sous Alexa. Sur
+    // l'Echo Show (paysage), toujours digitale, pas de bouton.
+    const showAnalog = isRound && this._clockFace === "analog";
 
     return html`
-      <div class="card ${isRound ? "round" : ""}" style=${cardStyle}>
+      <div
+        class="card ${isRound ? "round" : ""} ${showAnalog ? "analog" : ""}"
+        style=${cardStyle}
+      >
         <div class="shader"></div>
         ${showWeather ? this._renderWeather(weatherState) : nothing}
         <div class="clockgroup">
           ${cfg.show_clock
-            ? html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
+            ? showAnalog
+              ? this._renderAnalogClock(now, locale, timeFormat)
+              : html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
             : nothing}
           ${cfg.show_date && !isNightMode
             ? html`<div class="date">${formatShortDate(now, locale)}</div>`
             : nothing}
         </div>
+        ${isRound && !isNightMode ? this._renderClockToggle(showAnalog) : nothing}
       </div>
+    `;
+  }
+
+  // Cadran analogique en SVG : pensé pour rappeler l'horloge ronde de
+  // l'Echo Spot d'origine (avant LineageOS/View Assist), en alternative
+  // au digital. Diamètre indépendant de --_clock-size (qui pilote une
+  // taille de police, pas un diamètre) — cf. --_analog-size et
+  // .card.round.analog .date, qui a donc sa propre position plutôt que
+  // de réutiliser le calcul basé sur --_clock-size.
+  //
+  // Tout est construit avec le tag `svg` de Lit (pas `html`), y compris
+  // les graduations générées en boucle : un sous-template `html` séparé
+  // pour un élément SVG (ex: chaque <line> de graduation dans son propre
+  // `html\`...\`` avant d'être inséré dans le <svg> englobant) atterrit
+  // dans le mauvais espace de noms (xhtml, pas svg) et ne s'affiche pas
+  // — piège classique de Lit avec du SVG composé/généré dynamiquement,
+  // repéré ici en inspectant `line.namespaceURI` sur le rendu réel.
+  _renderAnalogClock(now, locale, timeFormat) {
+    const hours = now.getHours() % 12;
+    const minutes = now.getMinutes();
+    const hourAngle = hours * 30 + minutes * 0.5;
+    const minuteAngle = minutes * 6;
+    const ticks = [];
+    for (let i = 0; i < 12; i++) {
+      const major = i % 3 === 0;
+      ticks.push(svg`
+        <line
+          class="tick"
+          x1="50"
+          y1=${major ? 6 : 8}
+          x2="50"
+          y2=${major ? 14 : 11}
+          stroke-width=${major ? 2.5 : 1.5}
+          transform="rotate(${i * 30} 50 50)"
+        />
+      `);
+    }
+    return html`
+      <svg
+        class="analog-clock"
+        viewBox="0 0 100 100"
+        role="img"
+        aria-label=${formatTime(now, locale, timeFormat)}
+      >
+        <g class="ticks">${ticks}</g>
+        <line
+          class="hand hand-hour"
+          x1="50"
+          y1="50"
+          x2="50"
+          y2="28"
+          transform="rotate(${hourAngle} 50 50)"
+        />
+        <line
+          class="hand hand-minute"
+          x1="50"
+          y1="50"
+          x2="50"
+          y2="16"
+          transform="rotate(${minuteAngle} 50 50)"
+        />
+        <circle class="hand-center" cx="50" cy="50" r="3" />
+      </svg>
+    `;
+  }
+
+  // Petit bouton discret (mode round uniquement, masqué la nuit comme le
+  // reste — pas de lumière/info superflue sur un écran de chevet) pour
+  // basculer digital ↔ analogique. L'icône affichée est celle du cadran
+  // vers lequel on bascule (convention usuelle pour un bouton toggle),
+  // pas celle du cadran actuel.
+  _renderClockToggle(showAnalog) {
+    const icon = showAnalog ? "mdi:clock-digital" : "mdi:clock-outline";
+    const label = showAnalog
+      ? "Afficher l'horloge digitale"
+      : "Afficher l'horloge analogique";
+    return html`
+      <button
+        type="button"
+        class="clock-toggle"
+        aria-label=${label}
+        title=${label}
+        @click=${() => this._toggleClockFace()}
+      >
+        <ha-icon icon=${icon}></ha-icon>
+      </button>
     `;
   }
 
@@ -424,6 +560,92 @@ class EchoHomeCard extends LitElement {
       transform: translateX(-50%);
     }
 
+    /* Cadran analogique (mode round uniquement) : rappelle l'horloge
+       ronde de l'Echo Spot sous Alexa, avant LineageOS/View Assist.
+       --_analog-size est un diamètre, pas une taille de police —
+       calibré indépendamment de --_clock-size (cf. .card.round
+       ci-dessous), donc .card.round.analog .date a sa propre position
+       plutôt que de réutiliser le calcul basé sur --_clock-size. */
+    .analog-clock {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: var(--_analog-size);
+      height: var(--_analog-size);
+      color: var(--_text-color);
+      transition: color 0.4s ease, opacity 0.4s ease;
+    }
+
+    :host(.night) .analog-clock {
+      color: var(--_night-color);
+      opacity: var(--_night-opacity);
+    }
+
+    .analog-clock .tick {
+      stroke: currentColor;
+      opacity: 0.7;
+    }
+
+    .analog-clock .hand {
+      stroke: currentColor;
+      stroke-linecap: round;
+    }
+
+    .analog-clock .hand-hour {
+      stroke-width: 5;
+    }
+
+    .analog-clock .hand-minute {
+      stroke-width: 3.5;
+    }
+
+    .analog-clock .hand-center {
+      fill: currentColor;
+    }
+
+    .card.round.analog .date {
+      top: calc(50% + var(--_analog-size) / 2 + clamp(12px, 4vmin, 24px));
+    }
+
+    /* Bouton discret pour basculer digital ↔ analogique — masqué la nuit
+       (cf. render(), même logique que la météo/la date : pas de lumière
+       ni d'info superflue sur un écran de chevet). Docké près du bas :
+       même à quelques px du bord, le cercle y offre encore largement
+       assez de largeur pour un petit bouton (contrairement à une ligne
+       de texte, cf. .card.round .date plus haut). */
+    .clock-toggle {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(10px, 5%, 20px);
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--_text-color);
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      --mdc-icon-size: 20px;
+    }
+
+    .clock-toggle:hover,
+    .clock-toggle:focus-visible {
+      opacity: 1;
+    }
+
+    .clock-toggle:focus-visible {
+      outline: 2px solid var(--_text-color);
+      outline-offset: 2px;
+    }
+
     .weather.clickable {
       cursor: pointer;
     }
@@ -457,6 +679,7 @@ class EchoHomeCard extends LitElement {
       --_date-size: clamp(1.6rem, 13vmin, 3.6rem);
       --_weather-icon-size: clamp(40px, 14vmin, 84px);
       --_weather-temp-size: clamp(1.6rem, 13vmin, 3.2rem);
+      --_analog-size: clamp(120px, 50vmin, 240px);
     }
   `;
 }

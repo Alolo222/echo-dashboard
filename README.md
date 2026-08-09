@@ -57,6 +57,11 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
   (2017, écran circulaire 480x480) : mêmes éléments, repositionnés pour
   rester dans la zone visible du cercle (le bloc météo ne se place pas
   dans un coin, qui serait sous le boîtier physique).
+- En mode round, **horloge analogique** en alternative au digital — un
+  clin d'œil au cadran rond de l'Echo Spot sous Alexa, avant
+  LineageOS/View Assist. Un petit bouton discret (masqué la nuit) bascule
+  entre les deux ; le choix est retenu au-delà du rechargement de la
+  page. Voir [Mode round](#mode-round-echo-spot).
 - Aucune entité n'est requise : sans rien configurer, la carte reste une
   horloge plein écran sur fond dégradé.
 - Thème et tailles personnalisables via variables CSS, sans surcharge de
@@ -143,6 +148,12 @@ background: null                # override CSS `background` complet (couleur
                                  # sur l'image dynamique du satellite
 layout: null                    # null (paysage, Echo Show) ou "round"
                                  # (écran circulaire, Echo Spot 1ère gen 2017)
+clock_face: digital             # "digital" ou "analog" — mode round
+                                 # uniquement. Valeur de départ seulement :
+                                 # le bouton affiché en mode round retient
+                                 # le choix de l'utilisateur au-delà (voir
+                                 # "Mode round" plus bas), qui prime sur
+                                 # cette option une fois qu'il a tapé dessus
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
                                  # de rattrapage si le texte ne suit pas
                                  # correctement la taille de l'écran
@@ -169,6 +180,21 @@ masqués.
 sur son propre fond) plutôt que de compter sur le boîtier physique, et
 repositionne le bloc météo en haut centré plutôt qu'en coin — un coin
 serait caché sous le boîtier sur un écran rond.
+
+### Horloge analogique
+
+L'Echo Spot d'origine (sous Alexa, avant LineageOS/View Assist) affichait
+une horloge ronde à aiguilles. Un petit bouton discret (en bas du
+cadran, masqué la nuit comme le reste) permet de retrouver ce rendu en
+alternative au digital :
+
+| Digital | Analogique |
+|---|---|
+| ![Mode round digital](docs/screenshot-round.png) | ![Mode round analogique](docs/screenshot-round-analog.png) |
+
+Le choix fait via ce bouton est retenu dans le navigateur (`localStorage`)
+au-delà d'un rechargement de page — `clock_face` dans la config ne sert
+que de valeur de départ, écrasée dès le premier tap sur le bouton.
 
 ![Aperçu du mode round à 480x480](docs/screenshot-round.png)
 

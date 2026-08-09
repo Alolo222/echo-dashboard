@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.1.0
+
+- **Horloge analogique** (mode round uniquement) : cadran SVG (12
+  graduations, aiguilles heure/minute) en alternative au digital, clin
+  d'œil à l'horloge ronde de l'Echo Spot sous Alexa. Nouvelle option
+  `clock_face` ("digital" par défaut, "analog"), et un petit bouton
+  discret en bas du cadran (masqué la nuit) pour basculer — le choix est
+  retenu en `localStorage` au-delà du rechargement de page.
+- Corrigé en cours de route : les graduations généraires en boucle
+  atterrissaient dans le mauvais espace de noms SVG (`xhtml` au lieu de
+  `svg`) et ne s'affichaient pas du tout — un sous-template `html`
+  séparé pour un élément SVG, au lieu du tag `svg` de Lit, casse le
+  rendu. Repéré en inspectant `namespaceURI` sur le DOM réel, pas
+  seulement à l'écran.
+- Nouvelle capture `docs/screenshot-round-analog.png`.
+
 ## 1.0.10
 
 - Capture `docs/screenshot-round.png` de la 1.0.9 livrée par erreur avec

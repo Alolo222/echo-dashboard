@@ -45,6 +45,11 @@ export const DEFAULT_CONFIG = {
   // satellite et sur le dégradé par défaut
   layout: null, // null (paysage, Echo Show) ou "round" (écran circulaire,
   // Echo Spot 1ère gen 2017, 480x480)
+  clock_face: "digital", // "digital" ou "analog" — uniquement en mode
+  // round (l'Echo Spot d'origine avait une horloge analogique). Sert
+  // juste de valeur de départ : le petit bouton affiché en mode round
+  // bascule l'affichage et retient le choix (localStorage) au-delà de
+  // cette valeur de config.
   zoom: 1, // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
 };
