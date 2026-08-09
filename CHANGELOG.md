@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.6
+
+- Le retrait météo de la 1.0.5 était trop subtil pour être perceptible
+  (~12px d'écart sur 960px de large). Nettement plus marqué cette fois
+  (mesuré : 90px depuis la gauche, 43px depuis le haut, contre 44/29
+  avant — plus du double).
+- Pour clarifier un doute : ni `--_date-size` ni `--_weather-temp-size`
+  n'ont changé depuis la 1.0.2 (vérifié dans l'historique et par
+  mesure : les deux valent 72px sur 960x480, identique). L'impression de
+  police plus grosse sur la météo vient du format ajouté en 1.0.3
+  (`21.4°C` au lieu de `21°`, texte plus long à taille égale).
+
 ## 1.0.5
 
 - Espace horloge→date désormais égal à l'espace date→bas d'écran (18px

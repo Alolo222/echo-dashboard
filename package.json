@@ -1,6 +1,6 @@
 {
   "name": "echo-home-card",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Carte d'accueil Home Assistant (horloge + météo compacte) pour smart displays (Echo Show 5 / View Assist).",
   "type": "module",
   "license": "MIT",

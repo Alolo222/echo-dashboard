@@ -936,8 +936,8 @@ q(V, "properties", {
 
     .weather {
       position: absolute;
-      top: clamp(20px, 6vh, 40px);
-      left: clamp(20px, 7%, 44px);
+      top: clamp(36px, 9vh, 70px);
+      left: clamp(40px, 10%, 90px);
       z-index: 1;
       display: flex;
       align-items: center;
@@ -949,7 +949,7 @@ q(V, "properties", {
        en haut à la place. */
     .card.round .weather {
       left: 50%;
-      top: clamp(36px, 18%, 64px);
+      top: clamp(44px, 22%, 80px);
       transform: translateX(-50%);
     }
 
