@@ -37,15 +37,18 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
 
 - Horloge géante + date, lisibles de loin, sur fond plein écran — mêmes
   proportions que le button-card d'origine (horloge à 55vh, date et
-  bloc météo tous deux à 15vh, sur une grille à 3 bandes 15vh/50vh/15vh),
-  pas une échelle réinventée.
+  bloc météo tous deux à 15vh), centrées verticalement sur toute la
+  hauteur de l'écran, indépendamment du bloc météo (positionné à part
+  en haut) plutôt que figées dans une grille qui les tirait vers le
+  haut.
 - Fond dynamique : reprend l'attribut `background` (URL d'image) de
   l'entité satellite View Assist, avec un léger voile sombre pour garder
   le texte lisible dessus. Repli sur un dégradé sombre si aucune image
   n'est disponible.
 - Mini bloc météo (icône [Meteocons](https://github.com/basmilius/meteocons)
-  + température) en coin, qui **tape → navigue vers la vue météo** du
-  dashboard View Assist via le service `view_assist.navigate`.
+  + température avec une décimale et son unité, ex: `21.4°C`) en coin,
+  qui **tape → navigue vers la vue météo** du dashboard View Assist via
+  le service `view_assist.navigate`.
 - **Mode nuit** : piloté par l'attribut `mode` de l'entité satellite
   (`mode: "night"`) — fond masqué, horloge en rouge très atténué, date et
   bloc météo masqués. Pensé pour un écran de chevet qui ne doit pas

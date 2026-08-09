@@ -206,12 +206,14 @@ class EchoHomeCard extends LitElement {
       <div class="card ${isRound ? "round" : ""}" style=${cardStyle}>
         <div class="shader"></div>
         ${showWeather ? this._renderWeather(weatherState) : nothing}
-        ${cfg.show_clock
-          ? html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
-          : nothing}
-        ${cfg.show_date && !isNightMode
-          ? html`<div class="date">${formatShortDate(now, locale)}</div>`
-          : nothing}
+        <div class="clockgroup">
+          ${cfg.show_clock
+            ? html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
+            : nothing}
+          ${cfg.show_date && !isNightMode
+            ? html`<div class="date">${formatShortDate(now, locale)}</div>`
+            : nothing}
+        </div>
       </div>
     `;
   }
@@ -219,7 +221,10 @@ class EchoHomeCard extends LitElement {
   _renderWeather(weatherState) {
     const slug = conditionToIconSlug(weatherState.state, this._isDarkOutside());
     const url = iconUrl(slug, this._config.icons);
-    const temp = Math.round(weatherState.attributes.temperature);
+    // Une décimale + unité (ex: "21.4°C"), comme la var_weather_temperature
+    // d'origine — pas un entier arrondi sans unité.
+    const temp = Number(weatherState.attributes.temperature).toFixed(1);
+    const tempUnit = weatherState.attributes.temperature_unit || "°C";
     const label = localizeCondition(this._hass, weatherState.state);
     const clickable = this._weatherClickable();
 
@@ -228,12 +233,12 @@ class EchoHomeCard extends LitElement {
         class="weather ${clickable ? "clickable" : ""}"
         role=${clickable ? "button" : nothing}
         tabindex=${clickable ? "0" : nothing}
-        aria-label="${label}, ${temp}°"
+        aria-label="${label}, ${temp}${tempUnit}"
         @click=${clickable ? () => this._navigateToWeather() : nothing}
         @keydown=${clickable ? (e) => this._onWeatherKeydown(e) : nothing}
       >
         <img class="weather-icon" src=${url} alt="" />
-        <span class="weather-temp">${temp}°</span>
+        <span class="weather-temp">${temp}${tempUnit}</span>
       </div>
     `;
   }
@@ -291,15 +296,6 @@ class EchoHomeCard extends LitElement {
       color: var(--_text-color);
     }
 
-    /* Grille à 3 bandes reprise du button-card d'origine
-       (grid-template-areas "title status" / "time time" / "date date",
-       lignes 15vh/50vh/15vh) : la météo occupe la colonne de gauche de
-       la première bande (la colonne de droite, "status", reste vide —
-       déjà inutilisée dans la version personnalisée d'origine), horloge
-       et date prennent toute la largeur en dessous. Les 3 lignes ne
-       totalisent que 80vh : le reste de la hauteur (20vh) reste
-       volontairement vide sous la date plutôt que d'être redistribué,
-       comme dans l'original (pas de align-content: stretch/center ici). */
     .card {
       position: relative;
       height: 100%;
@@ -311,27 +307,13 @@ class EchoHomeCard extends LitElement {
       background-color: #0a1424;
       background-size: cover;
       background-position: center;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 15vh 50vh 15vh;
-      grid-template-areas:
-        "weather status"
-        "clock clock"
-        "date date";
     }
 
     /* Écran rond (Echo Spot) : la carte se clippe elle-même en cercle
        plutôt que de compter sur le boîtier physique — cf. gotchas
-       matériel. Une seule colonne : un bloc météo calé à gauche comme en
-       paysage tomberait sous le boîtier physique (coin clippé). */
+       matériel. */
     .card.round {
       border-radius: 50%;
-      grid-template-columns: 1fr;
-      grid-template-rows: 15% 55% 15%;
-      grid-template-areas:
-        "weather"
-        "clock"
-        "date";
     }
 
     /* Assombrit légèrement toute image de fond pour garder l'horloge
@@ -344,11 +326,21 @@ class EchoHomeCard extends LitElement {
       pointer-events: none;
     }
 
-    .clock {
-      grid-area: clock;
-      justify-self: center;
-      align-self: center;
+    /* Horloge + date centrées sur toute la hauteur de la carte,
+       indépendamment du bloc météo (positionné à part, cf. .weather
+       ci-dessous) — sinon la météo tire tout le groupe vers le haut. */
+    .clockgroup {
+      position: absolute;
+      inset: 0;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(4px, 1.5vh, 12px);
+    }
+
+    .clock {
       font-size: var(--_clock-size);
       font-weight: 700;
       line-height: 1;
@@ -363,33 +355,28 @@ class EchoHomeCard extends LitElement {
     }
 
     .date {
-      grid-area: date;
-      justify-self: center;
-      align-self: center;
-      z-index: 1;
       font-size: var(--_date-size);
       color: var(--_text-color);
       opacity: 0.85;
     }
 
     .weather {
-      grid-area: weather;
-      justify-self: start;
-      align-self: center;
+      position: absolute;
+      top: clamp(12px, 4vh, 28px);
+      left: clamp(12px, 5%, 32px);
       z-index: 1;
       display: flex;
       align-items: center;
       gap: clamp(6px, 1.2vw, 14px);
-      padding-left: clamp(12px, 5%, 32px);
     }
 
     /* En mode round, un bloc météo calé à gauche tomberait sous le
        boîtier physique (coin clippé) — cf. gotchas écran rond. Centré
-       à la place, sans le padding-left qui n'a plus lieu d'être sur une
-       seule colonne. */
+       en haut à la place. */
     .card.round .weather {
-      justify-self: center;
-      padding-left: 0;
+      left: 50%;
+      top: clamp(28px, 15%, 56px);
+      transform: translateX(-50%);
     }
 
     .weather.clickable {

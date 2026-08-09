@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.3
+
+- **Horloge + date vraiment centrées verticalement.** La grille à 3
+  bandes de la 1.0.2 (héritée du button-card d'origine) ancrait le bloc
+  horloge+date en haut de l'écran, avec un vide en dessous — repéré sur
+  appareil réel (photo de référence à l'appui). Le bloc météo est
+  maintenant positionné indépendamment (overlay absolu en haut), et le
+  groupe horloge+date se centre sur toute la hauteur de la carte, sans
+  changer les tailles (déjà correctes depuis la 1.0.2).
+- Température météo affichée avec sa décimale et son unité (`21.4°C`)
+  plutôt qu'arrondie sans unité (`21°`), pour correspondre au format
+  d'origine.
+- Captures docs/ régénérées.
+
 ## 1.0.2
 
 - Portage fidèle des proportions du button-card d'origine, remplaçant
