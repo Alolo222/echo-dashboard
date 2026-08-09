@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.4.3
+
+- Captures `docs/` régénérées — la 1.4.2 (bouton digital/analogique
+  repensé) et, pour `docs/screenshot.png`, la 1.3.0 (bouton disponible
+  aussi en mode large) n'avaient pas été suivies d'une mise à jour des
+  captures concernées, laissant sept images montrant un bouton absent
+  ou périmé (icône et/ou position d'avant ces versions) :
+  `screenshot.png`, `screenshot-round.png`, `screenshot-round-analog.png`,
+  `screenshot-round-analog-styles.png`,
+  `screenshot-round-analog-complications.png`,
+  `screenshot-landscape-analog.png`, `screenshot-landscape-analog-photo.png`.
+  `screenshot-night.png` vérifiée à jour (le bouton reste masqué la nuit,
+  inchangé) — pas besoin d'y toucher.
+
 ## 1.4.2
 
 - Bouton de bascule digital ↔ analogique repensé, signalé peu adapté à
