@@ -37,10 +37,10 @@ matériel](#gotchas-matériel-echo-show-5--echo-spot) plus bas).
 
 - Horloge géante + date, lisibles de loin, sur fond plein écran — mêmes
   proportions que le button-card d'origine (horloge à 55vh, date et
-  bloc météo tous deux à 15vh), centrées verticalement sur toute la
-  hauteur de l'écran, indépendamment du bloc météo (positionné à part
-  en haut) plutôt que figées dans une grille qui les tirait vers le
-  haut.
+  bloc météo tous deux à 15vh). L'horloge est pile centrée verticalement
+  sur l'écran (positionnement indépendant, pas juste le centre d'un
+  groupe horloge+date qui la décalerait vers le haut), la date juste en
+  dessous ; le bloc météo est positionné à part, en haut.
 - Fond dynamique : reprend l'attribut `background` (URL d'image) de
   l'entité satellite View Assist, avec un léger voile sombre pour garder
   le texte lisible dessus. Repli sur un dégradé sombre si aucune image

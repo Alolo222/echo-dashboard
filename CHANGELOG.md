@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.4
+
+- La 1.0.3 centrait le *groupe* horloge+date (flex column), pas
+  l'horloge elle-même — la date, bien plus petite, tirait visiblement
+  l'horloge au-dessus du centre réel de l'écran. Toujours visible sur la
+  capture, signalé par l'utilisateur. Horloge et date sont maintenant
+  positionnées indépendamment (absolu, centrées sur leurs propres axes) :
+  l'horloge est pile au centre (vérifié par mesure exacte : milieu à
+  240px sur 480, pas juste "à l'œil"), la date juste en dessous.
+- Corrige au passage un débordement bas d'écran de la date (line-height
+  par défaut du navigateur trop généreux, clippé silencieusement par
+  `overflow: hidden` — invisible sur la capture précédente mais réel).
+- Captures docs/ régénérées.
+
 ## 1.0.3
 
 - **Horloge + date vraiment centrées verticalement.** La grille à 3

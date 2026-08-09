@@ -326,26 +326,34 @@ class EchoHomeCard extends LitElement {
       pointer-events: none;
     }
 
-    /* Horloge + date centrées sur toute la hauteur de la carte,
-       indépendamment du bloc météo (positionné à part, cf. .weather
-       ci-dessous) — sinon la météo tire tout le groupe vers le haut. */
+    /* Horloge centrée sur toute la hauteur de la carte, indépendamment
+       du bloc météo (positionné à part, cf. .weather ci-dessous) et de
+       la date. Un flex column + justify-content:center centrerait le
+       *groupe* horloge+date, pas l'horloge elle-même — comme la date est
+       bien plus petite, ça tirait visiblement l'horloge au-dessus du
+       centre réel de l'écran (repéré par l'utilisateur en comparant au
+       rendu attendu). Positionnement absolu à la place : l'horloge est
+       calée pile au centre, la date juste en dessous (décalée de la
+       moitié de la taille de l'horloge + un petit espace, via
+       --_clock-size plutôt qu'une valeur fixe pour rester correcte en
+       mode round où --_clock-size est redéfinie, cf. .card.round). */
     .clockgroup {
       position: absolute;
       inset: 0;
       z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(4px, 1.5vh, 12px);
     }
 
     .clock {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-size: var(--_clock-size);
       font-weight: 700;
       line-height: 1;
       color: var(--_text-color);
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
       transition: color 0.4s ease, opacity 0.4s ease;
     }
 
@@ -355,9 +363,21 @@ class EchoHomeCard extends LitElement {
     }
 
     .date {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      /* line-height: 1 est nécessaire ici, pas que par cohérence avec
+         .clock : le line-height par défaut du navigateur (~1.2) ajoutait
+         un espace vide sous le texte assez grand pour pousser la date
+         hors de l'écran (repéré par mesure exacte du rendu, pas à l'œil
+         — le débordement se clippe silencieusement via overflow:hidden
+         sur .card, sans erreur visible). */
+      line-height: 1;
+      transform: translate(-50%, calc(var(--_clock-size) * 0.5 + 0.3em));
       font-size: var(--_date-size);
       color: var(--_text-color);
       opacity: 0.85;
+      white-space: nowrap;
     }
 
     .weather {
@@ -404,19 +424,14 @@ class EchoHomeCard extends LitElement {
        carte n'est pas exactement carrée (aperçu dans une fenêtre large,
        par exemple) — cf. même logique que echo-weather-card en mode
        round. Valeurs propres à ce layout (pas de variable CSS exposée),
-       comme pour echo-weather-card. */
-    .card.round .clock {
-      font-size: clamp(3.6rem, 48vmin, 11rem);
-    }
-    .card.round .date {
-      font-size: clamp(1.4rem, 12vmin, 3.2rem);
-    }
-    .card.round .weather-icon {
-      width: clamp(36px, 13vmin, 72px);
-      height: clamp(36px, 13vmin, 72px);
-    }
-    .card.round .weather-temp {
-      font-size: clamp(1.4rem, 12vmin, 2.8rem);
+       comme pour echo-weather-card. Redéfinies comme tokens (pas comme
+       overrides directs de .clock/.date/...) pour que le calc() du
+       décalage de la date (cf. .date ci-dessus) reste juste ici aussi. */
+    .card.round {
+      --_clock-size: clamp(3.6rem, 48vmin, 11rem);
+      --_date-size: clamp(1.4rem, 12vmin, 3.2rem);
+      --_weather-icon-size: clamp(36px, 13vmin, 72px);
+      --_weather-temp-size: clamp(1.4rem, 12vmin, 2.8rem);
     }
   `;
 }
