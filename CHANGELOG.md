@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.4.4
+
+- Captures `docs/` régénérées à nouveau (aucun changement de code) : le
+  bouton digital/analogique y montrait un rond avec la lettre "A" ou "D"
+  dedans — pas un bug de la carte, un artefact du harnais de test local
+  utilisé pour produire ces captures (`<ha-icon>`, un composant du
+  frontend Home Assistant réel, indisponible hors de HA ; imité par un
+  repère texte minimal, suffisant pour vérifier position/contraste mais
+  jamais pensé pour apparaître tel quel dans une capture montrée telle
+  quelle). Remplacé par deux silhouettes SVG (montre à aiguilles / écran
+  digital rectangulaire), pas des icônes MDI fidèles mais nettement
+  moins trompeuses dans le contexte d'une capture.
+
 ## 1.4.3
 
 - Captures `docs/` régénérées — la 1.4.2 (bouton digital/analogique
