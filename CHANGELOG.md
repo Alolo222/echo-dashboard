@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.5
+
+- `docs/screenshot-round.png` régénérée : la 1.2.4 a changé la taille
+  réellement rendue de l'horloge en mode round (toujours calée sur le
+  pire cas désormais, cf. 1.2.4), rendant la capture existante
+  trompeuse — elle montrait encore l'ancien rendu plein format d'avant
+  ce correctif. Repéré en le demandant explicitement plutôt qu'au
+  hasard. Mode large (paysage) inchangé (toujours à l'échelle 1 pour une
+  heure normale), pas besoin d'y toucher.
+
 ## 1.2.4
 
 - Corrigé : l'heure et la date changeaient de taille visible selon le
