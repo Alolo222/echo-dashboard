@@ -68,24 +68,33 @@ dashboard au lieu du dashboard View Assist par défaut.
   s'affichera juste pas tant que cette vue n'est pas créée (aucune
   erreur, comportement documenté de la carte).
 
-## Barre d'onglets en haut de l'écran
+## Barre d'onglets en haut de l'écran → Browsermod, pas `subview`
 
-`dashboard.yaml` met `subview: true` sur les vues `music` et `weather`
-(pas sur `home`) pour éviter que Home Assistant affiche une barre
-d'onglets (Home | Music | Weather) — ce chrome HA n'a pas de sens ici
-puisque la navigation se fait par `view_assist.navigate` (tap sur
-l'horloge, la météo, la puce file d'attente), jamais en cliquant un
-onglet. Avec une seule vue non-subview (`home`), HA masque la barre
-entièrement.
+`dashboard.yaml` garde volontairement les 3 vues (`home`, `music`,
+`weather`) normales, sans `subview: true`. Un essai réel avec
+`subview: true` sur music/weather a bien fait disparaître la barre
+d'onglets, mais a aussi cassé le **swipe tactile** entre les vues : une
+vue `subview` sort du carrousel swipable de HA en plus de sortir de la
+barre d'onglets — comportement natif HA, pas contournable en YAML.
 
-Ceci dit, une vue `subview` affiche quand même une fine barre en haut
-avec son nom + un bouton retour tant qu'on y est (comportement HA natif,
-pas configurable par YAML) — bien moins gênant qu'une barre d'onglets
-complète, mais pas du chrome zéro absolu. Pour la faire disparaître
-totalement, il faut passer par du CSS (`card-mod` sur la vue, ou
-Browsermod "Hide Header" si déjà installé pour d'autres raisons) — pas
-inclus ici pour ne pas ajouter une dépendance HACS de plus si ce n'est
-pas déjà gênant en pratique.
+La bonne solution, c'est celle du [wiki officiel View
+Assist](https://github.com/dinki/View-Assist/wiki/View-Assist-dashboard-and-views#browsermod-settings) :
+masquer le header (qui contient la barre d'onglets) **visuellement** via
+[Browsermod](https://github.com/thomasloven/hass-browser_mod), pas en
+retirant des vues du dashboard — les 3 vues restent normales, swipe
+compris, seul le chrome autour disparaît.
+
+1. Installer Browsermod (HACS → Intégrations)
+2. Ouvrir Browsermod depuis la barre latérale HA → **Frontend Settings**
+3. **Hide Header** → **+ Add Browser Setting** → sélectionner le
+   navigateur de l'appareil (l'Echo Spot/Show, identifié par sa
+   connexion WebView CoqPit) → activer → OK
+4. **Hide Sidebar** → même procédure
+5. (Optionnel) **Default Dashboard** → même procédure → choisir
+   `ViewAssist` — pratique si l'appareil a plusieurs dashboards, pour
+   qu'il revienne toujours sur celui-ci par défaut
+
+Répéter pour chaque appareil satellite visuel.
 
 ## Écran circulaire (Echo Spot)
 
