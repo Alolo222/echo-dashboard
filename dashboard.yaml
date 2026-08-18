@@ -1,0 +1,55 @@
+# Dashboard View Assist basé sur les echo-cards (echo-home-card, echo-player-card,
+# echo-weather-card) à la place des vues button-card par défaut de View Assist.
+#
+# Remplace À MINIMA les 3 champs marqués "# <-- À CHANGER" ci-dessous par tes propres entités
+# avant de coller ce YAML. Voir README.md dans ce dossier pour la procédure complète
+# (création du dashboard dans Home Assistant, installation des cartes, réglage du satellite).
+#
+# Contrairement au dashboard.yaml officiel de View Assist (qui repose sur button_card_templates +
+# button-card, voir https://github.com/dinki/View-Assist), les echo-cards sont des Lit custom
+# elements autonomes - pas besoin de ce bloc de templates partagé ici, chaque vue est une carte
+# unique en mode "Panel".
+
+title: ViewAssist
+views:
+  # --- Vue "home" : horloge + météo compacte, remplace clock.yaml -----------------------------
+  # path "home" (pas préfixé par le dashboard) : convention View Assist d'origine, confirmée dans
+  # le bloc top-nav de dashboard.yaml officiel (bouton "home" -> path: home, brut).
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:echo-home-card
+        satellite_entity: sensor.viewassist_XXX      # <-- À CHANGER : entité satellite View Assist
+        weather_entity: weather.XXX                  # <-- À CHANGER : ton entité météo (optionnel, retire la ligne si tu n'en veux pas ici)
+        dashboard: echo-view-assist                   # <-- À CHANGER : url_path choisi en créant CE dashboard (voir README, étape 1)
+        weather_view: weather                          # doit matcher le `path:` de la vue "weather" plus bas
+        show_clock: true
+        show_date: true
+        show_weather: true
+
+  # --- Vue "music" : lecteur plein écran, remplace music.yaml ----------------------------------
+  - title: Music
+    path: music
+    type: panel
+    cards:
+      - type: custom:echo-player-card
+        media_player_entity: media_player.XXX         # <-- À CHANGER : ton media_player (Music Assistant, Sonos, etc.)
+        satellite_entity: sensor.viewassist_XXX        # <-- À CHANGER : même entité que la vue home
+        dashboard: echo-view-assist                     # <-- À CHANGER : même url_path que la vue home
+        queue_view: player-queue                          # laisse tel quel si tu n'as pas de vue file d'attente séparée -
+                                                           # la puce "File d'attente" ne s'affichera simplement pas sans
+                                                           # une vue nommée "player-queue" existante
+
+  # --- Vue "weather" : météo détaillée plein écran, remplace weather.yaml ----------------------
+  - title: Weather
+    path: weather
+    type: panel
+    cards:
+      - type: custom:echo-weather-card
+        entity: weather.XXX                            # <-- À CHANGER : même entité météo que la vue home
+        hourly_count: 6
+        daily_count: 4
+        show_current: true
+        show_hourly: true
+        show_daily: true

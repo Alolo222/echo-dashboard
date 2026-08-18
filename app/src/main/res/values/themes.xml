@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Base platform theme for the launcher activity; actual UI theming is done in Compose. -->
-    <style name="Theme.EchoDashboard" parent="android:Theme.DeviceDefault.NoActionBar">
-        <item name="android:statusBarColor">@color/ic_launcher_background</item>
-        <item name="android:navigationBarColor">@color/ic_launcher_background</item>
-    </style>
-</resources>
