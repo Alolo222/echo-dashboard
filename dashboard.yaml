@@ -9,6 +9,11 @@
 # button-card, voir https://github.com/dinki/View-Assist), les echo-cards sont des Lit custom
 # elements autonomes - pas besoin de ce bloc de templates partagé ici, chaque vue est une carte
 # unique en mode "Panel".
+#
+# `layout: round` est réglé ci-dessous sur les 3 cartes pour l'écran circulaire de l'Echo Spot
+# 1ère gen (480x480) - ce n'est PAS automatique, la carte ne détecte pas la forme de l'écran.
+# Si ce dashboard sert aussi (ou plutôt) un Echo Show rectangulaire, retire ces 3 lignes
+# `layout: round` (ou mets `layout: null`) pour repasser en mise en page large.
 
 title: ViewAssist
 views:
@@ -24,6 +29,7 @@ views:
         weather_entity: weather.XXX                  # <-- À CHANGER : ton entité météo (optionnel, retire la ligne si tu n'en veux pas ici)
         dashboard: echo-view-assist                   # <-- À CHANGER : url_path choisi en créant CE dashboard (voir README, étape 1)
         weather_view: weather                          # doit matcher le `path:` de la vue "weather" plus bas
+        layout: round                                  # écran circulaire Echo Spot - retire/mets null pour un Echo Show
         show_clock: true
         show_date: true
         show_weather: true
@@ -37,6 +43,7 @@ views:
         media_player_entity: media_player.XXX         # <-- À CHANGER : ton media_player (Music Assistant, Sonos, etc.)
         satellite_entity: sensor.viewassist_XXX        # <-- À CHANGER : même entité que la vue home
         dashboard: echo-view-assist                     # <-- À CHANGER : même url_path que la vue home
+        layout: round                                    # écran circulaire Echo Spot - retire/mets null pour un Echo Show
         queue_view: player-queue                          # laisse tel quel si tu n'as pas de vue file d'attente séparée -
                                                            # la puce "File d'attente" ne s'affichera simplement pas sans
                                                            # une vue nommée "player-queue" existante
@@ -48,6 +55,7 @@ views:
     cards:
       - type: custom:echo-weather-card
         entity: weather.XXX                            # <-- À CHANGER : même entité météo que la vue home
+        layout: round                                  # écran circulaire Echo Spot - retire/mets null pour un Echo Show
         hourly_count: 6
         daily_count: 4
         show_current: true

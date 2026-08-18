@@ -1,65 +1,80 @@
-# Echo dashboard — View Assist
+# Dashboard View Assist — echo-cards
 
-Dashboard Home Assistant pour transformer un Amazon Echo Show/Spot flashé
-sous LineageOS en écran de contrôle domotique, en s'appuyant sur
-[CoqPit](https://git.alocoq.fr/alois/CoqPit) (fork de View Assist
-Companion App) et les cartes maison
+Dashboard Home Assistant pour remplacer les vues par défaut de [View
+Assist](https://github.com/dinki/View-Assist) par les cartes maison
 [echo-home-card](https://git.alocoq.fr/alois/echo-home-card),
 [echo-player-card](https://git.alocoq.fr/alois/echo-player-card) et
 [echo-weather-card](https://git.alocoq.fr/alois/echo-weather-card).
 
-## Historique
+C'est ce qui manquait pour que CoqPit arrête d'afficher le dashboard View
+Assist générique : l'app lit l'attribut `dashboard` de l'entité satellite
+View Assist (voir `settings["ha_dashboard"]` dans `Settings.kt` côté
+CoqPit) — tant que cet attribut ne pointe pas vers un dashboard existant,
+elle affiche le dashboard par défaut. Aucun changement côté APK n'est
+nécessaire : une fois ce dashboard créé et l'attribut réglé côté HA,
+CoqPit le chargera automatiquement.
 
-Ce repo contenait auparavant le début d'une app Android native
-from-scratch (assistant IA, dashboard WebView, lecteur Music Assistant —
-voir l'historique git avant ce commit). Ce chantier est abandonné : tout
-ce qu'il visait à faire (wrapper WebView Home Assistant, pont d'auth
-externe, connexion satellite) existe déjà, en plus mature et déjà validé
-sur device réel, dans **CoqPit**. Repartir d'un dashboard Lovelace
-[View Assist](https://github.com/dinki/View-Assist) personnalisé au-dessus
-de CoqPit atteint le même objectif pour une fraction du travail — pas
-besoin de réécrire un client HA WebView qui existe déjà.
+## 1. Installer les 3 cartes dans Home Assistant
 
-L'historique git d'avant ce pivot reste consultable (`git log`), rien
-n'a été supprimé.
+Si elles ne le sont pas déjà (HACS → Frontend → dépôt personnalisé, ou
+copie manuelle de `dist/echo-*-card.js` dans `www/` + ressource
+Lovelace) :
+- `echo-home-card`
+- `echo-player-card`
+- `echo-weather-card`
 
-## Contenu
+Chaque repo a ses instructions d'installation dans son propre README.
 
-- [`dashboard.yaml`](dashboard.yaml) — dashboard Lovelace complet (vues
-  home/music/weather) prêt à coller dans l'éditeur YAML brut de Home
-  Assistant, avec les echo-cards à la place des vues button-card par
-  défaut de View Assist.
+## 2. Créer le nouveau dashboard
 
-## Installation
+- Home Assistant → **Paramètres** → **Tableaux de bord** → **Ajouter un
+  tableau de bord** → **Nouveau tableau de bord vierge**
+- Titre : `ViewAssist` (ou ce que tu veux), icône libre
+- **Note l'url_path proposé/choisi** (ex: `echo-view-assist`) — c'est la
+  valeur à mettre partout où ce README dit `dashboard: echo-view-assist`
+  dans `dashboard.yaml`
+- Ouvre le nouveau dashboard → ⋮ → **Modifier le tableau de bord** → ⋮ →
+  **Éditeur en mode brut (YAML)**
+- Remplace tout le contenu par celui de [`dashboard.yaml`](dashboard.yaml)
+  de ce dossier, après avoir remplacé les 6 champs marqués
+  `# <-- À CHANGER` (entité satellite, media_player, entité météo,
+  url_path du dashboard)
+- **Enregistrer**
 
-1. Installer les 3 cartes (`echo-home-card`, `echo-player-card`,
-   `echo-weather-card`) dans Home Assistant (HACS ou copie manuelle dans
-   `www/` + ressource Lovelace).
-2. Créer un nouveau dashboard vierge dans Home Assistant, ouvrir
-   l'éditeur en mode brut (YAML), coller le contenu de `dashboard.yaml`
-   — après avoir remplacé les champs marqués `# <-- À CHANGER` (entités
-   satellite/media_player/météo, url_path du dashboard).
-3. Dans la configuration View Assist de l'appareil satellite (Paramètres
-   → Appareils), régler le champ **Dashboard** sur l'url_path choisi à
-   l'étape 2.
-4. Relancer CoqPit sur l'appareil — il charge automatiquement ce
-   dashboard (attribut `dashboard` de l'entité satellite, lu par
-   `Settings.kt` côté CoqPit).
+## 3. Pointer le satellite View Assist vers ce dashboard
 
-## Limites actuelles
+- Home Assistant → **Paramètres** → **Appareils et services** →
+  **Appareils** → ton appareil satellite (l'Echo Spot/Show concerné)
+- Dans sa configuration View Assist, champ **Dashboard** : mets le même
+  url_path que celui utilisé dans `dashboard.yaml` (ex:
+  `/echo-view-assist` — avec ou sans le `/` initial selon ce que
+  l'intégration attend, vérifie ce qu'elle propose)
 
-- Seules 3 vues sont couvertes (home/clock, music, weather) — View
-  Assist en prévoit d'autres en standard (camera, alarm, calendar,
-  thermostat...) : à ajouter à la main avec des cartes HA classiques si
-  besoin.
+## 4. Vérifier
+
+Relance CoqPit sur l'appareil (ou attends le prochain rafraîchissement de
+la WebView) — il doit maintenant charger la vue `home` de ce nouveau
+dashboard au lieu du dashboard View Assist par défaut.
+
+## Limites de cette première version
+
+- Seules 3 vues sont couvertes (home/clock, music, weather) — View Assist
+  en prévoit d'autres en standard (camera, alarm, calendar, thermostat,
+  etc., voir `views/` du repo officiel) : à ajouter à la main dans
+  `dashboard.yaml` avec des cartes standards HA si besoin, les echo-cards
+  ne couvrent que ces 3 usages pour l'instant.
 - La puce "File d'attente" d'`echo-player-card` référence une vue
-  `player-queue` qui n'existe pas dans `dashboard.yaml` — elle ne
-  s'affiche simplement pas tant que cette vue n'est pas créée (pas
-  d'erreur).
-- Pas de mode `round` explicitement activé pour l'Echo Spot 1ère gen —
-  voir la doc d'`echo-home-card` (`layout: round`) si l'écran est
-  circulaire.
+  `player-queue` qui n'existe pas dans ce `dashboard.yaml` — elle ne
+  s'affichera juste pas tant que cette vue n'est pas créée (aucune
+  erreur, comportement documenté de la carte).
 
-## Licence
+## Écran circulaire (Echo Spot)
 
-GPLv3 — voir [LICENSE](LICENSE).
+`layout: round` est réglé par défaut sur les 3 cartes dans
+`dashboard.yaml` — **ce n'est pas automatique**, aucune des cartes ne
+détecte la forme de l'écran, c'est un réglage YAML explicite par carte
+(pas un réglage global du dashboard). Si ce même dashboard sert aussi un
+Echo Show rectangulaire, retire ces lignes `layout: round` (ou passe à
+`layout: null`) sur les cartes concernées — potentiellement en dupliquant
+le dashboard (un par forme d'écran) si les deux types d'appareils
+partagent le même Home Assistant.
