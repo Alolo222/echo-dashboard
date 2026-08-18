@@ -68,6 +68,25 @@ dashboard au lieu du dashboard View Assist par défaut.
   s'affichera juste pas tant que cette vue n'est pas créée (aucune
   erreur, comportement documenté de la carte).
 
+## Barre d'onglets en haut de l'écran
+
+`dashboard.yaml` met `subview: true` sur les vues `music` et `weather`
+(pas sur `home`) pour éviter que Home Assistant affiche une barre
+d'onglets (Home | Music | Weather) — ce chrome HA n'a pas de sens ici
+puisque la navigation se fait par `view_assist.navigate` (tap sur
+l'horloge, la météo, la puce file d'attente), jamais en cliquant un
+onglet. Avec une seule vue non-subview (`home`), HA masque la barre
+entièrement.
+
+Ceci dit, une vue `subview` affiche quand même une fine barre en haut
+avec son nom + un bouton retour tant qu'on y est (comportement HA natif,
+pas configurable par YAML) — bien moins gênant qu'une barre d'onglets
+complète, mais pas du chrome zéro absolu. Pour la faire disparaître
+totalement, il faut passer par du CSS (`card-mod` sur la vue, ou
+Browsermod "Hide Header" si déjà installé pour d'autres raisons) — pas
+inclus ici pour ne pas ajouter une dépendance HACS de plus si ce n'est
+pas déjà gênant en pratique.
+
 ## Écran circulaire (Echo Spot)
 
 `layout: round` est réglé par défaut sur les 3 cartes dans

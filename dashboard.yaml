@@ -14,6 +14,13 @@
 # 1ère gen (480x480) - ce n'est PAS automatique, la carte ne détecte pas la forme de l'écran.
 # Si ce dashboard sert aussi (ou plutôt) un Echo Show rectangulaire, retire ces 3 lignes
 # `layout: round` (ou mets `layout: null`) pour repasser en mise en page large.
+#
+# `subview: true` sur music/weather (pas sur home) : sans ça, HA affiche une barre d'onglets
+# (Home | Music | Weather) en haut de l'écran - du chrome HA que View Assist ne veut jamais
+# puisque la navigation entre vues se fait par `view_assist.navigate` (tap sur l'horloge/la
+# météo/la puce file d'attente), jamais en cliquant un onglet. Une vue "subview" disparaît de
+# cette barre ; comme "home" reste la seule vue non-subview, HA masque la barre entièrement
+# (elle ne s'affiche que s'il y a plusieurs vues à choisir).
 
 title: ViewAssist
 views:
@@ -38,6 +45,7 @@ views:
   - title: Music
     path: music
     type: panel
+    subview: true
     cards:
       - type: custom:echo-player-card
         media_player_entity: media_player.XXX         # <-- À CHANGER : ton media_player (Music Assistant, Sonos, etc.)
@@ -52,6 +60,7 @@ views:
   - title: Weather
     path: weather
     type: panel
+    subview: true
     cards:
       - type: custom:echo-weather-card
         entity: weather.XXX                            # <-- À CHANGER : même entité météo que la vue home
