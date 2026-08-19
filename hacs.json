@@ -1,0 +1,6 @@
+{
+  "name": "Echo Dashboard",
+  "filename": "echo-dashboard.js",
+  "content_in_root": false,
+  "render_readme": true
+}

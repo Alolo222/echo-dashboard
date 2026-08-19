@@ -1,29 +1,39 @@
-# Dashboard View Assist — echo-cards
+# echo-dashboard
 
-Dashboard Home Assistant pour remplacer les vues par défaut de [View
-Assist](https://github.com/dinki/View-Assist) par les cartes maison
-[echo-home-card](https://git.alocoq.fr/alois/echo-home-card),
-[echo-player-card](https://git.alocoq.fr/alois/echo-player-card) et
-[echo-weather-card](https://git.alocoq.fr/alois/echo-weather-card).
+Bundle HACS unique regroupant 3 cartes Lovelace maison — **echo-home-card**
+(horloge + météo compacte), **echo-player-card** (lecteur média plein
+écran) et **echo-weather-card** (météo détaillée) — pour smart displays
+Home Assistant (Echo Show 5 / Echo Spot sous LineageOS + [View
+Assist](https://github.com/dinki/View-Assist)), plus le `dashboard.yaml`
+de référence pour les utiliser ensemble.
 
-C'est ce qui manquait pour que CoqPit arrête d'afficher le dashboard View
-Assist générique : l'app lit l'attribut `dashboard` de l'entité satellite
-View Assist (voir `settings["ha_dashboard"]` dans `Settings.kt` côté
-CoqPit) — tant que cet attribut ne pointe pas vers un dashboard existant,
-elle affiche le dashboard par défaut. Aucun changement côté APK n'est
-nécessaire : une fois ce dashboard créé et l'attribut réglé côté HA,
-CoqPit le chargera automatiquement.
+Une seule installation HACS donne accès aux 3 tags
+`custom:echo-home-card` / `custom:echo-player-card` /
+`custom:echo-weather-card` (même principe que
+[Mushroom](https://github.com/piitaya/lovelace-mushroom) : tout est
+regroupé dans un seul `dist/echo-dashboard.js`). Chaque carte garde son
+propre code, sa propre version et son propre changelog dans
+[`packages/`](packages) — voir le README de chacune pour le détail de ses
+options (`packages/echo-home-card/README.md`,
+`packages/echo-player-card/README.md`,
+`packages/echo-weather-card/README.md`). Ce README-ci ne couvre que
+l'assemblage : installation du bundle et mise en place du dashboard
+`dashboard.yaml` qui les utilise toutes les trois.
 
-## 1. Installer les 3 cartes dans Home Assistant
+C'est aussi ce qui manquait pour que CoqPit arrête d'afficher le
+dashboard View Assist générique : l'app lit l'attribut `dashboard` de
+l'entité satellite View Assist (voir `settings["ha_dashboard"]` dans
+`Settings.kt` côté CoqPit) — tant que cet attribut ne pointe pas vers un
+dashboard existant, elle affiche le dashboard par défaut. Aucun
+changement côté APK n'est nécessaire : une fois ce dashboard créé et
+l'attribut réglé côté HA, CoqPit le chargera automatiquement.
 
-Si elles ne le sont pas déjà (HACS → Frontend → dépôt personnalisé, ou
-copie manuelle de `dist/echo-*-card.js` dans `www/` + ressource
-Lovelace) :
-- `echo-home-card`
-- `echo-player-card`
-- `echo-weather-card`
+## 1. Installer echo-dashboard dans Home Assistant
 
-Chaque repo a ses instructions d'installation dans son propre README.
+Une seule carte à ajouter (HACS → Frontend → dépôt personnalisé
+`echo-dashboard`, ou copie manuelle de `dist/echo-dashboard.js` dans
+`www/` + ressource Lovelace) — les 3 tags `custom:echo-*-card` sont
+disponibles immédiatement après, aucune étape supplémentaire par carte.
 
 ## 2. Créer le nouveau dashboard
 

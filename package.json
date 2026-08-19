@@ -1,0 +1,21 @@
+{
+  "name": "echo-dashboard",
+  "version": "1.0.0",
+  "description": "Bundle HACS unique regroupant echo-home-card, echo-player-card et echo-weather-card (cartes Home Assistant pour smart displays Echo Show / Echo Spot, View Assist), plus le dashboard.yaml de référence pour les utiliser.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
