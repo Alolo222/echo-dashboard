@@ -399,6 +399,18 @@ complet, indépendant du style de jour :
 - **Chandelle** (`atlas`) : aiguilles en lame effilée, graduations à
   opacité vacillante façon flamme.
 
+Le mode nuit dépend de l'entité `satellite_entity` (voir plus bas) — pas
+pratique pour prévisualiser un thème sans attendre la vraie nuit. Ces 3
+concepts sont donc aussi exposés en clé à part, sélectionnable comme
+n'importe quel autre style : `aurore_night`, `corail_night`,
+`atlas_night` (et `soleil_night` pour le recolorage simple) restent
+identiques à eux-mêmes jour comme nuit, pratiques pour les tester
+directement :
+
+```yaml
+analog_style: atlas_night   # affiche "Chandelle" en permanence, pour tester
+```
+
 Le fond par défaut de chaque style se personnalise avec l'option
 `analog_background` (voir [Configuration complète](#configuration-complète))
 — un simple champ YAML, indépendant de `background` qui ne concerne que

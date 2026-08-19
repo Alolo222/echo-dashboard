@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.1
+
+Les 4 concepts de nuit (`aurore`, `corail`, `atlas`, `soleil`) exposés en
+clé à part, sélectionnable via `analog_style` comme n'importe quel autre
+style — `aurore_night`, `corail_night`, `atlas_night`, `soleil_night` :
+pour prévisualiser un thème de nuit sans attendre la vraie nuit (ou sans
+avoir à forcer l'attribut `mode` de l'entité satellite dans Développeur →
+États). Chacune pointe sur elle-même via `night: { swap }`, donc reste
+identique même si sélectionnée à la vraie nuit — pas de double
+traitement. Les 3 styles atteints par une simple bascule de nuit
+(`ardoise` → `carbone`, `grenat` → `mono`, `prisme` → `neon`) n'ont pas
+besoin d'un tel alias : ce sont déjà des styles normaux, sélectionnables
+tels quels.
+
 ## 1.6.0
 
 Les 7 styles "planétaires" de 1.5.0 remplacés : jugés trop démonstratifs

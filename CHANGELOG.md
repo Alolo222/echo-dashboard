@@ -8,6 +8,14 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.2.1
+
+`echo-home-card` passe à 1.6.1 : les concepts de nuit (`aurore_night`,
+`corail_night`, `atlas_night`, `soleil_night`) exposés en style à part,
+sélectionnable pour prévisualiser un thème de nuit sans attendre/forcer
+la vraie nuit. Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#161).
+
 ## 1.2.0
 
 `echo-home-card` passe à 1.6.0 : les 7 styles analogiques planétaires de

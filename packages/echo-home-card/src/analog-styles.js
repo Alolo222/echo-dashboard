@@ -425,6 +425,119 @@ export const ANALOG_STYLES = {
     // retrait.
     night: { background: "#0a0e1e", color: "#ffb84d" },
   },
+
+  // --- Nuits sélectionnables seules ------------------------------------
+  // Les concepts de nuit ci-dessus ne s'affichent normalement que la
+  // nuit réelle (attribut `mode` du satellite View Assist, cf.
+  // _isNightMode). Ces 4 entrées les exposent en clé à part —
+  // sélectionnables via `analog_style` comme n'importe quel autre style,
+  // pour les prévisualiser sans attendre/forcer la nuit. Chacune pointe
+  // sur elle-même via `night: { swap }` : sélectionnée à la vraie nuit,
+  // elle reste identique plutôt que de retomber sur le rouge atténué
+  // générique (qui n'aurait pas de sens sur un style déjà pensé nuit).
+  aurore_night: {
+    label: "Aurore Boréale (nuit d'aurore)",
+    description:
+      "Nuit de \"aurore\" isolée pour prévisualisation : une teinte différente par aiguille (cyan/vert/violet), aucune graduation.",
+    background: "radial-gradient(120% 100% at 50% 15%, #0d2b28 0%, #071a2e 45%, #030712 100%)",
+    glow: true,
+    ticks: null,
+    numerals: null,
+    hour: { len: 23, color: "#2ee6c8", width: 4, cap: "round" },
+    minute: { len: 35, color: "#5ee6a0", width: 2.6, cap: "round" },
+    second: {
+      len: 42,
+      tail: 8,
+      color: "#b06bff",
+      width: 1,
+      cap: "round",
+      opacity: 0.9,
+      tipDot: { r: 1.3, fill: "#b06bff" },
+    },
+    center: { r: 2, color: "#2ee6c8", ring: { r: 3.4, width: 1, color: "#b06bff" } },
+    comp: { color: "#8ff5e0", opacity: 0.75 },
+    night: { swap: "aurore_night" },
+  },
+
+  corail_night: {
+    label: "Bioluminescence (nuit de corail)",
+    description:
+      "Nuit de \"corail\" isolée pour prévisualisation : récif profond, graduations de taille et d'éclat irréguliers.",
+    background: "radial-gradient(120% 100% at 50% 100%, #04211f 0%, #010a09 70%)",
+    glow: true,
+    ticks: {
+      shape: "dot",
+      mode: "all",
+      radius: 44,
+      radii: [1.8, 0.6, 1.2, 2.4, 0.8, 1.6, 0.5, 2.0, 1.0, 1.8, 0.7, 1.4],
+      opacities: [0.7, 0.3, 0.5, 0.85, 0.35, 0.6, 0.25, 0.75, 0.4, 0.65, 0.3, 0.55],
+      color: "#7dffcf",
+    },
+    numerals: null,
+    hour: { len: 23, color: "#ff9f80", width: 4, cap: "round" },
+    minute: { len: 35, color: "#ff9f80", width: 2.6, cap: "round" },
+    second: {
+      len: 42,
+      tail: 8,
+      color: "#7dffcf",
+      width: 1,
+      cap: "round",
+      opacity: 0.95,
+      tipDot: { r: 1.4, fill: "#7dffcf" },
+    },
+    center: { r: 1.8, color: "#ff9f80", ring: { r: 3.2, width: 1, color: "#7dffcf" } },
+    comp: { color: "#7dffcf", opacity: 0.7 },
+    night: { swap: "corail_night" },
+  },
+
+  atlas_night: {
+    label: "Chandelle (nuit d'atlas)",
+    description:
+      "Nuit de \"atlas\" isolée pour prévisualisation : lueur de chandelle, aiguilles en lame effilée, graduations en flamme vacillante.",
+    background: "radial-gradient(60% 60% at 50% 55%, #3a1508 0%, #1a0a06 45%, #0a0403 100%)",
+    glow: true,
+    shape: "leaf",
+    ticks: {
+      shape: "dot",
+      mode: "all",
+      radius: 44,
+      minorR: 1.2,
+      cardinalR: 1.2,
+      opacities: [0.75, 0.15, 0.5, 0.9, 0.25, 0.6, 0.4, 0.15, 0.8, 0.3, 0.55, 0.2],
+      color: "#e0a84a",
+    },
+    numerals: null,
+    hour: { len: 24, color: "#f0b860", width: 4, cap: "round" },
+    minute: { len: 36, color: "#f0b860", width: 2.6, cap: "round" },
+    second: { len: 42, tail: 8, color: "#ff3d6e", width: 1, cap: "round", opacity: 0.9 },
+    center: { r: 2, color: "#f0b860", ring: { r: 3.4, width: 1, color: "#ff3d6e" } },
+    comp: { color: "#f0b860", opacity: 0.7 },
+    night: { swap: "atlas_night" },
+  },
+
+  soleil_night: {
+    label: "Braises (nuit de soleil)",
+    description:
+      "Nuit de \"soleil\" isolée pour prévisualisation : indigo profond, aiguilles et rayons en braises ambrées.",
+    background: "#0a0e1e",
+    glow: false,
+    ticks: {
+      shape: "line",
+      mode: "all",
+      y2: 9,
+      width: 1.2,
+      color: "#ffb84d",
+      y1s: [2, 7, 7, 2, 7, 7, 2, 7, 7, 2, 7, 7],
+      opacities: [0.95, 0.6, 0.6, 0.95, 0.6, 0.6, 0.95, 0.6, 0.6, 0.95, 0.6, 0.6],
+    },
+    numerals: null,
+    hour: { len: 23, color: "#ffb84d", width: 4.5, cap: "round" },
+    minute: { len: 35, color: "#ffb84d", width: 2.8, cap: "round" },
+    second: { len: 42, tail: 8, color: "#ffb84d", width: 1, cap: "round", opacity: 0.9 },
+    center: { r: 2.2, color: "#ffb84d" },
+    comp: { color: "#ffb84d", opacity: 0.85 },
+    night: { swap: "soleil_night" },
+  },
 };
 
 // Résolution de `analog_style: "auto"` — un style par jour de la
