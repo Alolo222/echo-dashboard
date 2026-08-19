@@ -8,6 +8,14 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.1.0
+
+`echo-home-card` passe à 1.5.0 : sept nouveaux styles de cadran
+analogique planétaires (un par jour de la semaine, `analog_style: auto`
+pour un choix automatique selon le jour), avec palette de nuit propre à
+chacun. Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#150).
+
 ## 1.0.0
 
 Première version du bundle. Fusionne les 3 repos précédemment séparés
