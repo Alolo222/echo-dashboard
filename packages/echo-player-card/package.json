@@ -1,0 +1,17 @@
+{
+  "name": "echo-player-card",
+  "version": "0.1.0",
+  "description": "Lecteur média plein écran Home Assistant pour smart displays (Echo Show / Echo Spot, View Assist).",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
