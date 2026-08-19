@@ -1122,12 +1122,15 @@ class EchoHomeCard extends LitElement {
          inhabituellement étroit, une valeur purement basée sur la
          hauteur déborderait sur la colonne météo/date à gauche. */
       --_analog-landscape-size: min(80vh, 42vw);
-      /* Sensiblement plus petite que --_date-size (pensée pour le mode
-         digital, sous l'horloge géante) : à côté de la météo plutôt que
-         sous une horloge, --_date-size la ferait presque aussi grosse
-         que la température elle-même (--_weather-temp-size, quasi le
-         même facteur vh) — pas ce qu'on veut d'une info secondaire. */
-      --_analog-landscape-date-size: clamp(1.1rem, 8vh, 3rem);
+      /* Plus petite que --_date-size (pensée pour le mode digital, sous
+         l'horloge géante) : à côté de la météo plutôt que sous une
+         horloge, --_date-size la ferait presque aussi grosse que la
+         température elle-même (--_weather-temp-size, quasi le même
+         facteur vh) — pas ce qu'on veut d'une info secondaire. Remontée
+         (1.1rem/8vh/3rem -> 1.4rem/10vh/3.6rem) après un retour "trop
+         petite" sur appareil réel, sans revenir au poids de
+         --_date-size. */
+      --_analog-landscape-date-size: clamp(1.4rem, 10vh, 3.6rem);
       --_text-color: var(--echo-home-text-color, #ffffff);
       /* "red" tel quel par défaut (pas une teinte adoucie) : c'est
          volontairement discret/peu lumineux plutôt que joli — usage
@@ -1542,7 +1545,19 @@ class EchoHomeCard extends LitElement {
        théorique trouvé en testant une position intermédiaire, plus haut
        mais toujours centrée, n'a jamais existé à la position d'origine
        ci-dessus, seulement à cette position intermédiaire jamais
-       déployée). Redevenu centré, comme avant la 1.4.2. */
+       déployée). Redevenu centré, comme avant la 1.4.2 — mais seulement
+       en digital : en analogique + round, "bottom" le place ~91% vers
+       le bas de la carte (calculé sur la position réelle), en plein
+       dans l'anneau de graduations du cadran (~90-92%, cf.
+       analog-styles.js) — signalé après un vrai test sur appareil.
+       Remonté à 79%, sous la date (~68%) mais bien avant les
+       graduations, dans l'espace vide entre les deux. Le digital n'a ni
+       cadran ni date à cette hauteur, donc pas touché. */
+    .card.round.analog .clock-toggle {
+      top: 79%;
+      bottom: auto;
+      transform: translate(-50%, -50%);
+    }
 
     .clock-toggle:hover,
     .clock-toggle:focus-visible {
@@ -1595,13 +1610,15 @@ class EchoHomeCard extends LitElement {
          clippé en cercle (évite un rendu "coupé net" à l'anticrénelage
          près). */
       --_analog-size: 94%;
-      /* Sensiblement plus petites que --_weather-icon-size/--_weather-
-         temp-size/--_date-size ci-dessus : une complication doit rester
-         discrète à côté d'aiguilles qui occupent tout l'écran, pas
-         reproduire le poids visuel du bloc météo/date du mode digital. */
-      --_analog-weather-icon-size: clamp(14px, 5vmin, 30px);
-      --_analog-weather-temp-size: clamp(0.65rem, 4.6vmin, 1.15rem);
-      --_analog-date-size: clamp(0.6rem, 4vmin, 1rem);
+      /* Plus petites que --_weather-icon-size/--_weather-temp-size/
+         --_date-size ci-dessus : une complication reste plus discrète
+         qu'à côté d'aiguilles qui occupent tout l'écran que le bloc
+         météo/date du mode digital — mais remontées (0.65rem/4.6vmin/
+         1.15rem -> 0.85rem/5.6vmin/1.4rem etc.) après un retour "trop
+         petit" sur appareil réel. */
+      --_analog-weather-icon-size: clamp(18px, 6vmin, 36px);
+      --_analog-weather-temp-size: clamp(0.85rem, 5.6vmin, 1.4rem);
+      --_analog-date-size: clamp(0.8rem, 5vmin, 1.3rem);
     }
   `;
 }

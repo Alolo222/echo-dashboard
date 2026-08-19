@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.6.3
+
+Deux ajustements signalés après un vrai test sur appareil, mode
+analogique uniquement :
+
+- **Météo/date agrandies** sur le cadran analogique : round
+  (`--_analog-weather-icon-size`/`--_analog-weather-temp-size`/
+  `--_analog-date-size`) et paysage (`--_analog-landscape-date-size`)
+  remontées d'environ 20-30% — restaient délibérément discrètes à côté
+  des aiguilles, jugées trop petites en usage réel.
+- **Bouton de bascule remonté en mode round** : `bottom` le plaçait à
+  ~91% de la hauteur de la carte, en plein dans l'anneau de graduations
+  du cadran (~90-92%) — signalé "dans les graduations". Remonté à 79%
+  (`.card.round.analog .clock-toggle`), sous la date (~68%) mais avant
+  les graduations, dans l'espace libre entre les deux. Le digital (pas
+  de cadran à cette hauteur) et le mode paysage (cadran casé à droite,
+  bouton centré horizontalement sur toute la carte donc jamais dessus)
+  ne sont pas concernés, volontairement pas touchés.
+- Vérifié (Playwright) : positions du bouton mesurées par
+  `getBoundingClientRect` (79.0% round+analog, 91.3% round+digital et
+  paysage, inchangé) ; tailles de police effectives confirmées plus
+  grandes ; suite de tests existante toujours au vert.
+
 ## 1.6.2
 
 **Corrige la dérive de la trotteuse**, signalée après un vrai test sur

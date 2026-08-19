@@ -1,6 +1,6 @@
 {
   "name": "echo-dashboard",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Bundle HACS unique regroupant echo-home-card, echo-player-card et echo-weather-card (cartes Home Assistant pour smart displays Echo Show / Echo Spot, View Assist), plus le dashboard.yaml de référence pour les utiliser.",
   "type": "module",
   "license": "MIT",

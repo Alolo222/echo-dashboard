@@ -8,6 +8,13 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.2.3
+
+`echo-home-card` passe à 1.6.3 : météo/date agrandies sur le cadran
+analogique, bouton de bascule remonté en mode round (était dans les
+graduations). Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#163).
+
 ## 1.2.2
 
 `echo-home-card` passe à 1.6.2 : corrige un saut de la trotteuse en mode
