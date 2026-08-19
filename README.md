@@ -50,6 +50,15 @@ pour sa configuration en attendant. Chaque README de carte
 (`packages/<carte>/README.md`) contient davantage de captures détaillant
 ses différents modes et styles.
 
+## Documentation par carte
+
+Un aperçu par carte, plus digeste que le README complet de son package
+(qui reste la référence pour la configuration détaillée) :
+
+- [`docs/echo-home-card.md`](docs/echo-home-card.md)
+- [`docs/echo-player-card.md`](docs/echo-player-card.md) *(à compléter)*
+- [`docs/echo-weather-card.md`](docs/echo-weather-card.md) *(à compléter)*
+
 ## 1. Installer echo-dashboard dans Home Assistant
 
 Une seule carte à ajouter (HACS → Frontend → dépôt personnalisé
