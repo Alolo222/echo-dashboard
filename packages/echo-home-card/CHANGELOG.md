@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.6.4
+
+Nouvelle option **`night_mode_entity`** : source alternative pour le
+mode nuit, à la place de `satellite_entity.attributes.mode`. Repérer le
+bon attribut/la bonne entité pour le Do Not Disturb côté View Assist
+s'est révélé pénible en pratique (mode/DND parfois sur des entités
+séparées selon l'intégration installée) — plus simple d'accepter
+directement une entité "sun" (nuit si `below_horizon`) ou n'importe
+quelle entité booléenne (`input_boolean`/`switch`/`binary_sensor`, nuit
+si état `on`), ex. un `input_boolean` piloté par une automatisation
+horaire.
+
+- Une fois renseignée, remplace entièrement la vérification de
+  `satellite_entity.attributes.mode` (les deux ne se cumulent pas).
+  Comportement par défaut (non renseignée) strictement inchangé.
+- `hass` déclenche maintenant aussi un re-rendu quand l'état de
+  `night_mode_entity` change (même mécanisme que satellite_entity/
+  weather_entity).
+- Vérifié (Playwright) : 7 scénarios (défaut jour/nuit via satellite,
+  sun au-dessus/en dessous de l'horizon, booléen on/off, et
+  night_mode_entity qui prime bien sur satellite_entity.attributes.mode
+  quand les deux sont renseignés) ; suite de tests existante toujours au
+  vert.
+
 ## 1.6.3
 
 Deux ajustements signalés après un vrai test sur appareil, mode

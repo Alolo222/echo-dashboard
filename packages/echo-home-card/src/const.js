@@ -10,12 +10,22 @@ export const DEFAULT_CONFIG = {
   // --- Entités (aucune n'est requise — la carte fonctionne comme simple
   // horloge sans rien configurer du tout) ---
   satellite_entity: null, // entité View Assist du satellite (attributs
-  // `mode` — "night" bascule le mode nuit — et `background`, l'URL de
-  // fond dynamique choisie côté View Assist)
+  // `mode` — "night" bascule le mode nuit, sauf si night_mode_entity est
+  // renseigné (voir plus bas) — et `background`, l'URL de fond
+  // dynamique choisie côté View Assist)
   weather_entity: null, // bloc météo compact (icône + température) ; le
   // bloc est simplement absent si non renseignée
   sun_entity: null, // sinon sun.sun — sert uniquement à choisir la bonne
-  // variante jour/nuit de l'icône météo (ex: partiellement nuageux)
+  // variante jour/nuit de l'icône météo (ex: partiellement nuageux) —
+  // sans rapport avec night_mode_entity ci-dessous
+  night_mode_entity: null, // source alternative pour le mode nuit "écran
+  // de chevet", à la place de satellite_entity.attributes.mode (utile si
+  // ton intégration ne l'expose pas facilement) : une entité "sun" (ex.
+  // "sun.sun", nuit si en dessous de l'horizon) ou n'importe quelle
+  // entité booléenne (input_boolean/switch/binary_sensor, nuit si état
+  // "on") — ex. un input_boolean piloté par une automatisation horaire.
+  // Une fois renseignée, remplace entièrement la vérification de
+  // satellite_entity.attributes.mode (les deux ne se cumulent pas).
 
   // --- Navigation (bloc météo cliquable, via le service view_assist.navigate) ---
   dashboard: null, // base du chemin de dashboard, ex: "dashboard-view-assist"

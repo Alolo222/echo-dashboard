@@ -323,12 +323,14 @@ class EchoHomeCard extends LitElement {
   set hass(hass) {
     const prevSatellite = this._hass?.states[this._config?.satellite_entity];
     const prevWeather = this._hass?.states[this._config?.weather_entity];
+    const prevNightMode = this._hass?.states[this._config?.night_mode_entity];
     this._hass = hass;
     if (!this._config) return;
 
     const nextSatellite = hass.states[this._config.satellite_entity];
     const nextWeather = hass.states[this._config.weather_entity];
-    if (prevSatellite !== nextSatellite || prevWeather !== nextWeather) {
+    const nextNightMode = hass.states[this._config.night_mode_entity];
+    if (prevSatellite !== nextSatellite || prevWeather !== nextWeather || prevNightMode !== nextNightMode) {
       this.requestUpdate();
     }
   }
@@ -346,10 +348,24 @@ class EchoHomeCard extends LitElement {
   }
 
   // Mode nuit "écran de chevet" : piloté par l'attribut `mode` de l'entité
-  // satellite View Assist (mode: "night"), pas par l'heure — c'est
-  // l'utilisateur (ou une automatisation côté HA) qui décide quand
-  // l'écran doit s'assombrir, pas la carte.
+  // satellite View Assist (mode: "night") par défaut, pas par l'heure —
+  // c'est l'utilisateur (ou une automatisation côté HA) qui décide quand
+  // l'écran doit s'assombrir, pas la carte. `night_mode_entity` (cf.
+  // const.js) remplace entièrement cette vérification si renseigné :
+  // trouver le bon attribut/la bonne valeur côté View Assist peut être
+  // pénible selon l'intégration installée (mode/do-not-disturb parfois
+  // sur des entités séparées) — une entité "sun" ou un booléen
+  // (input_boolean piloté par une automatisation horaire, par exemple)
+  // est une source plus simple à mettre en place dans ce cas.
   _isNightMode(satelliteState) {
+    const nightEntityId = this._config.night_mode_entity;
+    if (nightEntityId) {
+      const nightState = this._hass?.states[nightEntityId];
+      if (!nightState) return false;
+      return nightEntityId.split(".")[0] === "sun"
+        ? nightState.state === "below_horizon"
+        : nightState.state === "on";
+    }
     return satelliteState?.attributes?.mode === "night";
   }
 

@@ -122,12 +122,18 @@ type: custom:echo-home-card
 
 # --- Entités (aucune n'est requise) ---
 satellite_entity: null          # entité satellite View Assist — lit
-                                 # attributes.mode ("night" => mode nuit)
+                                 # attributes.mode ("night" => mode nuit,
+                                 # sauf si night_mode_entity ci-dessous)
                                  # et attributes.background (URL de fond)
 weather_entity: null            # bloc météo compact (icône + température)
                                  # — bloc simplement absent si non renseignée
 sun_entity: null                # sinon sun.sun — choisit la variante
                                  # jour/nuit de l'icône météo uniquement
+night_mode_entity: null         # remplace satellite_entity.attributes.mode
+                                 # comme source du mode nuit : entité "sun"
+                                 # (nuit si below_horizon) ou n'importe quelle
+                                 # entité booléenne (nuit si état "on") — voir
+                                 # "Mode nuit" plus bas
 
 # --- Navigation (bloc météo cliquable) ---
 dashboard: null                 # base du chemin envoyé à view_assist.navigate,
@@ -312,11 +318,29 @@ forme objet, plus précise, prime toujours si les deux sont présents).
 
 ## Mode nuit
 
-Le mode nuit n'est pas basé sur l'heure : il suit l'attribut `mode` de
-`satellite_entity` (`mode: "night"`), exactement comme le template View
-Assist d'origine — c'est donc une automatisation côté Home Assistant (ou
-une action manuelle) qui décide quand l'écran doit s'assombrir, pas la
-carte elle-même.
+Le mode nuit n'est pas basé sur l'heure : par défaut, il suit l'attribut
+`mode` de `satellite_entity` (`mode: "night"`), exactement comme le
+template View Assist d'origine — c'est donc une automatisation côté Home
+Assistant (ou une action manuelle) qui décide quand l'écran doit
+s'assombrir, pas la carte elle-même.
+
+Selon l'intégration installée, cet attribut peut être pénible à trouver
+ou ne pas correspondre à ce que tu attends (Do Not Disturb parfois
+exposé comme une entité séparée plutôt qu'un attribut `mode`, par
+exemple). `night_mode_entity` remplace entièrement cette vérification si
+besoin d'une source plus simple à mettre en place :
+
+```yaml
+night_mode_entity: sun.sun                    # nuit dès la tombée de la nuit astronomique
+# ou
+night_mode_entity: input_boolean.chambre_nuit # nuit quand l'entité est "on"
+```
+
+- Une entité `sun.*` : nuit quand son état est `below_horizon`.
+- N'importe quelle autre entité (`input_boolean`, `switch`,
+  `binary_sensor`...) : nuit quand son état est `on` — pratique avec un
+  `input_boolean` piloté par une automatisation horaire si tu préfères
+  un créneau fixe plutôt que le coucher du soleil réel.
 
 ![Mode nuit](docs/screenshot-night.png)
 

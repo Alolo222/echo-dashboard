@@ -8,6 +8,14 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.2.4
+
+`echo-home-card` passe à 1.6.4 : nouvelle option `night_mode_entity`
+(source alternative pour le mode nuit — entité "sun" ou booléenne — à la
+place de `satellite_entity.attributes.mode`, pénible à localiser selon
+l'intégration View Assist installée). Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#164).
+
 ## 1.2.3
 
 `echo-home-card` passe à 1.6.3 : météo/date agrandies sur le cadran
