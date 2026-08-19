@@ -1,4 +1,5 @@
 import { LitElement, html, svg, css, nothing } from "lit";
+import { keyed } from "lit/directives/keyed.js";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import { formatShortDate, formatTime, localizeCondition } from "./format.js";
@@ -900,23 +901,34 @@ class EchoHomeCard extends LitElement {
     const tip = s.tipDot
       ? svg`<circle class="hand" cx="50" cy=${50 - s.len} r=${s.tipDot.r} fill=${s.tipDot.fill} filter=${glowAttr ?? nothing} />`
       : nothing;
-    const second = svg`
-      <g
-        class="hand-second"
-        style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
-      >
-        <line
-          class="hand"
-          x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len}
-          stroke=${s.color}
-          stroke-width=${s.width}
-          stroke-linecap=${s.cap}
-          opacity=${s.opacity}
-          filter=${glowAttr ?? nothing}
-        />
-        ${tip}
-      </g>
-    `;
+    // keyed() sur `secondHandDelay` (unique à chaque rendu, cf. plus bas)
+    // force Lit à recréer ce <g> plutôt qu'à muter animation-delay sur
+    // l'élément existant : changer animation-delay en place sur une
+    // animation CSS déjà en cours ne la reseeke pas de façon fiable
+    // selon les navigateurs — l'aiguille pouvait sauter vers une
+    // position fausse à chaque re-rendu (météo, entité satellite...),
+    // pas seulement au tick de minute. Un nouvel élément démarre
+    // l'animation proprement avec le bon délai dès sa création.
+    const second = keyed(
+      secondHandDelay,
+      svg`
+        <g
+          class="hand-second"
+          style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
+        >
+          <line
+            class="hand"
+            x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len}
+            stroke=${s.color}
+            stroke-width=${s.width}
+            stroke-linecap=${s.cap}
+            opacity=${s.opacity}
+            filter=${glowAttr ?? nothing}
+          />
+          ${tip}
+        </g>
+      `
+    );
     const center = style.center;
     const ring = center.ring
       ? svg`
@@ -944,6 +956,20 @@ class EchoHomeCard extends LitElement {
     const m = style.minute;
     const s = style.second;
     const c = style.center;
+    // keyed() : cf. commentaire dans _renderLineHands — force Lit à
+    // recréer ce <g> plutôt que de muter animation-delay en place.
+    const second = keyed(
+      secondHandDelay,
+      svg`
+        <g
+          class="hand-second"
+          style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
+        >
+          <rect class="hand" x=${50 - s.w / 2} y=${50 - s.len} width=${s.w} height=${s.len} fill=${s.color} />
+          <rect class="hand" x=${50 - s.w / 2} y="50" width=${s.w} height=${s.tail} fill=${s.color} />
+        </g>
+      `
+    );
     return svg`
       <rect
         class="hand hand-hour"
@@ -957,13 +983,7 @@ class EchoHomeCard extends LitElement {
         fill=${m.color}
         transform="rotate(${minuteAngle} 50 50)"
       />
-      <g
-        class="hand-second"
-        style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
-      >
-        <rect class="hand" x=${50 - s.w / 2} y=${50 - s.len} width=${s.w} height=${s.len} fill=${s.color} />
-        <rect class="hand" x=${50 - s.w / 2} y="50" width=${s.w} height=${s.tail} fill=${s.color} />
-      </g>
+      ${second}
       <rect
         class="hand"
         x=${50 - c.size / 2} y=${50 - c.size / 2} width=${c.size} height=${c.size}
@@ -998,12 +1018,17 @@ class EchoHomeCard extends LitElement {
     const tip = s.tipDot
       ? svg`<circle class="hand" cx="50" cy=${50 - s.len} r=${s.tipDot.r} fill=${s.tipDot.fill} />`
       : nothing;
-    const second = svg`
-      <g class="hand-second" style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)">
-        <line class="hand" x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len} stroke=${s.color} stroke-width=${s.width} stroke-linecap=${s.cap} opacity=${s.opacity} />
-        ${tip}
-      </g>
-    `;
+    // keyed() : cf. commentaire dans _renderLineHands — force Lit à
+    // recréer ce <g> plutôt que de muter animation-delay en place.
+    const second = keyed(
+      secondHandDelay,
+      svg`
+        <g class="hand-second" style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)">
+          <line class="hand" x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len} stroke=${s.color} stroke-width=${s.width} stroke-linecap=${s.cap} opacity=${s.opacity} />
+          ${tip}
+        </g>
+      `
+    );
     const center = style.center;
     return svg`${hour}${minute}${second}<circle class="hand" cx="50" cy="50" r=${center.r} fill=${center.color} />`;
   }

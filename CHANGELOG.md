@@ -8,6 +8,14 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.2.2
+
+`echo-home-card` passe à 1.6.2 : corrige un saut de la trotteuse en mode
+analogique (l'aiguille des secondes pouvait sauter vers une position
+fausse à chaque re-rendu hors tick de minute — météo, entité satellite
+— pas seulement une fois par minute). Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#162).
+
 ## 1.2.1
 
 `echo-home-card` passe à 1.6.1 : les concepts de nuit (`aurore_night`,

@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.6.2
+
+**Corrige la dérive de la trotteuse**, signalée après un vrai test sur
+appareil ("l'aiguille des secondes saute vers une position différente
+parfois, qui n'est pas la bonne") : `animation-delay` (qui repositionne
+l'animation CSS continue de la trotteuse sur la bonne seconde à chaque
+rendu, cf. 1.4.5) était réassigné en mutant l'attribut `style` du `<g>`
+existant. Modifier `animation-delay` en place sur une animation CSS déjà
+en cours ne la reseeke pas de façon fiable selon les navigateurs — d'où
+le saut, à chaque re-rendu hors tick de minute (mise à jour météo,
+entité satellite...), pas seulement une fois par minute.
+
+- Le `<g class="hand-second">` (dans les 3 fonctions de rendu des
+  aiguilles) est maintenant enveloppé dans `keyed()` (directive Lit),
+  avec `secondHandDelay` (unique à chaque rendu, inclut les
+  millisecondes) comme clé : Lit recrée l'élément au lieu de le muter en
+  place, donc l'animation démarre proprement avec le bon délai à chaque
+  fois plutôt que d'être repositionnée sur un élément déjà en cours.
+- Vérifié (Playwright) : après un re-rendu forcé hors tick de minute, le
+  noeud `.hand-second` est bien un nouvel élément DOM (pas le même
+  muté) ; suite de tests existante (dérive seconde, alignement minute,
+  régression) toujours au vert.
+
 ## 1.6.1
 
 Les 4 concepts de nuit (`aurore`, `corail`, `atlas`, `soleil`) exposés en
