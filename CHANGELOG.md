@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.4.5
+
+Quatre correctifs signalés après un vrai test sur Echo Spot :
+
+- **Icônes du bouton digital/analogique inversées** : la 1.4.2 avait
+  changé la convention pour "icône = cadran actuel", lu à l'envers sur
+  l'appareil réel (l'attente naturelle sur un bouton est "l'icône montre
+  ce que le tap va donner"). Revenu à la convention d'origine (icône =
+  cadran cible).
+- **Bouton pas centré du tout en mode round** : la même 1.4.2 l'avait
+  décalé en bas à droite pour l'écarter de la date/du chiffre "6" — un
+  chevauchement trouvé en testant une position intermédiaire (remontée
+  mais toujours centrée) qui n'a en réalité jamais existé à la position
+  d'origine, jamais déployée entre les deux. Redevenu centré.
+- **Aiguille des minutes en retard sur l'heure réelle** : le tick
+  d'horloge (`setInterval(30000)`, démarré à la connexion du composant)
+  n'était jamais calé sur la bascule de minute réelle — déphasé de
+  jusqu'à 30s selon l'instant de connexion, un décalage qui ne se
+  corrigeait jamais tout seul. Remplacé par un `setTimeout` recalculé à
+  chaque tick plutôt qu'un `setInterval` fixe : se recale sur la seconde
+  0 de la minute suivante à chaque fois, s'auto-corrige au lieu
+  d'accumuler la dérive. Vérifié avec l'horloge virtuelle de Playwright
+  (`page.clock`) : la mise à jour tombe désormais à moins de 300ms de
+  chaque vraie bascule de minute, sur 5 minutes consécutives testées.
+- **Aiguille des secondes parfois désynchronisée** : son animation CSS
+  ne recalait son délai de démarrage qu'une seule fois, à l'entrée en
+  mode analogique — si l'horloge d'animation du navigateur dérivait de
+  l'heure réelle entre-temps (WebView mise en arrière-plan, écran en
+  veille...), rien ne la recorrigeait tant qu'on restait en analogique.
+  Recalculé à chaque rendu maintenant (au moins une fois par minute,
+  cf. correctif ci-dessus) : borne la dérive possible et s'auto-corrige
+  en continu. Vérifié : le délai suit bien l'heure réelle sur plusieurs
+  rendus consécutifs sans jamais quitter le mode analogique, là où il
+  restait figé sur sa toute première valeur avant ce correctif.
+
 ## 1.4.4
 
 - Captures `docs/` régénérées à nouveau (aucun changement de code) : le

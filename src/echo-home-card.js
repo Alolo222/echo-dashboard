@@ -191,14 +191,7 @@ class EchoHomeCard extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // Horloge : un simple tick à la minute (pas une boucle d'animation),
-    // ne redéclenche un rendu que si horloge ou date sont effectivement
-    // affichées.
-    this._clockTimer = setInterval(() => {
-      if (this._config?.show_clock || this._config?.show_date) {
-        this.requestUpdate();
-      }
-    }, 30000);
+    this._scheduleClockTick();
     // Recalcule le fit-scale (cf. _fitOverflowingText) si la carte
     // change de taille — pas pour suivre le vh/vmin de l'horloge
     // elle-même (déjà fluide via CSS), mais parce qu'un simple
@@ -212,10 +205,38 @@ class EchoHomeCard extends LitElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    clearInterval(this._clockTimer);
+    clearTimeout(this._clockTimer);
     this._resizeObserver?.disconnect();
     this._digitalBackground.destroy();
     this._analogBackground.destroy();
+  }
+
+  // Horloge : un tick recalé sur chaque changement de minute réelle,
+  // pas un setInterval(30000) fixe démarré à la connexion du composant
+  // (l'ancien comportement) — celui-ci ne tombait quasiment jamais pile
+  // sur la bascule de minute (déphasé de jusqu'à 30s selon l'instant de
+  // connexion), un décalage qui ne se corrigeait jamais tout seul :
+  // l'horloge digitale, et surtout l'aiguille des minutes en
+  // analogique (qui elle n'a pas d'animation continue pour masquer le
+  // problème comme la trotteuse), changeaient de valeur jusqu'à 30s
+  // après le vrai changement de minute plutôt qu'au bon moment —
+  // signalé après un vrai test sur appareil. setTimeout recalculé à
+  // chaque tick (pas setInterval) : se recale sur la seconde 0 de la
+  // minute suivante à chaque fois, s'auto-corrige si un tick est
+  // arrivé en retard plutôt que d'accumuler la dérive.
+  _scheduleClockTick() {
+    const now = new Date();
+    const msToNextMinute =
+      60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+    // +250ms de marge : mieux vaut lire l'horloge un peu après la
+    // bascule de minute (imperceptible) que pile dessus, où une
+    // exécution un peu en avance lirait encore l'ancienne minute.
+    this._clockTimer = setTimeout(() => {
+      if (this._config?.show_clock || this._config?.show_date) {
+        this.requestUpdate();
+      }
+      this._scheduleClockTick();
+    }, msToNextMinute + 250);
   }
 
   updated(changedProperties) {
@@ -259,8 +280,9 @@ class EchoHomeCard extends LitElement {
   // mise à jour de Lit plante alors (`Cannot set properties of null
   // (setting 'data')`, vu en testant ce changement). Un clone n'est pas
   // suivi par Lit, donc rien à casser. Coût négligeable : un clone + une
-  // lecture de layout par élément, au pire toutes les 30s (tick
-  // d'horloge) ou au redimensionnement — jamais par frame.
+  // lecture de layout par élément, au pire une fois par minute (tick
+  // d'horloge, cf. _scheduleClockTick) ou au redimensionnement — jamais
+  // par frame.
   _fitOverflowingText() {
     const root = this.shadowRoot;
     const card = root?.querySelector(".card");
@@ -474,12 +496,6 @@ class EchoHomeCard extends LitElement {
         ? `--_analog-default-bg:${analogDefaultBg}`
         : null
     );
-    // L'aiguille des secondes tourne en continu via une animation CSS
-    // (cf. _renderAnalogClock) plutôt qu'un rafraîchissement JS par
-    // seconde — invalidée dès qu'on quitte l'analogique, pour être
-    // recalculée sur le bon instant la prochaine fois qu'on y rentre
-    // (l'élément SVG est recréé à chaque bascule, cf. plus bas).
-    if (!showAnalog) this._secondHandDelay = undefined;
     // Le voile de lisibilité ne sert qu'au-dessus d'une photo (digital,
     // ou analogique paysage avec analog_background_photo) — inutile sur
     // le fond uni du cadran analogique classique.
@@ -590,8 +606,9 @@ class EchoHomeCard extends LitElement {
     const minuteAngle = minutes * 6;
     const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
     // Angle statique, recalculé à chaque rendu (au fil du tick d'horloge,
-    // toutes les 30s) : sert de repli quand l'animation ci-dessous est
-    // coupée (`prefers-reduced-motion`), sinon simplement écrasé par elle
+    // recalé sur chaque minute réelle, cf. _scheduleClockTick) : sert de
+    // repli quand l'animation ci-dessous est coupée
+    // (`prefers-reduced-motion`), sinon simplement écrasé par elle
     // pendant qu'elle tourne.
     const secondAngle = seconds * 6;
 
@@ -600,16 +617,22 @@ class EchoHomeCard extends LitElement {
     // animé, composité par le GPU, coûte bien moins cher qu'un re-rendu
     // Lit chaque seconde sur du matériel modeste (cf. gotchas Echo
     // Show/Spot). --_second-hand-delay décale l'animation pour qu'elle
-    // démarre déjà à la bonne position (calculé une fois par entrée en
-    // mode analogique) plutôt que de repartir de midi à chaque fois.
-    if (this._secondHandDelay === undefined) {
-      this._secondHandDelay = `-${seconds}s`;
-    }
+    // démarre déjà à la bonne position — recalculé à CHAQUE rendu (pas
+    // une seule fois à l'entrée en mode analogique, comme avant) : le
+    // calage était sinon figé indéfiniment tant qu'on restait en
+    // analogique, sans jamais se corriger si l'horloge d'animation CSS
+    // du navigateur dérive de l'heure réelle (WebView mise en arrière-
+    // plan, écran en veille...) — signalé après un vrai test sur
+    // appareil ("l'aiguille des secondes est parfois mal synchronisée").
+    // Recalculer à chaque rendu (au moins une fois par minute désormais,
+    // cf. _scheduleClockTick) borne la dérive possible et l'auto-corrige
+    // en continu plutôt que de ne jamais s'en rendre compte.
+    const secondHandDelay = `-${seconds}s`;
 
     const hands =
       style.shape === "rect"
-        ? this._renderRectHands(style, hourAngle, minuteAngle, secondAngle)
-        : this._renderLineHands(style, hourAngle, minuteAngle, secondAngle);
+        ? this._renderRectHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay)
+        : this._renderLineHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay);
 
     return html`
       <svg
@@ -732,7 +755,7 @@ class EchoHomeCard extends LitElement {
   // trait par aiguille, couleur/épaisseur/forme de bout définies par le
   // style. La seconde peut avoir une petite queue derrière le pivot et un
   // point à la pointe (styles "mono"/"neon").
-  _renderLineHands(style, hourAngle, minuteAngle, secondAngle) {
+  _renderLineHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay) {
     const glowAttr = style.glow ? "url(#echo-home-analog-glow)" : undefined;
     const hour = svg`
       <line
@@ -768,7 +791,7 @@ class EchoHomeCard extends LitElement {
     const second = svg`
       <g
         class="hand-second"
-        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${secondAngle}deg)"
+        style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
       >
         <line
           class="hand"
@@ -804,7 +827,7 @@ class EchoHomeCard extends LitElement {
   // pivot pour la seconde (elle est animée via le même mécanisme —
   // rotation continue sur le <g> englobant, cf. .hand-second dans static
   // styles, qui s'applique aussi bien à un <line> qu'à un <g>).
-  _renderRectHands(style, hourAngle, minuteAngle, secondAngle) {
+  _renderRectHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay) {
     const h = style.hour;
     const m = style.minute;
     const s = style.second;
@@ -824,7 +847,7 @@ class EchoHomeCard extends LitElement {
       />
       <g
         class="hand-second"
-        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${secondAngle}deg)"
+        style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)"
       >
         <rect class="hand" x=${50 - s.w / 2} y=${50 - s.len} width=${s.w} height=${s.len} fill=${s.color} />
         <rect class="hand" x=${50 - s.w / 2} y="50" width=${s.w} height=${s.tail} fill=${s.color} />
@@ -841,13 +864,13 @@ class EchoHomeCard extends LitElement {
   // Petit bouton discret (round et large, masqué la nuit comme le reste
   // — pas de lumière/info superflue sur un écran de chevet) pour
   // basculer digital ↔ analogique. L'icône affichée est celle du cadran
-  // ACTUEL (pas celle vers laquelle on bascule) : un repère d'état
-  // lisible au premier coup d'œil ("je suis en mode X"), plus utile ici
-  // qu'une convention façon bouton d'action classique — clock-outline
-  // (cadran rond) se lit mieux comme "horloge" que clock-digital une
-  // fois affiché en tout petit sur le cadran analogique lui-même.
+  // vers lequel on bascule (pas l'actuel) : la 1.4.2 avait inversé cette
+  // convention ("icône = état actuel"), en pratique lu à l'envers une
+  // fois sur l'appareil réel — l'attente naturelle sur un bouton est
+  // "l'icône montre ce que le tap va donner", pas "l'icône décrit ce
+  // qui est déjà à l'écran".
   _renderClockToggle(showAnalog) {
-    const icon = showAnalog ? "mdi:clock-outline" : "mdi:clock-digital";
+    const icon = showAnalog ? "mdi:clock-digital" : "mdi:clock-outline";
     const label = showAnalog
       ? "Afficher l'horloge digitale"
       : "Afficher l'horloge analogique";
@@ -1333,22 +1356,13 @@ class EchoHomeCard extends LitElement {
       --mdc-icon-size: 22px;
     }
 
-    /* Round : décalé en bas à droite plutôt que centré comme en mode
-       large (left/bottom/transform ci-dessus, pensés pour un écran
-       rectangulaire) — pile en bas d'un cercle, la largeur disponible se
-       rétrécit vite (cf. commentaire sur .card.round .date plus haut,
-       même souci de géométrie) ET c'est là que vit déjà du contenu
-       centré (la date en digital, le chiffre "6" en analogique) : un
-       bouton remonté mais toujours centré finit par les chevaucher
-       (repéré à l'écran, pas juste en théorie). En diagonale, il reste
-       dans une zone large du disque sans entrer en concurrence avec ce
-       contenu centré. */
-    .card.round .clock-toggle {
-      left: auto;
-      right: 12%;
-      bottom: 12%;
-      transform: none;
-    }
+    /* La 1.4.2 avait décalé ce bouton en bas à droite en mode round,
+       pour l'écarter du chevron/de la date centrés à cette hauteur —
+       signalé pas centré du tout une fois sur l'appareil réel (l'écart
+       théorique trouvé en testant une position intermédiaire, plus haut
+       mais toujours centrée, n'a jamais existé à la position d'origine
+       ci-dessus, seulement à cette position intermédiaire jamais
+       déployée). Redevenu centré, comme avant la 1.4.2. */
 
     .clock-toggle:hover,
     .clock-toggle:focus-visible {

@@ -1,12 +1,12 @@
-var Ie = Object.defineProperty;
-var Be = (o, e, t) => e in o ? Ie(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
-var G = (o, e, t) => Be(o, typeof e != "symbol" ? e + "" : e, t);
+var Be = Object.defineProperty;
+var Fe = (n, e, t) => e in n ? Be(n, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : n[e] = t;
+var G = (n, e, t) => Fe(n, typeof e != "symbol" ? e + "" : e, t);
 /**
  * @license
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const B = globalThis, se = B.ShadowRoot && (B.ShadyCSS === void 0 || B.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, ie = Symbol(), le = /* @__PURE__ */ new WeakMap();
+const F = globalThis, se = F.ShadowRoot && (F.ShadyCSS === void 0 || F.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, ie = Symbol(), le = /* @__PURE__ */ new WeakMap();
 let Ue = class {
   constructor(e, t, s) {
     if (this._$cssResult$ = !0, s !== ie) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -25,61 +25,61 @@ let Ue = class {
     return this.cssText;
   }
 };
-const Fe = (o) => new Ue(typeof o == "string" ? o : o + "", void 0, ie), Ve = (o, ...e) => {
-  const t = o.length === 1 ? o[0] : e.reduce((s, i, a) => s + ((n) => {
-    if (n._$cssResult$ === !0) return n.cssText;
-    if (typeof n == "number") return n;
-    throw Error("Value passed to 'css' function must be a 'css' function result: " + n + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-  })(i) + o[a + 1], o[0]);
-  return new Ue(t, o, ie);
-}, We = (o, e) => {
-  if (se) o.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
+const Ie = (n) => new Ue(typeof n == "string" ? n : n + "", void 0, ie), Ve = (n, ...e) => {
+  const t = n.length === 1 ? n[0] : e.reduce((s, i, o) => s + ((a) => {
+    if (a._$cssResult$ === !0) return a.cssText;
+    if (typeof a == "number") return a;
+    throw Error("Value passed to 'css' function must be a 'css' function result: " + a + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+  })(i) + n[o + 1], n[0]);
+  return new Ue(t, n, ie);
+}, We = (n, e) => {
+  if (se) n.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
-    const s = document.createElement("style"), i = B.litNonce;
-    i !== void 0 && s.setAttribute("nonce", i), s.textContent = t.cssText, o.appendChild(s);
+    const s = document.createElement("style"), i = F.litNonce;
+    i !== void 0 && s.setAttribute("nonce", i), s.textContent = t.cssText, n.appendChild(s);
   }
-}, ce = se ? (o) => o : (o) => o instanceof CSSStyleSheet ? ((e) => {
+}, ce = se ? (n) => n : (n) => n instanceof CSSStyleSheet ? ((e) => {
   let t = "";
   for (const s of e.cssRules) t += s.cssText;
-  return Fe(t);
-})(o) : o;
+  return Ie(t);
+})(n) : n;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Ge, defineProperty: Je, getOwnPropertyDescriptor: Ke, getOwnPropertyNames: Ye, getOwnPropertySymbols: Xe, getPrototypeOf: Ze } = Object, k = globalThis, ue = k.trustedTypes, Qe = ue ? ue.emptyScript : "", J = k.reactiveElementPolyfillSupport, U = (o, e) => o, ee = { toAttribute(o, e) {
+const { is: Ge, defineProperty: Je, getOwnPropertyDescriptor: Ke, getOwnPropertyNames: Ye, getOwnPropertySymbols: Xe, getPrototypeOf: Ze } = Object, k = globalThis, ue = k.trustedTypes, Qe = ue ? ue.emptyScript : "", J = k.reactiveElementPolyfillSupport, U = (n, e) => n, ee = { toAttribute(n, e) {
   switch (e) {
     case Boolean:
-      o = o ? Qe : null;
+      n = n ? Qe : null;
       break;
     case Object:
     case Array:
-      o = o == null ? o : JSON.stringify(o);
+      n = n == null ? n : JSON.stringify(n);
   }
-  return o;
-}, fromAttribute(o, e) {
-  let t = o;
+  return n;
+}, fromAttribute(n, e) {
+  let t = n;
   switch (e) {
     case Boolean:
-      t = o !== null;
+      t = n !== null;
       break;
     case Number:
-      t = o === null ? null : Number(o);
+      t = n === null ? null : Number(n);
       break;
     case Object:
     case Array:
       try {
-        t = JSON.parse(o);
+        t = JSON.parse(n);
       } catch {
         t = null;
       }
   }
   return t;
-} }, Ne = (o, e) => !Ge(o, e), de = { attribute: !0, type: String, converter: ee, reflect: !1, useDefault: !1, hasChanged: Ne };
-var ze, Ee;
-(ze = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (Ee = k.litPropertyMetadata) != null || (k.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
-let C = class extends HTMLElement {
+} }, Ne = (n, e) => !Ge(n, e), de = { attribute: !0, type: String, converter: ee, reflect: !1, useDefault: !1, hasChanged: Ne };
+var ze, Ce;
+(ze = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (Ce = k.litPropertyMetadata) != null || (k.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
+let E = class extends HTMLElement {
   static addInitializer(e) {
     var t;
     this._$Ei(), ((t = this.l) != null ? t : this.l = []).push(e);
@@ -94,15 +94,15 @@ let C = class extends HTMLElement {
     }
   }
   static getPropertyDescriptor(e, t, s) {
-    var n;
-    const { get: i, set: a } = (n = Ke(this.prototype, e)) != null ? n : { get() {
+    var a;
+    const { get: i, set: o } = (a = Ke(this.prototype, e)) != null ? a : { get() {
       return this[t];
     }, set(l) {
       this[t] = l;
     } };
     return { get: i, set(l) {
       const r = i == null ? void 0 : i.call(this);
-      a == null || a.call(this, l), this.requestUpdate(e, r, s);
+      o == null || o.call(this, l), this.requestUpdate(e, r, s);
     }, configurable: !0, enumerable: !0 };
   }
   static getPropertyOptions(e) {
@@ -189,35 +189,35 @@ let C = class extends HTMLElement {
     this._$AK(e, s);
   }
   _$ET(e, t) {
-    var a;
+    var o;
     const s = this.constructor.elementProperties.get(e), i = this.constructor._$Eu(e, s);
     if (i !== void 0 && s.reflect === !0) {
-      const n = (((a = s.converter) == null ? void 0 : a.toAttribute) !== void 0 ? s.converter : ee).toAttribute(t, s.type);
-      this._$Em = e, n == null ? this.removeAttribute(i) : this.setAttribute(i, n), this._$Em = null;
+      const a = (((o = s.converter) == null ? void 0 : o.toAttribute) !== void 0 ? s.converter : ee).toAttribute(t, s.type);
+      this._$Em = e, a == null ? this.removeAttribute(i) : this.setAttribute(i, a), this._$Em = null;
     }
   }
   _$AK(e, t) {
-    var a, n, l;
+    var o, a, l;
     const s = this.constructor, i = s._$Eh.get(e);
     if (i !== void 0 && this._$Em !== i) {
-      const r = s.getPropertyOptions(i), c = typeof r.converter == "function" ? { fromAttribute: r.converter } : ((a = r.converter) == null ? void 0 : a.fromAttribute) !== void 0 ? r.converter : ee;
+      const r = s.getPropertyOptions(i), c = typeof r.converter == "function" ? { fromAttribute: r.converter } : ((o = r.converter) == null ? void 0 : o.fromAttribute) !== void 0 ? r.converter : ee;
       this._$Em = i;
-      const h = c.fromAttribute(t, r.type);
-      this[i] = (l = h != null ? h : (n = this._$Ej) == null ? void 0 : n.get(i)) != null ? l : h, this._$Em = null;
+      const d = c.fromAttribute(t, r.type);
+      this[i] = (l = d != null ? d : (a = this._$Ej) == null ? void 0 : a.get(i)) != null ? l : d, this._$Em = null;
     }
   }
-  requestUpdate(e, t, s, i = !1, a) {
-    var n, l;
+  requestUpdate(e, t, s, i = !1, o) {
+    var a, l;
     if (e !== void 0) {
       const r = this.constructor;
-      if (i === !1 && (a = this[e]), s != null || (s = r.getPropertyOptions(e)), !(((n = s.hasChanged) != null ? n : Ne)(a, t) || s.useDefault && s.reflect && a === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(r._$Eu(e, s)))) return;
+      if (i === !1 && (o = this[e]), s != null || (s = r.getPropertyOptions(e)), !(((a = s.hasChanged) != null ? a : Ne)(o, t) || s.useDefault && s.reflect && o === ((l = this._$Ej) == null ? void 0 : l.get(e)) && !this.hasAttribute(r._$Eu(e, s)))) return;
       this.C(e, t, s);
     }
     this.isUpdatePending === !1 && (this._$ES = this._$EP());
   }
-  C(e, t, { useDefault: s, reflect: i, wrapped: a }, n) {
+  C(e, t, { useDefault: s, reflect: i, wrapped: o }, a) {
     var l, r, c;
-    s && !((l = this._$Ej) != null ? l : this._$Ej = /* @__PURE__ */ new Map()).has(e) && (this._$Ej.set(e, (r = n != null ? n : t) != null ? r : this[e]), a !== !0 || n !== void 0) || (this._$AL.has(e) || (this.hasUpdated || s || (t = void 0), this._$AL.set(e, t)), i === !0 && this._$Em !== e && ((c = this._$Eq) != null ? c : this._$Eq = /* @__PURE__ */ new Set()).add(e));
+    s && !((l = this._$Ej) != null ? l : this._$Ej = /* @__PURE__ */ new Map()).has(e) && (this._$Ej.set(e, (r = a != null ? a : t) != null ? r : this[e]), o !== !0 || a !== void 0) || (this._$AL.has(e) || (this.hasUpdated || s || (t = void 0), this._$AL.set(e, t)), i === !0 && this._$Em !== e && ((c = this._$Eq) != null ? c : this._$Eq = /* @__PURE__ */ new Set()).add(e));
   }
   async _$EP() {
     this.isUpdatePending = !0;
@@ -237,24 +237,24 @@ let C = class extends HTMLElement {
     if (!this.isUpdatePending) return;
     if (!this.hasUpdated) {
       if ((s = this.renderRoot) != null || (this.renderRoot = this.createRenderRoot()), this._$Ep) {
-        for (const [n, l] of this._$Ep) this[n] = l;
+        for (const [a, l] of this._$Ep) this[a] = l;
         this._$Ep = void 0;
       }
-      const a = this.constructor.elementProperties;
-      if (a.size > 0) for (const [n, l] of a) {
-        const { wrapped: r } = l, c = this[n];
-        r !== !0 || this._$AL.has(n) || c === void 0 || this.C(n, void 0, l, c);
+      const o = this.constructor.elementProperties;
+      if (o.size > 0) for (const [a, l] of o) {
+        const { wrapped: r } = l, c = this[a];
+        r !== !0 || this._$AL.has(a) || c === void 0 || this.C(a, void 0, l, c);
       }
     }
     let e = !1;
     const t = this._$AL;
     try {
-      e = this.shouldUpdate(t), e ? (this.willUpdate(t), (i = this._$EO) == null || i.forEach((a) => {
-        var n;
-        return (n = a.hostUpdate) == null ? void 0 : n.call(a);
+      e = this.shouldUpdate(t), e ? (this.willUpdate(t), (i = this._$EO) == null || i.forEach((o) => {
+        var a;
+        return (a = o.hostUpdate) == null ? void 0 : a.call(o);
       }), this.update(t)) : this._$EM();
-    } catch (a) {
-      throw e = !1, this._$EM(), a;
+    } catch (o) {
+      throw e = !1, this._$EM(), o;
     }
     e && this._$AE(t);
   }
@@ -287,62 +287,62 @@ let C = class extends HTMLElement {
   firstUpdated(e) {
   }
 };
-var Ce;
-C.elementStyles = [], C.shadowRootOptions = { mode: "open" }, C[U("elementProperties")] = /* @__PURE__ */ new Map(), C[U("finalized")] = /* @__PURE__ */ new Map(), J == null || J({ ReactiveElement: C }), ((Ce = k.reactiveElementVersions) != null ? Ce : k.reactiveElementVersions = []).push("2.1.2");
+var Ee;
+E.elementStyles = [], E.shadowRootOptions = { mode: "open" }, E[U("elementProperties")] = /* @__PURE__ */ new Map(), E[U("finalized")] = /* @__PURE__ */ new Map(), J == null || J({ ReactiveElement: E }), ((Ee = k.reactiveElementVersions) != null ? Ee : k.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const N = globalThis, he = (o) => o, F = N.trustedTypes, pe = F ? F.createPolicy("lit-html", { createHTML: (o) => o }) : void 0, Me = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, Pe = "?" + w, et = `<${Pe}>`, z = document, R = () => z.createComment(""), D = (o) => o === null || typeof o != "object" && typeof o != "function", ae = Array.isArray, tt = (o) => ae(o) || typeof (o == null ? void 0 : o[Symbol.iterator]) == "function", K = `[ 	
-\f\r]`, T = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, me = /-->/g, ge = />/g, A = RegExp(`>|${K}(?:([^\\s"'>=/]+)(${K}*=${K}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), fe = /'/g, _e = /"/g, Re = /^(?:script|style|textarea|title)$/i, De = (o) => (e, ...t) => ({ _$litType$: o, strings: e, values: t }), _ = De(1), m = De(2), q = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), $e = /* @__PURE__ */ new WeakMap(), x = z.createTreeWalker(z, 129);
-function He(o, e) {
-  if (!ae(o) || !o.hasOwnProperty("raw")) throw Error("invalid template strings array");
+const N = globalThis, he = (n) => n, I = N.trustedTypes, pe = I ? I.createPolicy("lit-html", { createHTML: (n) => n }) : void 0, Me = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, Pe = "?" + w, et = `<${Pe}>`, z = document, R = () => z.createComment(""), D = (n) => n === null || typeof n != "object" && typeof n != "function", ae = Array.isArray, tt = (n) => ae(n) || typeof (n == null ? void 0 : n[Symbol.iterator]) == "function", K = `[ 	
+\f\r]`, O = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, me = /-->/g, ge = />/g, A = RegExp(`>|${K}(?:([^\\s"'>=/]+)(${K}*=${K}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), fe = /'/g, _e = /"/g, Re = /^(?:script|style|textarea|title)$/i, De = (n) => (e, ...t) => ({ _$litType$: n, strings: e, values: t }), _ = De(1), g = De(2), q = Symbol.for("lit-noChange"), u = Symbol.for("lit-nothing"), $e = /* @__PURE__ */ new WeakMap(), x = z.createTreeWalker(z, 129);
+function He(n, e) {
+  if (!ae(n) || !n.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return pe !== void 0 ? pe.createHTML(e) : e;
 }
-const st = (o, e) => {
-  const t = o.length - 1, s = [];
-  let i, a = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", n = T;
+const st = (n, e) => {
+  const t = n.length - 1, s = [];
+  let i, o = e === 2 ? "<svg>" : e === 3 ? "<math>" : "", a = O;
   for (let l = 0; l < t; l++) {
-    const r = o[l];
-    let c, h, u = -1, p = 0;
-    for (; p < r.length && (n.lastIndex = p, h = n.exec(r), h !== null); ) p = n.lastIndex, n === T ? h[1] === "!--" ? n = me : h[1] !== void 0 ? n = ge : h[2] !== void 0 ? (Re.test(h[2]) && (i = RegExp("</" + h[2], "g")), n = A) : h[3] !== void 0 && (n = A) : n === A ? h[0] === ">" ? (n = i != null ? i : T, u = -1) : h[1] === void 0 ? u = -2 : (u = n.lastIndex - h[2].length, c = h[1], n = h[3] === void 0 ? A : h[3] === '"' ? _e : fe) : n === _e || n === fe ? n = A : n === me || n === ge ? n = T : (n = A, i = void 0);
-    const g = n === A && o[l + 1].startsWith("/>") ? " " : "";
-    a += n === T ? r + et : u >= 0 ? (s.push(c), r.slice(0, u) + Me + r.slice(u) + w + g) : r + w + (u === -2 ? l : g);
+    const r = n[l];
+    let c, d, h = -1, p = 0;
+    for (; p < r.length && (a.lastIndex = p, d = a.exec(r), d !== null); ) p = a.lastIndex, a === O ? d[1] === "!--" ? a = me : d[1] !== void 0 ? a = ge : d[2] !== void 0 ? (Re.test(d[2]) && (i = RegExp("</" + d[2], "g")), a = A) : d[3] !== void 0 && (a = A) : a === A ? d[0] === ">" ? (a = i != null ? i : O, h = -1) : d[1] === void 0 ? h = -2 : (h = a.lastIndex - d[2].length, c = d[1], a = d[3] === void 0 ? A : d[3] === '"' ? _e : fe) : a === _e || a === fe ? a = A : a === me || a === ge ? a = O : (a = A, i = void 0);
+    const m = a === A && n[l + 1].startsWith("/>") ? " " : "";
+    o += a === O ? r + et : h >= 0 ? (s.push(c), r.slice(0, h) + Me + r.slice(h) + w + m) : r + w + (h === -2 ? l : m);
   }
-  return [He(o, a + (o[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), s];
+  return [He(n, o + (n[t] || "<?>") + (e === 2 ? "</svg>" : e === 3 ? "</math>" : "")), s];
 };
 class H {
   constructor({ strings: e, _$litType$: t }, s) {
     let i;
     this.parts = [];
-    let a = 0, n = 0;
-    const l = e.length - 1, r = this.parts, [c, h] = st(e, t);
+    let o = 0, a = 0;
+    const l = e.length - 1, r = this.parts, [c, d] = st(e, t);
     if (this.el = H.createElement(c, s), x.currentNode = this.el.content, t === 2 || t === 3) {
-      const u = this.el.content.firstChild;
-      u.replaceWith(...u.childNodes);
+      const h = this.el.content.firstChild;
+      h.replaceWith(...h.childNodes);
     }
     for (; (i = x.nextNode()) !== null && r.length < l; ) {
       if (i.nodeType === 1) {
-        if (i.hasAttributes()) for (const u of i.getAttributeNames()) if (u.endsWith(Me)) {
-          const p = h[n++], g = i.getAttribute(u).split(w), f = /([.?@])?(.*)/.exec(p);
-          r.push({ type: 1, index: a, name: f[2], strings: g, ctor: f[1] === "." ? at : f[1] === "?" ? nt : f[1] === "@" ? ot : V }), i.removeAttribute(u);
-        } else u.startsWith(w) && (r.push({ type: 6, index: a }), i.removeAttribute(u));
+        if (i.hasAttributes()) for (const h of i.getAttributeNames()) if (h.endsWith(Me)) {
+          const p = d[a++], m = i.getAttribute(h).split(w), f = /([.?@])?(.*)/.exec(p);
+          r.push({ type: 1, index: o, name: f[2], strings: m, ctor: f[1] === "." ? at : f[1] === "?" ? ot : f[1] === "@" ? nt : V }), i.removeAttribute(h);
+        } else h.startsWith(w) && (r.push({ type: 6, index: o }), i.removeAttribute(h));
         if (Re.test(i.tagName)) {
-          const u = i.textContent.split(w), p = u.length - 1;
+          const h = i.textContent.split(w), p = h.length - 1;
           if (p > 0) {
-            i.textContent = F ? F.emptyScript : "";
-            for (let g = 0; g < p; g++) i.append(u[g], R()), x.nextNode(), r.push({ type: 2, index: ++a });
-            i.append(u[p], R());
+            i.textContent = I ? I.emptyScript : "";
+            for (let m = 0; m < p; m++) i.append(h[m], R()), x.nextNode(), r.push({ type: 2, index: ++o });
+            i.append(h[p], R());
           }
         }
-      } else if (i.nodeType === 8) if (i.data === Pe) r.push({ type: 2, index: a });
+      } else if (i.nodeType === 8) if (i.data === Pe) r.push({ type: 2, index: o });
       else {
-        let u = -1;
-        for (; (u = i.data.indexOf(w, u + 1)) !== -1; ) r.push({ type: 7, index: a }), u += w.length - 1;
+        let h = -1;
+        for (; (h = i.data.indexOf(w, h + 1)) !== -1; ) r.push({ type: 7, index: o }), h += w.length - 1;
       }
-      a++;
+      o++;
     }
   }
   static createElement(e, t) {
@@ -350,12 +350,12 @@ class H {
     return s.innerHTML = e, s;
   }
 }
-function O(o, e, t = o, s) {
-  var n, l, r;
+function T(n, e, t = n, s) {
+  var a, l, r;
   if (e === q) return e;
-  let i = s !== void 0 ? (n = t._$Co) == null ? void 0 : n[s] : t._$Cl;
-  const a = D(e) ? void 0 : e._$litDirective$;
-  return (i == null ? void 0 : i.constructor) !== a && ((l = i == null ? void 0 : i._$AO) == null || l.call(i, !1), a === void 0 ? i = void 0 : (i = new a(o), i._$AT(o, t, s)), s !== void 0 ? ((r = t._$Co) != null ? r : t._$Co = [])[s] = i : t._$Cl = i), i !== void 0 && (e = O(o, i._$AS(o, e.values), i, s)), e;
+  let i = s !== void 0 ? (a = t._$Co) == null ? void 0 : a[s] : t._$Cl;
+  const o = D(e) ? void 0 : e._$litDirective$;
+  return (i == null ? void 0 : i.constructor) !== o && ((l = i == null ? void 0 : i._$AO) == null || l.call(i, !1), o === void 0 ? i = void 0 : (i = new o(n), i._$AT(n, t, s)), s !== void 0 ? ((r = t._$Co) != null ? r : t._$Co = [])[s] = i : t._$Cl = i), i !== void 0 && (e = T(n, i._$AS(n, e.values), i, s)), e;
 }
 class it {
   constructor(e, t) {
@@ -371,13 +371,13 @@ class it {
     var c;
     const { el: { content: t }, parts: s } = this._$AD, i = ((c = e == null ? void 0 : e.creationScope) != null ? c : z).importNode(t, !0);
     x.currentNode = i;
-    let a = x.nextNode(), n = 0, l = 0, r = s[0];
+    let o = x.nextNode(), a = 0, l = 0, r = s[0];
     for (; r !== void 0; ) {
-      if (n === r.index) {
-        let h;
-        r.type === 2 ? h = new j(a, a.nextSibling, this, e) : r.type === 1 ? h = new r.ctor(a, r.name, r.strings, this, e) : r.type === 6 && (h = new rt(a, this, e)), this._$AV.push(h), r = s[++l];
+      if (a === r.index) {
+        let d;
+        r.type === 2 ? d = new j(o, o.nextSibling, this, e) : r.type === 1 ? d = new r.ctor(o, r.name, r.strings, this, e) : r.type === 6 && (d = new rt(o, this, e)), this._$AV.push(d), r = s[++l];
       }
-      n !== (r == null ? void 0 : r.index) && (a = x.nextNode(), n++);
+      a !== (r == null ? void 0 : r.index) && (o = x.nextNode(), a++);
     }
     return x.currentNode = z, i;
   }
@@ -392,8 +392,8 @@ class j {
     return (t = (e = this._$AM) == null ? void 0 : e._$AU) != null ? t : this._$Cv;
   }
   constructor(e, t, s, i) {
-    var a;
-    this.type = 2, this._$AH = d, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = s, this.options = i, this._$Cv = (a = i == null ? void 0 : i.isConnected) != null ? a : !0;
+    var o;
+    this.type = 2, this._$AH = u, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = s, this.options = i, this._$Cv = (o = i == null ? void 0 : i.isConnected) != null ? o : !0;
   }
   get parentNode() {
     let e = this._$AA.parentNode;
@@ -407,7 +407,7 @@ class j {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = O(this, e, t), D(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== q && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : tt(e) ? this.k(e) : this._(e);
+    e = T(this, e, t), D(e) ? e === u || e == null || e === "" ? (this._$AH !== u && this._$AR(), this._$AH = u) : e !== this._$AH && e !== q && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : tt(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -416,15 +416,15 @@ class j {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== d && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(z.createTextNode(e)), this._$AH = e;
+    this._$AH !== u && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(z.createTextNode(e)), this._$AH = e;
   }
   $(e) {
-    var a;
+    var o;
     const { values: t, _$litType$: s } = e, i = typeof s == "number" ? this._$AC(e) : (s.el === void 0 && (s.el = H.createElement(He(s.h, s.h[0]), this.options)), s);
-    if (((a = this._$AH) == null ? void 0 : a._$AD) === i) this._$AH.p(t);
+    if (((o = this._$AH) == null ? void 0 : o._$AD) === i) this._$AH.p(t);
     else {
-      const n = new it(i, this), l = n.u(this.options);
-      n.p(t), this.T(l), this._$AH = n;
+      const a = new it(i, this), l = a.u(this.options);
+      a.p(t), this.T(l), this._$AH = a;
     }
   }
   _$AC(e) {
@@ -435,7 +435,7 @@ class j {
     ae(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let s, i = 0;
-    for (const a of e) i === t.length ? t.push(s = new j(this.O(R()), this.O(R()), this, this.options)) : s = t[i], s._$AI(a), i++;
+    for (const o of e) i === t.length ? t.push(s = new j(this.O(R()), this.O(R()), this, this.options)) : s = t[i], s._$AI(o), i++;
     i < t.length && (this._$AR(s && s._$AB.nextSibling, i), t.length = i);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -457,22 +457,22 @@ class V {
   get _$AU() {
     return this._$AM._$AU;
   }
-  constructor(e, t, s, i, a) {
-    this.type = 1, this._$AH = d, this._$AN = void 0, this.element = e, this.name = t, this._$AM = i, this.options = a, s.length > 2 || s[0] !== "" || s[1] !== "" ? (this._$AH = Array(s.length - 1).fill(new String()), this.strings = s) : this._$AH = d;
+  constructor(e, t, s, i, o) {
+    this.type = 1, this._$AH = u, this._$AN = void 0, this.element = e, this.name = t, this._$AM = i, this.options = o, s.length > 2 || s[0] !== "" || s[1] !== "" ? (this._$AH = Array(s.length - 1).fill(new String()), this.strings = s) : this._$AH = u;
   }
   _$AI(e, t = this, s, i) {
-    const a = this.strings;
-    let n = !1;
-    if (a === void 0) e = O(this, e, t, 0), n = !D(e) || e !== this._$AH && e !== q, n && (this._$AH = e);
+    const o = this.strings;
+    let a = !1;
+    if (o === void 0) e = T(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== q, a && (this._$AH = e);
     else {
       const l = e;
       let r, c;
-      for (e = a[0], r = 0; r < a.length - 1; r++) c = O(this, l[s + r], t, r), c === q && (c = this._$AH[r]), n || (n = !D(c) || c !== this._$AH[r]), c === d ? e = d : e !== d && (e += (c != null ? c : "") + a[r + 1]), this._$AH[r] = c;
+      for (e = o[0], r = 0; r < o.length - 1; r++) c = T(this, l[s + r], t, r), c === q && (c = this._$AH[r]), a || (a = !D(c) || c !== this._$AH[r]), c === u ? e = u : e !== u && (e += (c != null ? c : "") + o[r + 1]), this._$AH[r] = c;
     }
-    n && !i && this.j(e);
+    a && !i && this.j(e);
   }
   j(e) {
-    e === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e != null ? e : "");
+    e === u ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e != null ? e : "");
   }
 }
 class at extends V {
@@ -480,26 +480,26 @@ class at extends V {
     super(...arguments), this.type = 3;
   }
   j(e) {
-    this.element[this.name] = e === d ? void 0 : e;
+    this.element[this.name] = e === u ? void 0 : e;
   }
 }
-class nt extends V {
+class ot extends V {
   constructor() {
     super(...arguments), this.type = 4;
   }
   j(e) {
-    this.element.toggleAttribute(this.name, !!e && e !== d);
+    this.element.toggleAttribute(this.name, !!e && e !== u);
   }
 }
-class ot extends V {
-  constructor(e, t, s, i, a) {
-    super(e, t, s, i, a), this.type = 5;
+class nt extends V {
+  constructor(e, t, s, i, o) {
+    super(e, t, s, i, o), this.type = 5;
   }
   _$AI(e, t = this) {
-    var n;
-    if ((e = (n = O(this, e, t, 0)) != null ? n : d) === q) return;
-    const s = this._$AH, i = e === d && s !== d || e.capture !== s.capture || e.once !== s.once || e.passive !== s.passive, a = e !== d && (s === d || i);
-    i && this.element.removeEventListener(this.name, this, s), a && this.element.addEventListener(this.name, this, e), this._$AH = e;
+    var a;
+    if ((e = (a = T(this, e, t, 0)) != null ? a : u) === q) return;
+    const s = this._$AH, i = e === u && s !== u || e.capture !== s.capture || e.once !== s.once || e.passive !== s.passive, o = e !== u && (s === u || i);
+    i && this.element.removeEventListener(this.name, this, s), o && this.element.addEventListener(this.name, this, e), this._$AH = e;
   }
   handleEvent(e) {
     var t, s;
@@ -514,21 +514,21 @@ class rt {
     return this._$AM._$AU;
   }
   _$AI(e) {
-    O(this, e);
+    T(this, e);
   }
 }
 const Y = N.litHtmlPolyfillSupport;
 var qe;
 Y == null || Y(H, j), ((qe = N.litHtmlVersions) != null ? qe : N.litHtmlVersions = []).push("3.3.3");
-const lt = (o, e, t) => {
-  var a, n;
-  const s = (a = t == null ? void 0 : t.renderBefore) != null ? a : e;
+const lt = (n, e, t) => {
+  var o, a;
+  const s = (o = t == null ? void 0 : t.renderBefore) != null ? o : e;
   let i = s._$litPart$;
   if (i === void 0) {
-    const l = (n = t == null ? void 0 : t.renderBefore) != null ? n : null;
+    const l = (a = t == null ? void 0 : t.renderBefore) != null ? a : null;
     s._$litPart$ = i = new j(e.insertBefore(R(), l), l, void 0, t != null ? t : {});
   }
-  return i._$AI(o), i;
+  return i._$AI(n), i;
 };
 /**
  * @license
@@ -536,7 +536,7 @@ const lt = (o, e, t) => {
  * SPDX-License-Identifier: BSD-3-Clause
  */
 const S = globalThis;
-class M extends C {
+class M extends E {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -561,12 +561,12 @@ class M extends C {
     return q;
   }
 }
-var Oe;
-M._$litElement$ = !0, M.finalized = !0, (Oe = S.litElementHydrateSupport) == null || Oe.call(S, { LitElement: M });
+var Te;
+M._$litElement$ = !0, M.finalized = !0, (Te = S.litElementHydrateSupport) == null || Te.call(S, { LitElement: M });
 const X = S.litElementPolyfillSupport;
 X == null || X({ LitElement: M });
-var Te;
-((Te = S.litElementVersions) != null ? Te : S.litElementVersions = []).push("4.2.2");
+var Oe;
+((Oe = S.litElementVersions) != null ? Oe : S.litElementVersions = []).push("4.2.2");
 const je = "echo-home-card", ct = "https://cdn.jsdelivr.net/npm/@meteocons/svg", v = {
   // --- Entités (aucune n'est requise — la carte fonctionne comme simple
   // horloge sans rien configurer du tout) ---
@@ -679,32 +679,32 @@ const je = "echo-home-card", ct = "https://cdn.jsdelivr.net/npm/@meteocons/svg",
   windy: "wind",
   "windy-variant": "wind"
 };
-function ve(o, e) {
-  return o === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : o === "sunny" && e ? "clear-night" : ut[o] || "not-available";
+function ve(n, e) {
+  return n === "partlycloudy" ? e ? "partly-cloudy-night" : "partly-cloudy-day" : n === "sunny" && e ? "clear-night" : ut[n] || "not-available";
 }
-function ye(o, e) {
+function ye(n, e) {
   if (e != null && e.base_url)
-    return `${e.base_url.replace(/\/$/, "")}/${o}.svg`;
+    return `${e.base_url.replace(/\/$/, "")}/${n}.svg`;
   const t = (e == null ? void 0 : e.style) || "fill";
-  return `${ct}/${t}/${o}.svg`;
+  return `${ct}/${t}/${n}.svg`;
 }
-function Z(o, e, t) {
+function Z(n, e, t) {
   return new Intl.DateTimeFormat(e, {
     hour: "numeric",
     minute: "2-digit",
     hour12: t === "12"
-  }).format(o).replace(/\s/g, "");
+  }).format(n).replace(/\s/g, "");
 }
-function Q(o, e) {
+function Q(n, e) {
   const t = new Intl.DateTimeFormat(e, {
     weekday: "short",
     day: "numeric",
     month: "short"
-  }).format(o);
+  }).format(n);
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
-function dt(o, e) {
-  return o.localize(
+function dt(n, e) {
+  return n.localize(
     `component.weather.entity_component._.state.${e}`
   ) || e;
 }
@@ -838,28 +838,28 @@ const be = "aurore", L = {
     center: { size: 4, color: "#b7e778" },
     comp: { color: "#edeef0", opacity: 0.6 }
   }
-}, ht = ["cover", "contain", "fill"], b = "cover", P = 300, pt = ["landscape", "portrait", "squarish"], I = ["satellite", "url", "media_folder", "picsum", "unsplash"];
-function mt(o) {
-  return o === "contain" ? "contain" : o === "fill" ? "100% 100%" : "cover";
+}, ht = ["cover", "contain", "fill"], b = "cover", P = 300, pt = ["landscape", "portrait", "squarish"], B = ["satellite", "url", "media_folder", "picsum", "unsplash"];
+function mt(n) {
+  return n === "contain" ? "contain" : n === "fill" ? "100% 100%" : "cover";
 }
-function E(o, e) {
-  return `center / ${mt(e)} no-repeat url("${o}")`;
+function C(n, e) {
+  return `center / ${mt(e)} no-repeat url("${n}")`;
 }
-function we(o, e, t) {
-  if (o != null) {
-    if (typeof o == "string") return { type: "css", value: o };
-    if (typeof o == "object") return { type: t, ...o };
+function we(n, e, t) {
+  if (n != null) {
+    if (typeof n == "string") return { type: "css", value: n };
+    if (typeof n == "object") return { type: t, ...n };
   } else if (e)
     return { type: "satellite" };
   return { type: t };
 }
-function ke(o, e, t, s, i) {
-  var n;
-  const a = { ...o };
-  return e.includes(a.type) || (i(`${s}.type`, t), a.type = t), a.fit != null && !ht.includes(a.fit) && (i(`${s}.fit`, b), a.fit = b), a.interval != null && (typeof a.interval != "number" || !Number.isFinite(a.interval) || a.interval <= 0) && (i(`${s}.interval`, P), a.interval = P), a.type === "url" && !a.url && !(((n = a.urls) == null ? void 0 : n.length) > 0) && (i(`${s}.url`, "satellite"), a.type = "satellite"), a.type === "media_folder" && !a.path && (i(`${s}.path`, "satellite"), a.type = "satellite"), a.type === "unsplash" && !a.access_key && (i(`${s}.access_key`, "satellite"), a.type = "satellite"), a.orientation != null && !pt.includes(a.orientation) && (i(`${s}.orientation`, "aucune"), delete a.orientation), a;
+function ke(n, e, t, s, i) {
+  var a;
+  const o = { ...n };
+  return e.includes(o.type) || (i(`${s}.type`, t), o.type = t), o.fit != null && !ht.includes(o.fit) && (i(`${s}.fit`, b), o.fit = b), o.interval != null && (typeof o.interval != "number" || !Number.isFinite(o.interval) || o.interval <= 0) && (i(`${s}.interval`, P), o.interval = P), o.type === "url" && !o.url && !(((a = o.urls) == null ? void 0 : a.length) > 0) && (i(`${s}.url`, "satellite"), o.type = "satellite"), o.type === "media_folder" && !o.path && (i(`${s}.path`, "satellite"), o.type = "satellite"), o.type === "unsplash" && !o.access_key && (i(`${s}.access_key`, "satellite"), o.type = "satellite"), o.orientation != null && !pt.includes(o.orientation) && (i(`${s}.orientation`, "aucune"), delete o.orientation), o;
 }
-async function gt(o, e) {
-  return ((await o.callWS({
+async function gt(n, e) {
+  return ((await n.callWS({
     type: "media_source/browse_media",
     media_content_id: e
   })).children || []).filter(
@@ -869,8 +869,8 @@ async function gt(o, e) {
     }
   ).map((s) => s.media_content_id);
 }
-async function ft(o, e) {
-  return (await o.callWS({
+async function ft(n, e) {
+  return (await n.callWS({
     type: "media_source/resolve_media",
     media_content_id: e
   })).url;
@@ -880,20 +880,20 @@ class Ae {
     this._onChange = e, this._signature = null, this._images = [], this._resolvedUrl = null, this._index = 0, this._timer = null, this._token = 0, this.cssValue = null;
   }
   configure(e, t, s) {
-    var n, l;
+    var a, l;
     const i = JSON.stringify([t, s]);
     if (i === this._signature) return;
     this._signature = i, this._token += 1;
-    const a = this._token;
+    const o = this._token;
     switch (clearInterval(this._timer), this._timer = null, this._images = [], this._index = 0, t.type) {
       case "style":
         this.cssValue = null;
         return;
       case "css":
-        this.cssValue = (n = t.value) != null ? n : null;
+        this.cssValue = (a = t.value) != null ? a : null;
         return;
       case "satellite":
-        this.cssValue = s.isNightMode ? null : s.satelliteBackgroundUrl ? E(s.satelliteBackgroundUrl, b) : null;
+        this.cssValue = s.isNightMode ? null : s.satelliteBackgroundUrl ? C(s.satelliteBackgroundUrl, b) : null;
         return;
       case "url": {
         if (s.isNightMode) {
@@ -901,7 +901,7 @@ class Ae {
           return;
         }
         const r = (l = t.urls) != null && l.length ? t.urls : [t.url];
-        this._images = r, this.cssValue = E(r[0], t.fit || b), this._startRotation(e, t, a);
+        this._images = r, this.cssValue = C(r[0], t.fit || b), this._startRotation(e, t, o);
         return;
       }
       case "media_folder": {
@@ -909,7 +909,7 @@ class Ae {
           this.cssValue = null;
           return;
         }
-        this.cssValue = null, this._loadMediaFolder(e, t, a);
+        this.cssValue = null, this._loadMediaFolder(e, t, o);
         return;
       }
       case "picsum": {
@@ -918,7 +918,7 @@ class Ae {
           return;
         }
         this._setPicsumUrl(t), this._timer = setInterval(() => {
-          a === this._token && (this._setPicsumUrl(t), this._onChange());
+          o === this._token && (this._setPicsumUrl(t), this._onChange());
         }, (t.interval || P) * 1e3);
         return;
       }
@@ -927,8 +927,8 @@ class Ae {
           this.cssValue = null;
           return;
         }
-        this.cssValue = null, this._loadUnsplash(t, a), this._timer = setInterval(() => {
-          a === this._token && this._loadUnsplash(t, a);
+        this.cssValue = null, this._loadUnsplash(t, o), this._timer = setInterval(() => {
+          o === this._token && this._loadUnsplash(t, o);
         }, (t.interval || P) * 1e3);
         return;
       }
@@ -947,7 +947,7 @@ class Ae {
   // navigateur (une URL identique reste sinon mise en cache).
   _setPicsumUrl(e) {
     const t = e.width || Math.round(window.innerWidth) || 960, s = e.height || Math.round(window.innerHeight) || 480, i = `https://picsum.photos/${t}/${s}?random=${Date.now()}`;
-    this.cssValue = E(i, e.fit || b);
+    this.cssValue = C(i, e.fit || b);
   }
   // API Unsplash officielle (contrairement à "picsum" ci-dessus) :
   // filtrage par mot-clé (query) et/ou orientation possible, mais
@@ -960,20 +960,20 @@ class Ae {
   async _loadUnsplash(e, t) {
     var s, i;
     try {
-      const a = new URLSearchParams({ client_id: e.access_key });
-      e.query && a.set("query", e.query), e.orientation && a.set("orientation", e.orientation), e.collections && a.set("collections", e.collections);
-      const n = await fetch(`https://api.unsplash.com/photos/random?${a}`);
-      if (!n.ok) throw new Error(`HTTP ${n.status}`);
-      const l = await n.json();
+      const o = new URLSearchParams({ client_id: e.access_key });
+      e.query && o.set("query", e.query), e.orientation && o.set("orientation", e.orientation), e.collections && o.set("collections", e.collections);
+      const a = await fetch(`https://api.unsplash.com/photos/random?${o}`);
+      if (!a.ok) throw new Error(`HTTP ${a.status}`);
+      const l = await a.json();
       if (t !== this._token) return;
       const r = ((s = l == null ? void 0 : l.urls) == null ? void 0 : s.regular) || ((i = l == null ? void 0 : l.urls) == null ? void 0 : i.full);
       if (!r) throw new Error("réponse Unsplash sans URL d'image exploitable");
-      this.cssValue = E(r, e.fit || b), this._onChange();
-    } catch (a) {
+      this.cssValue = C(r, e.fit || b), this._onChange();
+    } catch (o) {
       if (t !== this._token) return;
       console.warn(
         "[echo-home-card] impossible de récupérer une photo Unsplash (clé invalide, quota dépassé, ou hors-ligne ?)",
-        a
+        o
       );
     }
   }
@@ -998,14 +998,14 @@ class Ae {
   }
   async _showMediaAt(e, t, s, i) {
     try {
-      const a = await ft(e, this._images[i]);
+      const o = await ft(e, this._images[i]);
       if (s !== this._token) return;
-      this.cssValue = E(a, t.fit || b), this._onChange();
-    } catch (a) {
+      this.cssValue = C(o, t.fit || b), this._onChange();
+    } catch (o) {
       if (s !== this._token) return;
       console.warn(
         "[echo-home-card] impossible de charger une image du dossier Media Source",
-        a
+        o
       );
     }
   }
@@ -1017,7 +1017,7 @@ class Ae {
     if (this._images.length <= 1) return;
     const i = (t.interval || P) * 1e3;
     this._timer = setInterval(async () => {
-      s === this._token && (this._index = (this._index + 1) % this._images.length, t.type === "media_folder" ? await this._showMediaAt(e, t, s, this._index) : (this.cssValue = E(this._images[this._index], t.fit || b), this._onChange()));
+      s === this._token && (this._index = (this._index + 1) % this._images.length, t.type === "media_folder" ? await this._showMediaAt(e, t, s, this._index) : (this.cssValue = C(this._images[this._index], t.fit || b), this._onChange()));
     }, i);
   }
   destroy() {
@@ -1068,34 +1068,34 @@ class te extends M {
   // Validation légère : avertit dans la console et retombe sur la valeur
   // par défaut plutôt que de casser le rendu — cf. echo-weather-card.
   _validateConfig(e, t) {
-    const s = (n, l) => console.warn(
-      `[echo-home-card] "${n}" invalide (${JSON.stringify(t[n])}), valeur par défaut utilisée (${JSON.stringify(l)})`
+    const s = (a, l) => console.warn(
+      `[echo-home-card] "${a}" invalide (${JSON.stringify(t[a])}), valeur par défaut utilisée (${JSON.stringify(l)})`
     );
     e.layout !== null && e.layout !== "round" && (s("layout", v.layout), e.layout = v.layout), ["digital", "analog"].includes(e.clock_face) || (s("clock_face", v.clock_face), e.clock_face = v.clock_face), Object.keys(L).includes(e.analog_style) || (s("analog_style", v.analog_style), e.analog_style = v.analog_style), (typeof e.zoom != "number" || !Number.isFinite(e.zoom) || e.zoom <= 0) && (s("zoom", v.zoom), e.zoom = v.zoom), e.dashboard && !e.navigate_device && !e.satellite_entity && console.warn(
       `[echo-home-card] "dashboard" est configuré mais ni "navigate_device" ni "satellite_entity" ne fournissent d'id à passer au service view_assist.navigate — le bloc météo ne sera pas cliquable.`
     );
-    const i = (n, l) => console.warn(
-      `[echo-home-card] "${n}" invalide, valeur par défaut utilisée (${JSON.stringify(l)})`
+    const i = (a, l) => console.warn(
+      `[echo-home-card] "${a}" invalide, valeur par défaut utilisée (${JSON.stringify(l)})`
     );
     e.background = ke(
       we(e.background, !1, "satellite"),
-      ["css", ...I],
+      ["css", ...B],
       "satellite",
       "background",
       i
     );
-    let a = ke(
+    let o = ke(
       we(
         e.analog_background,
         e.analog_background_photo,
         "style"
       ),
-      ["style", "css", ...I],
+      ["style", "css", ...B],
       "style",
       "analog_background",
       i
     );
-    return e.layout === "round" && I.includes(a.type) && (i("analog_background.type", "style"), a = { type: "style" }), e.analog_background = a, e;
+    return e.layout === "round" && B.includes(o.type) && (i("analog_background.type", "style"), o = { type: "style" }), e.analog_background = o, e;
   }
   static getStubConfig(e) {
     const t = Object.keys(e.states).find(
@@ -1107,14 +1107,31 @@ class te extends M {
     return 6;
   }
   connectedCallback() {
-    super.connectedCallback(), this._clockTimer = setInterval(() => {
-      var e, t;
-      ((e = this._config) != null && e.show_clock || (t = this._config) != null && t.show_date) && this.requestUpdate();
-    }, 3e4), this._resizeObserver = new ResizeObserver(() => this._fitOverflowingText()), this._resizeObserver.observe(this);
+    super.connectedCallback(), this._scheduleClockTick(), this._resizeObserver = new ResizeObserver(() => this._fitOverflowingText()), this._resizeObserver.observe(this);
   }
   disconnectedCallback() {
     var e;
-    super.disconnectedCallback(), clearInterval(this._clockTimer), (e = this._resizeObserver) == null || e.disconnect(), this._digitalBackground.destroy(), this._analogBackground.destroy();
+    super.disconnectedCallback(), clearTimeout(this._clockTimer), (e = this._resizeObserver) == null || e.disconnect(), this._digitalBackground.destroy(), this._analogBackground.destroy();
+  }
+  // Horloge : un tick recalé sur chaque changement de minute réelle,
+  // pas un setInterval(30000) fixe démarré à la connexion du composant
+  // (l'ancien comportement) — celui-ci ne tombait quasiment jamais pile
+  // sur la bascule de minute (déphasé de jusqu'à 30s selon l'instant de
+  // connexion), un décalage qui ne se corrigeait jamais tout seul :
+  // l'horloge digitale, et surtout l'aiguille des minutes en
+  // analogique (qui elle n'a pas d'animation continue pour masquer le
+  // problème comme la trotteuse), changeaient de valeur jusqu'à 30s
+  // après le vrai changement de minute plutôt qu'au bon moment —
+  // signalé après un vrai test sur appareil. setTimeout recalculé à
+  // chaque tick (pas setInterval) : se recale sur la seconde 0 de la
+  // minute suivante à chaque fois, s'auto-corrige si un tick est
+  // arrivé en retard plutôt que d'accumuler la dérive.
+  _scheduleClockTick() {
+    const e = /* @__PURE__ */ new Date(), t = 6e4 - (e.getSeconds() * 1e3 + e.getMilliseconds());
+    this._clockTimer = setTimeout(() => {
+      var s, i;
+      ((s = this._config) != null && s.show_clock || (i = this._config) != null && i.show_date) && this.requestUpdate(), this._scheduleClockTick();
+    }, t + 250);
   }
   updated(e) {
     super.updated(e), this._fitOverflowingText();
@@ -1155,33 +1172,34 @@ class te extends M {
   // mise à jour de Lit plante alors (`Cannot set properties of null
   // (setting 'data')`, vu en testant ce changement). Un clone n'est pas
   // suivi par Lit, donc rien à casser. Coût négligeable : un clone + une
-  // lecture de layout par élément, au pire toutes les 30s (tick
-  // d'horloge) ou au redimensionnement — jamais par frame.
+  // lecture de layout par élément, au pire une fois par minute (tick
+  // d'horloge, cf. _scheduleClockTick) ou au redimensionnement — jamais
+  // par frame.
   _fitOverflowingText() {
-    var r, c, h, u;
+    var r, c, d, h;
     const e = this.shadowRoot, t = e == null ? void 0 : e.querySelector(".card"), s = this._config;
     if (!t || !s) return;
-    const i = s.language || ((c = (r = this._hass) == null ? void 0 : r.locale) == null ? void 0 : c.language) || "en", a = s.time_format || ((u = (h = this._hass) == null ? void 0 : h.locale) == null ? void 0 : u.time_format) || "24", n = t.getBoundingClientRect().width * 0.92, l = {
-      ".clock": Z(Se, i, a),
+    const i = s.language || ((c = (r = this._hass) == null ? void 0 : r.locale) == null ? void 0 : c.language) || "en", o = s.time_format || ((h = (d = this._hass) == null ? void 0 : d.locale) == null ? void 0 : h.time_format) || "24", a = t.getBoundingClientRect().width * 0.92, l = {
+      ".clock": Z(Se, i, o),
       ".date": Q(Se, i)
     };
-    for (const [p, g] of Object.entries(l)) {
+    for (const [p, m] of Object.entries(l)) {
       const f = e.querySelector(p);
       if (!f) continue;
       const $ = f.cloneNode(!1);
-      $.textContent = g, $.style.position = "absolute", $.style.visibility = "hidden", $.style.left = "-9999px", $.style.removeProperty("--_fit-scale"), f.parentNode.appendChild($);
+      $.textContent = m, $.style.position = "absolute", $.style.visibility = "hidden", $.style.left = "-9999px", $.style.removeProperty("--_fit-scale"), f.parentNode.appendChild($);
       const y = $.scrollWidth;
       $.remove();
-      const W = y > n ? n / y : 1;
+      const W = y > a ? a / y : 1;
       f.style.setProperty("--_fit-scale", W);
     }
   }
   set hass(e) {
-    var n, l, r, c;
-    const t = (l = this._hass) == null ? void 0 : l.states[(n = this._config) == null ? void 0 : n.satellite_entity], s = (c = this._hass) == null ? void 0 : c.states[(r = this._config) == null ? void 0 : r.weather_entity];
+    var a, l, r, c;
+    const t = (l = this._hass) == null ? void 0 : l.states[(a = this._config) == null ? void 0 : a.satellite_entity], s = (c = this._hass) == null ? void 0 : c.states[(r = this._config) == null ? void 0 : r.weather_entity];
     if (this._hass = e, !this._config) return;
-    const i = e.states[this._config.satellite_entity], a = e.states[this._config.weather_entity];
-    (t !== i || s !== a) && this.requestUpdate();
+    const i = e.states[this._config.satellite_entity], o = e.states[this._config.weather_entity];
+    (t !== i || s !== o) && this.requestUpdate();
   }
   get hass() {
     return this._hass;
@@ -1219,40 +1237,40 @@ class te extends M {
     (e.key === "Enter" || e.key === " ") && (e.preventDefault(), this._navigateToWeather());
   }
   render() {
-    var ne, oe, re;
-    if (!this._config || !this._hass) return d;
+    var oe, ne, re;
+    if (!this._config || !this._hass) return u;
     const e = this._config, t = e.satellite_entity ? this._hass.states[e.satellite_entity] : void 0, s = this._isNightMode(t);
     this.classList.toggle("night", s);
-    const i = e.language || ((ne = this._hass.locale) == null ? void 0 : ne.language) || "en", a = e.time_format || ((oe = this._hass.locale) == null ? void 0 : oe.time_format) || "24", n = /* @__PURE__ */ new Date(), l = e.weather_entity ? this._hass.states[e.weather_entity] : void 0, r = e.layout === "round", c = this._clockFace === "analog", h = {
+    const i = e.language || ((oe = this._hass.locale) == null ? void 0 : oe.language) || "en", o = e.time_format || ((ne = this._hass.locale) == null ? void 0 : ne.time_format) || "24", a = /* @__PURE__ */ new Date(), l = e.weather_entity ? this._hass.states[e.weather_entity] : void 0, r = e.layout === "round", c = this._clockFace === "analog", d = {
       isNightMode: s,
       satelliteBackgroundUrl: (re = t == null ? void 0 : t.attributes) == null ? void 0 : re.background
     };
-    this._digitalBackground.configure(this._hass, e.background, h), this._analogBackground.configure(this._hass, e.analog_background, h);
-    const u = c && !r && !s && I.includes(e.analog_background.type), p = e.show_weather && !s && l && !["unavailable", "unknown"].includes(l.state) && l.attributes.temperature != null, g = p && !c, f = e.show_date && !s, $ = c ? u ? this._analogBackground.cssValue : null : this._digitalBackground.cssValue, y = c ? u ? L[be] : L[e.analog_style] || L[be] : null, W = e.analog_background.type === "css" ? e.analog_background.value : y == null ? void 0 : y.background, Le = this._cardStyle(
+    this._digitalBackground.configure(this._hass, e.background, d), this._analogBackground.configure(this._hass, e.analog_background, d);
+    const h = c && !r && !s && B.includes(e.analog_background.type), p = e.show_weather && !s && l && !["unavailable", "unknown"].includes(l.state) && l.attributes.temperature != null, m = p && !c, f = e.show_date && !s, $ = c ? h ? this._analogBackground.cssValue : null : this._digitalBackground.cssValue, y = c ? h ? L[be] : L[e.analog_style] || L[be] : null, W = e.analog_background.type === "css" ? e.analog_background.value : y == null ? void 0 : y.background, Le = this._cardStyle(
       $,
-      y && !u ? `--_analog-default-bg:${W}` : null
+      y && !h ? `--_analog-default-bg:${W}` : null
     );
-    return c || (this._secondHandDelay = void 0), _`
+    return _`
       <div
         class="card ${r ? "round" : ""} ${c ? "analog" : ""}"
         style=${Le}
       >
-        ${!c || u ? _`<div class="shader"></div>` : d}
-        ${g ? this._renderWeather(l) : d}
+        ${!c || h ? _`<div class="shader"></div>` : u}
+        ${m ? this._renderWeather(l) : u}
         <div class="clockgroup">
           ${e.show_clock ? c ? _`
                   ${this._renderAnalogComplications(
       y,
       p ? l : null,
       f,
-      n,
+      a,
       i
     )}
-                  ${this._renderAnalogClock(n, i, a, y)}
-                ` : _`<div class="clock">${Z(n, i, a)}</div>` : d}
-          ${f && !c ? _`<div class="date">${Q(n, i)}</div>` : d}
+                  ${this._renderAnalogClock(a, i, o, y)}
+                ` : _`<div class="clock">${Z(a, i, o)}</div>` : u}
+          ${f && !c ? _`<div class="date">${Q(a, i)}</div>` : u}
         </div>
-        ${s ? d : this._renderClockToggle(c)}
+        ${s ? u : this._renderClockToggle(c)}
       </div>
     `;
   }
@@ -1272,12 +1290,12 @@ class te extends M {
   // que les aiguilles/graduations restent toujours visibles par-dessus
   // (le <svg> n'a pas de fond, seul ce qu'il dessine réellement masque
   // ce qu'il y a dessous) — pas besoin de <foreignObject> ni de z-index.
-  _renderAnalogComplications(e, t, s, i, a) {
-    if (!t && !s) return d;
-    let n = d;
+  _renderAnalogComplications(e, t, s, i, o) {
+    if (!t && !s) return u;
+    let a = u;
     if (t) {
-      const l = ve(t.state, this._isDarkOutside()), r = ye(l, this._config.icons), c = Number(t.attributes.temperature).toFixed(1), h = t.attributes.temperature_unit || "°C";
-      n = _`
+      const l = ve(t.state, this._isDarkOutside()), r = ye(l, this._config.icons), c = Number(t.attributes.temperature).toFixed(1), d = t.attributes.temperature_unit || "°C";
+      a = _`
         <div class="analog-weather">
           <img
             class="analog-weather-icon"
@@ -1285,7 +1303,7 @@ class te extends M {
             alt=""
             style="filter:${e.comp.iconFilter || "none"}"
           />
-          <span class="analog-weather-temp">${c}${h}</span>
+          <span class="analog-weather-temp">${c}${d}</span>
         </div>
       `;
     }
@@ -1294,8 +1312,8 @@ class te extends M {
         class="analog-complications"
         style="color:${e.comp.color};opacity:${e.comp.opacity}"
       >
-        ${n}
-        ${s ? _`<div class="analog-date">${Q(i, a)}</div>` : d}
+        ${a}
+        ${s ? _`<div class="analog-date">${Q(i, o)}</div>` : u}
       </div>
     `;
   }
@@ -1320,9 +1338,7 @@ class te extends M {
   // littéral dans CE template (pas construit à part), peut rester sous
   // `html`.
   _renderAnalogClock(e, t, s, i) {
-    const a = e.getHours() % 12, n = e.getMinutes(), l = a * 30 + n * 0.5, r = n * 6, c = e.getSeconds() + e.getMilliseconds() / 1e3, h = c * 6;
-    this._secondHandDelay === void 0 && (this._secondHandDelay = `-${c}s`);
-    const u = i.shape === "rect" ? this._renderRectHands(i, l, r, h) : this._renderLineHands(i, l, r, h);
+    const o = e.getHours() % 12, a = e.getMinutes(), l = o * 30 + a * 0.5, r = a * 6, c = e.getSeconds() + e.getMilliseconds() / 1e3, d = c * 6, h = `-${c}s`, p = i.shape === "rect" ? this._renderRectHands(i, l, r, d, h) : this._renderLineHands(i, l, r, d, h);
     return _`
       <svg
         class="analog-clock"
@@ -1330,10 +1346,10 @@ class te extends M {
         role="img"
         aria-label=${Z(e, t, s)}
       >
-        ${i.glow ? this._renderGlowFilter() : d}
+        ${i.glow ? this._renderGlowFilter() : u}
         ${this._renderTicks(i.ticks, i.glow)}
         ${this._renderNumerals(i.numerals)}
-        ${u}
+        ${p}
       </svg>
     `;
   }
@@ -1346,7 +1362,7 @@ class te extends M {
   // aiguilles absentes du rendu alors que les graduations, elles,
   // s'affichaient).
   _renderGlowFilter() {
-    return m`
+    return g`
       <defs>
         <filter id="echo-home-analog-glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="140" height="140">
           <feGaussianBlur stdDeviation="1.1" result="blur" />
@@ -1363,15 +1379,15 @@ class te extends M {
   // heures ("all"), les 8 non cardinales ("minor", pour laisser la place
   // aux chiffres) ou les 4 cardinales seulement ("cardinal").
   _renderTicks(e, t) {
-    var a;
-    if (!e) return d;
+    var o;
+    if (!e) return u;
     const s = t ? "url(#echo-home-analog-glow)" : void 0, i = [];
-    for (let n = 0; n < 12; n++) {
-      const l = n % 3 === 0;
-      if (e.mode === "minor" && l || e.mode === "cardinal" && !l || (a = e.skip) != null && a.includes(n)) continue;
-      const r = n * 30;
+    for (let a = 0; a < 12; a++) {
+      const l = a % 3 === 0;
+      if (e.mode === "minor" && l || e.mode === "cardinal" && !l || (o = e.skip) != null && o.includes(a)) continue;
+      const r = a * 30;
       if (e.shape === "line")
-        i.push(m`
+        i.push(g`
           <line
             class="tick hand"
             x1="50"
@@ -1381,18 +1397,18 @@ class te extends M {
             stroke=${e.color}
             stroke-width=${e.width}
             opacity=${e.opacity}
-            filter=${s != null ? s : d}
+            filter=${s != null ? s : u}
             transform="rotate(${r} 50 50)"
           />
         `);
       else {
-        const c = this._polar(e.radius, r), h = l ? e.cardinalR : e.minorR, u = l ? e.cardinalOpacity : e.minorOpacity;
-        i.push(m`
-          <circle class="tick hand" cx=${c.x} cy=${c.y} r=${h} fill=${e.color} opacity=${u} filter=${s != null ? s : d} />
+        const c = this._polar(e.radius, r), d = l ? e.cardinalR : e.minorR, h = l ? e.cardinalOpacity : e.minorOpacity;
+        i.push(g`
+          <circle class="tick hand" cx=${c.x} cy=${c.y} r=${d} fill=${e.color} opacity=${h} filter=${s != null ? s : u} />
         `);
       }
     }
-    return m`<g class="ticks">${i}</g>`;
+    return g`<g class="ticks">${i}</g>`;
   }
   // Chiffres : "quad" (12/3/6/9, style "aurore") ou "single" (12
   // seulement, style "ardoise"). Même rayon que les graduations à chaque
@@ -1401,14 +1417,14 @@ class te extends M {
   // cadran au lieu de marquer l'heure à la même distance du bord
   // (corrigé en 1.1.4 pour "aurore", appliqué d'emblée ici aux autres).
   _renderNumerals(e) {
-    if (!e) return d;
-    const s = (e.mode === "single" ? [["12", 0]] : [["12", 0], ["3", 1], ["6", 2], ["9", 3]]).map(([i, a]) => {
-      const n = this._polar(e.radius, a * 90);
-      return m`
+    if (!e) return u;
+    const s = (e.mode === "single" ? [["12", 0]] : [["12", 0], ["3", 1], ["6", 2], ["9", 3]]).map(([i, o]) => {
+      const a = this._polar(e.radius, o * 90);
+      return g`
         <text
           class="numeral hand"
-          x=${n.x}
-          y=${n.y}
+          x=${a.x}
+          y=${a.y}
           font-size=${e.size}
           font-weight=${e.weight}
           opacity=${e.opacity}
@@ -1418,7 +1434,7 @@ class te extends M {
         >${i}</text>
       `;
     });
-    return m`<g class="numerals">${s}</g>`;
+    return g`<g class="numerals">${s}</g>`;
   }
   // sin/cos plutôt que des positions écrites en dur pour chaque heure :
   // évite de se tromper de signe pour l'une d'elles (angle depuis midi,
@@ -1431,54 +1447,54 @@ class te extends M {
   // trait par aiguille, couleur/épaisseur/forme de bout définies par le
   // style. La seconde peut avoir une petite queue derrière le pivot et un
   // point à la pointe (styles "mono"/"neon").
-  _renderLineHands(e, t, s, i) {
-    const a = e.glow ? "url(#echo-home-analog-glow)" : void 0, n = m`
+  _renderLineHands(e, t, s, i, o) {
+    const a = e.glow ? "url(#echo-home-analog-glow)" : void 0, l = g`
       <line
         class="hand hand-hour"
         x1="50" y1="50" x2="50" y2=${50 - e.hour.len}
         stroke=${e.hour.color}
         stroke-width=${e.hour.width}
         stroke-linecap=${e.hour.cap}
-        filter=${a != null ? a : d}
+        filter=${a != null ? a : u}
         transform="rotate(${t} 50 50)"
       />
-    `, l = m`
+    `, r = g`
       <line
         class="hand hand-minute"
         x1="50" y1="50" x2="50" y2=${50 - e.minute.len}
         stroke=${e.minute.color}
         stroke-width=${e.minute.width}
         stroke-linecap=${e.minute.cap}
-        filter=${a != null ? a : d}
+        filter=${a != null ? a : u}
         transform="rotate(${s} 50 50)"
       />
-    `, r = e.second, c = r.tipDot ? m`<circle class="hand" cx="50" cy=${50 - r.len} r=${r.tipDot.r} fill=${r.tipDot.fill} filter=${a != null ? a : d} />` : d, h = m`
+    `, c = e.second, d = c.tipDot ? g`<circle class="hand" cx="50" cy=${50 - c.len} r=${c.tipDot.r} fill=${c.tipDot.fill} filter=${a != null ? a : u} />` : u, h = g`
       <g
         class="hand-second"
-        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${i}deg)"
+        style="animation-delay: ${o}; transform: rotate(${i}deg)"
       >
         <line
           class="hand"
-          x1="50" y1=${50 + r.tail} x2="50" y2=${50 - r.len}
-          stroke=${r.color}
-          stroke-width=${r.width}
-          stroke-linecap=${r.cap}
-          opacity=${r.opacity}
-          filter=${a != null ? a : d}
+          x1="50" y1=${50 + c.tail} x2="50" y2=${50 - c.len}
+          stroke=${c.color}
+          stroke-width=${c.width}
+          stroke-linecap=${c.cap}
+          opacity=${c.opacity}
+          filter=${a != null ? a : u}
         />
-        ${c}
+        ${d}
       </g>
-    `, u = e.center, p = u.ring ? m`
+    `, p = e.center, m = p.ring ? g`
           <circle
             class="hand"
-            cx="50" cy="50" r=${u.ring.r} fill="none"
-            stroke=${u.ring.color} stroke-width=${u.ring.width}
+            cx="50" cy="50" r=${p.ring.r} fill="none"
+            stroke=${p.ring.color} stroke-width=${p.ring.width}
           />
-        ` : d;
-    return m`
-      ${n}${l}${h}
-      ${p}
-      <circle class="hand" cx="50" cy="50" r=${u.r} fill=${u.color} />
+        ` : u;
+    return g`
+      ${l}${r}${h}
+      ${m}
+      <circle class="hand" cx="50" cy="50" r=${p.r} fill=${p.color} />
     `;
   }
   // Aiguilles "géométriques" (style "ardoise" uniquement) : des
@@ -1486,9 +1502,9 @@ class te extends M {
   // pivot pour la seconde (elle est animée via le même mécanisme —
   // rotation continue sur le <g> englobant, cf. .hand-second dans static
   // styles, qui s'applique aussi bien à un <line> qu'à un <g>).
-  _renderRectHands(e, t, s, i) {
-    const a = e.hour, n = e.minute, l = e.second, r = e.center;
-    return m`
+  _renderRectHands(e, t, s, i, o) {
+    const a = e.hour, l = e.minute, r = e.second, c = e.center;
+    return g`
       <rect
         class="hand hand-hour"
         x=${50 - a.w / 2} y=${50 - a.len} width=${a.w} height=${a.len}
@@ -1497,21 +1513,21 @@ class te extends M {
       />
       <rect
         class="hand hand-minute"
-        x=${50 - n.w / 2} y=${50 - n.len} width=${n.w} height=${n.len}
-        fill=${n.color}
+        x=${50 - l.w / 2} y=${50 - l.len} width=${l.w} height=${l.len}
+        fill=${l.color}
         transform="rotate(${s} 50 50)"
       />
       <g
         class="hand-second"
-        style="animation-delay: ${this._secondHandDelay}; transform: rotate(${i}deg)"
+        style="animation-delay: ${o}; transform: rotate(${i}deg)"
       >
-        <rect class="hand" x=${50 - l.w / 2} y=${50 - l.len} width=${l.w} height=${l.len} fill=${l.color} />
-        <rect class="hand" x=${50 - l.w / 2} y="50" width=${l.w} height=${l.tail} fill=${l.color} />
+        <rect class="hand" x=${50 - r.w / 2} y=${50 - r.len} width=${r.w} height=${r.len} fill=${r.color} />
+        <rect class="hand" x=${50 - r.w / 2} y="50" width=${r.w} height=${r.tail} fill=${r.color} />
       </g>
       <rect
         class="hand"
-        x=${50 - r.size / 2} y=${50 - r.size / 2} width=${r.size} height=${r.size}
-        fill=${r.color}
+        x=${50 - c.size / 2} y=${50 - c.size / 2} width=${c.size} height=${c.size}
+        fill=${c.color}
         transform="rotate(45 50 50)"
       />
     `;
@@ -1519,13 +1535,13 @@ class te extends M {
   // Petit bouton discret (round et large, masqué la nuit comme le reste
   // — pas de lumière/info superflue sur un écran de chevet) pour
   // basculer digital ↔ analogique. L'icône affichée est celle du cadran
-  // ACTUEL (pas celle vers laquelle on bascule) : un repère d'état
-  // lisible au premier coup d'œil ("je suis en mode X"), plus utile ici
-  // qu'une convention façon bouton d'action classique — clock-outline
-  // (cadran rond) se lit mieux comme "horloge" que clock-digital une
-  // fois affiché en tout petit sur le cadran analogique lui-même.
+  // vers lequel on bascule (pas l'actuel) : la 1.4.2 avait inversé cette
+  // convention ("icône = état actuel"), en pratique lu à l'envers une
+  // fois sur l'appareil réel — l'attente naturelle sur un bouton est
+  // "l'icône montre ce que le tap va donner", pas "l'icône décrit ce
+  // qui est déjà à l'écran".
   _renderClockToggle(e) {
-    const t = e ? "mdi:clock-outline" : "mdi:clock-digital", s = e ? "Afficher l'horloge digitale" : "Afficher l'horloge analogique";
+    const t = e ? "mdi:clock-digital" : "mdi:clock-outline", s = e ? "Afficher l'horloge digitale" : "Afficher l'horloge analogique";
     return _`
       <button
         type="button"
@@ -1539,18 +1555,18 @@ class te extends M {
     `;
   }
   _renderWeather(e) {
-    const t = ve(e.state, this._isDarkOutside()), s = ye(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), a = e.attributes.temperature_unit || "°C", n = dt(this._hass, e.state), l = this._weatherClickable();
+    const t = ve(e.state, this._isDarkOutside()), s = ye(t, this._config.icons), i = Number(e.attributes.temperature).toFixed(1), o = e.attributes.temperature_unit || "°C", a = dt(this._hass, e.state), l = this._weatherClickable();
     return _`
       <div
         class="weather ${l ? "clickable" : ""}"
-        role=${l ? "button" : d}
-        tabindex=${l ? "0" : d}
-        aria-label="${n}, ${i}${a}"
-        @click=${l ? () => this._navigateToWeather() : d}
-        @keydown=${l ? (r) => this._onWeatherKeydown(r) : d}
+        role=${l ? "button" : u}
+        tabindex=${l ? "0" : u}
+        aria-label="${a}, ${i}${o}"
+        @click=${l ? () => this._navigateToWeather() : u}
+        @keydown=${l ? (r) => this._onWeatherKeydown(r) : u}
       >
         <img class="weather-icon" src=${s} alt="" />
-        <span class="weather-temp">${i}${a}</span>
+        <span class="weather-temp">${i}${o}</span>
       </div>
     `;
   }
@@ -2002,22 +2018,13 @@ G(te, "properties", {
       --mdc-icon-size: 22px;
     }
 
-    /* Round : décalé en bas à droite plutôt que centré comme en mode
-       large (left/bottom/transform ci-dessus, pensés pour un écran
-       rectangulaire) — pile en bas d'un cercle, la largeur disponible se
-       rétrécit vite (cf. commentaire sur .card.round .date plus haut,
-       même souci de géométrie) ET c'est là que vit déjà du contenu
-       centré (la date en digital, le chiffre "6" en analogique) : un
-       bouton remonté mais toujours centré finit par les chevaucher
-       (repéré à l'écran, pas juste en théorie). En diagonale, il reste
-       dans une zone large du disque sans entrer en concurrence avec ce
-       contenu centré. */
-    .card.round .clock-toggle {
-      left: auto;
-      right: 12%;
-      bottom: 12%;
-      transform: none;
-    }
+    /* La 1.4.2 avait décalé ce bouton en bas à droite en mode round,
+       pour l'écarter du chevron/de la date centrés à cette hauteur —
+       signalé pas centré du tout une fois sur l'appareil réel (l'écart
+       théorique trouvé en testant une position intermédiaire, plus haut
+       mais toujours centrée, n'a jamais existé à la position d'origine
+       ci-dessus, seulement à cette position intermédiaire jamais
+       déployée). Redevenu centré, comme avant la 1.4.2. */
 
     .clock-toggle:hover,
     .clock-toggle:focus-visible {
