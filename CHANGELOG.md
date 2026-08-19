@@ -8,6 +8,15 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.2.0
+
+`echo-home-card` passe à 1.6.0 : les 7 styles analogiques planétaires de
+1.5.0 remplacés par un ensemble à thème libre (corail, grenat, prisme,
+atlas, carbone, soleil restylé), affiné sur plusieurs itérations avec
+retours visuels réels. Nuits repensées "vibrantes" plutôt qu'atténuées.
+Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#160).
+
 ## 1.1.0
 
 `echo-home-card` passe à 1.5.0 : sept nouveaux styles de cadran
