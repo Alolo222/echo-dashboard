@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.5.0
+
+Sept nouveaux styles de cadran analogique, un par jour de la semaine —
+sur le nom latin dont vient le jour français (lundi = Lune, mardi =
+Mars, mercredi = Mercure, jeudi = Jupiter, vendredi = Vénus, samedi =
+Saturne, dimanche = Soleil) : `lune`, `mars`, `mercure`, `jupiter`,
+`venus`, `saturne`, `soleil`, sélectionnables individuellement comme les
+5 styles existants, ou tous les 7 automatiquement via
+`analog_style: auto` (résolu selon le jour réel à chaque rendu — change
+de lui-même à minuit, sans reconfiguration).
+
+- Chaque style a sa propre palette (fond, aiguilles, graduations,
+  chiffres), pensée pour son thème : croissant de lune à la place du
+  "12" (`lune`), aiguilles rectangulaires façon étendard martial
+  (`mars`), dégradé métallique et aiguilles fines "vif-argent"
+  (`mercure`), chiffres et graduations or (`jupiter`), fond champagne
+  épuré (`venus`), anneau elliptique décoratif façon anneaux de Saturne
+  (`saturne`, nouvelle primitive de rendu — `_renderOuterRing`), halo et
+  graduations façon rayons de soleil (`soleil`).
+- **Mode nuit propre à chaque style planétaire** : contrairement aux 5
+  styles d'origine (qui gardent le traitement nuit uniforme historique —
+  fond bleu marine fixe, aiguilles rouge très atténué, inchangé), les 7
+  styles planétaires gardent une identité propre même la nuit via un
+  nouveau bloc `night` par style ({ background, color }) — toujours très
+  sombre et atténué (même économie de lumière qu'avant), mais avec une
+  teinte distincte par jour plutôt qu'un rouge unique pour tous
+  (`_applyNightPalette`, nouvelle classe CSS "custom-night" qui exempte
+  ces styles des règles `:host(.night)` forcées d'origine).
+- Petites extensions au moteur de style pour permettre tout ça :
+  `numerals.labels` (texte personnalisé par position, ex. "☾" pour
+  `lune`), `style.outerRing` (anneau décoratif, `saturne` uniquement).
+- Vérifié : les 7 styles + `auto` (jour réel) rendus sans erreur console
+  en journée et en mode nuit personnalisé (Playwright, palette/fond
+  effectifs lus via `getComputedStyle`, pas juste les attributs SVG posés
+  par le JS) ; les 5 styles d'origine et leur traitement nuit uniforme
+  vérifiés inchangés (non-régression) ; suite de tests existante (bouton,
+  alignement minute, dérive seconde, sweep digital/analog × round/large ×
+  jour/nuit) toujours au vert.
+
 ## 1.4.5
 
 Quatre correctifs signalés après un vrai test sur Echo Spot :

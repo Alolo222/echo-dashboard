@@ -2,7 +2,7 @@ import { LitElement, html, svg, css, nothing } from "lit";
 import { CARD_TAG, DEFAULT_CONFIG } from "./const.js";
 import { conditionToIconSlug, iconUrl } from "./icons.js";
 import { formatShortDate, formatTime, localizeCondition } from "./format.js";
-import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE } from "./analog-styles.js";
+import { ANALOG_STYLES, DEFAULT_ANALOG_STYLE, WEEKDAY_ANALOG_STYLES } from "./analog-styles.js";
 import {
   BackgroundSource,
   DYNAMIC_BACKGROUND_TYPES,
@@ -110,7 +110,10 @@ class EchoHomeCard extends LitElement {
       warn("clock_face", DEFAULT_CONFIG.clock_face);
       merged.clock_face = DEFAULT_CONFIG.clock_face;
     }
-    if (!Object.keys(ANALOG_STYLES).includes(merged.analog_style)) {
+    if (
+      merged.analog_style !== "auto" &&
+      !Object.keys(ANALOG_STYLES).includes(merged.analog_style)
+    ) {
       warn("analog_style", DEFAULT_CONFIG.analog_style);
       merged.analog_style = DEFAULT_CONFIG.analog_style;
     }
@@ -481,13 +484,33 @@ class EchoHomeCard extends LitElement {
     // personnalise via card_mod. Indépendant de `background` (mode
     // digital uniquement, cf. const.js) : les deux présentations ont
     // leur propre fond.
+    const resolvedStyleKey =
+      cfg.analog_style === "auto" ? WEEKDAY_ANALOG_STYLES[now.getDay()] : cfg.analog_style;
     const analogStyle = showAnalog
       ? usePhotoBackground
         ? ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
-        : ANALOG_STYLES[cfg.analog_style] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
+        : ANALOG_STYLES[resolvedStyleKey] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
       : null;
-    const analogDefaultBg =
-      cfg.analog_background.type === "css"
+    // La nuit, un style "planétaire" (cf. analog-styles.js) garde sa propre
+    // identité (fond + couleur d'aiguilles/graduations/chiffres distincts)
+    // via son bloc `night`, plutôt que le traitement nuit uniforme habituel
+    // — cf. _applyNightPalette. Les 5 styles d'origine (aurore/mono/clair/
+    // neon/ardoise, sans `night`) gardent eux ce traitement uniforme
+    // inchangé : hasCustomNight reste false pour eux, donc renderStyle
+    // === analogStyle et les règles CSS :host(.night) (non exemptées faute
+    // de classe "custom-night", cf. plus bas) reprennent le dessus comme
+    // avant.
+    const hasCustomNight = isNightMode && showAnalog && !!analogStyle?.night;
+    const renderStyle = hasCustomNight ? this._applyNightPalette(analogStyle) : analogStyle;
+    // La nuit, même pour un style "planétaire" avec son propre `night`, le
+    // fond de ce bloc prime toujours sur un `analog_background` de type
+    // "css" éventuel — la sobriété nocturne (peu de lumière émise) reste
+    // prioritaire sur un fond personnalisé, seule sa teinte cesse d'être
+    // uniforme (cf. commentaire sur backgroundValue plus haut, toujours
+    // valable pour les styles SANS bloc `night`).
+    const analogDefaultBg = hasCustomNight
+      ? analogStyle.night.background
+      : cfg.analog_background.type === "css"
         ? cfg.analog_background.value
         : analogStyle?.background;
     const cardStyle = this._cardStyle(
@@ -503,7 +526,7 @@ class EchoHomeCard extends LitElement {
 
     return html`
       <div
-        class="card ${isRound ? "round" : ""} ${showAnalog ? "analog" : ""}"
+        class="card ${isRound ? "round" : ""} ${showAnalog ? "analog" : ""} ${hasCustomNight ? "custom-night" : ""}"
         style=${cardStyle}
       >
         ${showShader ? html`<div class="shader"></div>` : nothing}
@@ -513,13 +536,13 @@ class EchoHomeCard extends LitElement {
             ? showAnalog
               ? html`
                   ${this._renderAnalogComplications(
-                    analogStyle,
+                    renderStyle,
                     weatherAvailable ? weatherState : null,
                     showDateText,
                     now,
                     locale
                   )}
-                  ${this._renderAnalogClock(now, locale, timeFormat, analogStyle)}
+                  ${this._renderAnalogClock(now, locale, timeFormat, renderStyle)}
                 `
               : html`<div class="clock">${formatTime(now, locale, timeFormat)}</div>`
             : nothing}
@@ -579,15 +602,52 @@ class EchoHomeCard extends LitElement {
     `;
   }
 
+  // Recolore un style pour la nuit à partir de son bloc `night` ({
+  // background, color }, cf. analog-styles.js) : mêmes formes/longueurs/
+  // épaisseurs que le style de jour (lisibilité, position des aiguilles
+  // inchangées), seules les couleurs de tout ce qui se dessine (aiguilles,
+  // graduations, chiffres, complications, éventuel anneau décoratif)
+  // basculent sur `night.color` — une seule teinte par style, sobre, plutôt
+  // que de redéfinir une palette nuit complète par élément. Le fond suit
+  // séparément (cf. analogDefaultBg dans render(), pas ici). glow désactivé
+  // : pas de halo la nuit, la sobriété prime sur l'esthétique (même
+  // principe que l'ancien traitement uniforme qu'il remplace pour ces
+  // styles).
+  _applyNightPalette(style) {
+    const c = style.night.color;
+    const recolor = (cfg) => (cfg ? { ...cfg, color: c } : cfg);
+    return {
+      ...style,
+      glow: false,
+      ticks: recolor(style.ticks),
+      numerals: recolor(style.numerals),
+      hour: recolor(style.hour),
+      minute: recolor(style.minute),
+      second: {
+        ...style.second,
+        color: c,
+        tipDot: style.second.tipDot ? { ...style.second.tipDot, fill: c } : undefined,
+      },
+      center: {
+        ...style.center,
+        color: c,
+        ring: style.center.ring ? { ...style.center.ring, color: c } : undefined,
+      },
+      comp: { ...style.comp, color: c },
+      outerRing: style.outerRing ? { ...style.outerRing, color: c } : undefined,
+    };
+  }
+
   // Cadran analogique en SVG : pensé pour rappeler l'horloge ronde de
   // l'Echo Spot d'origine (avant LineageOS/View Assist), en alternative
   // au digital. Diamètre indépendant de --_clock-size (qui pilote une
   // taille de police, pas un diamètre) — cf. --_analog-size et
   // .card.round.analog .date, qui a donc sa propre position plutôt que
-  // de réutiliser le calcul basé sur --_clock-size. Cinq habillages
-  // possibles (cf. src/analog-styles.js, choisis via `analog_style`) :
-  // mêmes primitives (graduations, chiffres, aiguilles), paramètres
-  // différents — sauf "ardoise", seul style à aiguilles rectangulaires
+  // de réutiliser le calcul basé sur --_clock-size. Douze habillages
+  // possibles (cf. src/analog-styles.js, choisis via `analog_style`, ou
+  // "auto" pour un style par jour de la semaine) : mêmes primitives
+  // (graduations, chiffres, aiguilles), paramètres différents — sauf
+  // "ardoise"/"mars"/"saturne", seuls styles à aiguilles rectangulaires
   // plutôt que des traits (cf. _renderRectHands).
   //
   // Tout sous-template SVG (graduations, chiffres, aiguilles — construits
@@ -642,10 +702,29 @@ class EchoHomeCard extends LitElement {
         aria-label=${formatTime(now, locale, timeFormat)}
       >
         ${style.glow ? this._renderGlowFilter() : nothing}
+        ${style.outerRing ? this._renderOuterRing(style.outerRing) : nothing}
         ${this._renderTicks(style.ticks, style.glow)}
         ${this._renderNumerals(style.numerals)}
         ${hands}
       </svg>
+    `;
+  }
+
+  // Anneau décoratif (style "saturne" uniquement) : une ellipse inclinée
+  // façon anneaux de Saturne, rendue avant graduations/chiffres/aiguilles
+  // (cf. ordre d'appel dans _renderAnalogClock) pour ne jamais passer
+  // par-dessus et gêner leur lisibilité — juste un habillage de fond.
+  _renderOuterRing(cfg) {
+    return svg`
+      <ellipse
+        class="outer-ring"
+        cx="50" cy="50" rx=${cfg.rx} ry=${cfg.ry}
+        fill="none"
+        stroke=${cfg.color}
+        stroke-width=${cfg.width}
+        opacity=${cfg.opacity}
+        transform="rotate(${cfg.rotate} 50 50)"
+      />
     `;
   }
 
@@ -718,12 +797,18 @@ class EchoHomeCard extends LitElement {
   // ramenés vers le centre, sinon ils paraissent "flotter" au milieu du
   // cadran au lieu de marquer l'heure à la même distance du bord
   // (corrigé en 1.1.4 pour "aurore", appliqué d'emblée ici aux autres).
+  // `cfg.labels` (optionnel) remplace le texte par défaut à chaque
+  // position — un seul élément pour "single" (ex: "☾", style "lune"),
+  // jusqu'à quatre pour "quad", dans le même ordre que les positions par
+  // défaut (12, 3, 6, 9).
   _renderNumerals(cfg) {
     if (!cfg) return nothing;
+    const defaultLabels = cfg.mode === "single" ? ["12"] : ["12", "3", "6", "9"];
+    const labels = cfg.labels ?? defaultLabels;
     const positions =
       cfg.mode === "single"
-        ? [["12", 0]]
-        : [["12", 0], ["3", 1], ["6", 2], ["9", 3]];
+        ? [[labels[0], 0]]
+        : labels.map((n, i) => [n, i]);
     const numerals = positions.map(([n, i]) => {
       const p = this._polar(cfg.radius, i * 90);
       return svg`
@@ -1134,11 +1219,14 @@ class EchoHomeCard extends LitElement {
       background: var(--echo-home-analog-background, var(--_analog-default-bg));
     }
 
-    /* La nuit, même en analogique, on retombe sur le traitement nuit
-       habituel (fond quasi noir) plutôt que le style choisi — l'objectif
-       du mode nuit (peu de lumière émise sur un écran de chevet) prime
-       sur l'esthétique. */
-    :host(.night) .card.analog {
+    /* La nuit, on retombe sur le traitement nuit uniforme (fond quasi
+       noir) plutôt que le fond du style choisi — SAUF pour les styles
+       "planétaires" qui définissent leur propre fond de nuit (bloc
+       "night", cf. analog-styles.js) : ceux-là portent la classe
+       "custom-night" (posée dans le JS, cf. render()) et sont donc
+       exemptés ici, leur fond nuit passant par --_analog-default-bg
+       comme en journée (cf. règle .card.analog juste au-dessus). */
+    :host(.night) .card.analog:not(.custom-night) {
       background: var(--_default-bg);
       background-color: #0a1424;
     }
@@ -1173,19 +1261,23 @@ class EchoHomeCard extends LitElement {
       height: var(--_analog-landscape-size);
     }
 
-    /* Couleurs et épaisseurs propres à chaque style (mono/aurore/clair/
-       neon/ardoise) posées directement en attributs SVG par
-       _renderLineHands/_renderRectHands/_renderTicks/_renderNumerals,
-       pas ici : contrairement à la version à un seul style (< 1.2.0), il
-       n'y a plus de couleur "currentColor" commune à surcharger. La
-       nuit, .hand regroupe toutes les aiguilles/graduations/chiffres
-       (cf. classes posées dans le JS) et retombe uniformément sur le
-       rouge très atténué habituel, quel que soit le style de jour. */
+    /* Couleurs et épaisseurs propres à chaque style posées directement en
+       attributs SVG par _renderLineHands/_renderRectHands/_renderTicks/
+       _renderNumerals, pas ici : contrairement à la version à un seul
+       style (< 1.2.0), il n'y a plus de couleur "currentColor" commune à
+       surcharger. L'opacité nuit (dimming) s'applique toujours, styles
+       "planétaires" compris : l'économie de lumière reste de mise même
+       quand ils gardent leur propre teinte (cf. règle suivante et
+       _applyNightPalette). Seule la couleur forcée ici est exemptée pour
+       eux (via "custom-night", cf. règle .card.analog plus haut) — pour
+       les 5 styles d'origine sans bloc "night", .hand regroupe toutes les
+       aiguilles/graduations/chiffres et retombe uniformément sur le rouge
+       très atténué habituel, comme avant. */
     :host(.night) .analog-clock {
       opacity: var(--_night-opacity);
     }
 
-    :host(.night) .analog-clock .hand {
+    :host(.night) .card.analog:not(.custom-night) .analog-clock .hand {
       fill: var(--_night-color);
       stroke: var(--_night-color);
     }

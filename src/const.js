@@ -85,13 +85,20 @@ export const DEFAULT_CONFIG = {
   // petit bouton affiché à l'écran bascule l'affichage et retient le
   // choix (localStorage) au-delà de cette valeur de config.
   analog_style: "aurore", // habillage du cadran analogique — "aurore"
-  // (défaut, dégradé turquoise/bleu/violet), "mono", "clair", "neon" ou
-  // "ardoise" (cf. src/analog-styles.js). Contrairement à clock_face, ce
-  // n'est qu'un réglage YAML : pas de bouton pour en changer à l'écran,
-  // pas de mémorisation localStorage — un seul style choisi une fois.
-  // Ignoré si analog_background a un type dynamique (satellite/url/
-  // media_folder) : retombe sur "aurore", blanc, lisible sur n'importe
-  // quelle photo (les couleurs d'un style donné ne le sont pas forcément).
+  // (défaut, dégradé turquoise/bleu/violet), "mono", "clair", "neon",
+  // "ardoise", ou l'un des 7 styles "planétaires" (un par jour de la
+  // semaine, du nom latin des jours : "lune", "mars", "mercure",
+  // "jupiter", "venus", "saturne", "soleil" — cf. src/analog-styles.js).
+  // Valeur spéciale "auto" : choisit automatiquement le style planétaire
+  // du jour (lundi -> "lune", mardi -> "mars", etc., cf.
+  // WEEKDAY_ANALOG_STYLES dans analog-styles.js) — recalculé à chaque
+  // rendu, donc change tout seul à minuit sans reconfiguration.
+  // Contrairement à clock_face, ce n'est qu'un réglage YAML : pas de
+  // bouton pour en changer à l'écran, pas de mémorisation localStorage —
+  // un seul style (ou "auto") choisi une fois. Ignoré si analog_background
+  // a un type dynamique (satellite/url/media_folder) : retombe sur
+  // "aurore", blanc, lisible sur n'importe quelle photo (les couleurs
+  // d'un style donné, planétaire ou non, ne le sont pas forcément).
   zoom: 1, // facteur d'échelle manuel (CSS zoom), filet de rattrapage si
   // les tailles fluides ne suivent pas correctement sur un appareil donné
 };
