@@ -1,5 +1,56 @@
 # Changelog
 
+## 1.6.0
+
+Les 7 styles "planétaires" de 1.5.0 remplacés : jugés trop démonstratifs
+(thème imposé par jour), et les nuits associées trop atténuées pour
+rester lisibles à table le soir. Nouvel ensemble à thème libre, affiné
+sur plusieurs itérations avec retours visuels réels (captures à chaque
+étape) plutôt que d'un coup :
+
+- **6 nouveaux styles de jour** : `corail` (récif turquoise, graduations
+  sur les heures non cardinales), `grenat` (bordeaux vif, graduations en
+  petits diamants facettés — nouvelle forme `shape: "diamond"`),
+  `prisme` (fond clair, une couleur par aiguille), `atlas` (horloge
+  ancienne : 12 chiffres romains en police serif, "IIII" à 4h par
+  convention d'horlogerie traditionnelle, aiguilles en lame effilée —
+  nouvelle forme `shape: "leaf"`, trotteuse en "lollipop"), `carbone`
+  (noir/cyan électrique, sert de nuit à `ardoise`), `soleil` restylé
+  (rayons alternés longs/courts façon icône soleil plutôt qu'une couronne
+  régulière). `ardoise` légèrement éclairci.
+- **`analog_style: auto` recalé sur ce nouvel ensemble** (un style par
+  jour, cf. `WEEKDAY_ANALOG_STYLES`) : dimanche `soleil`, lundi `aurore`,
+  mardi `ardoise`, mercredi `corail`, jeudi `grenat`, vendredi `prisme`,
+  samedi `atlas`.
+- **Nuits repensées "vibrantes"**, pas atténuées : l'appareil baisse déjà
+  la luminosité automatiquement la nuit, donc plus besoin de désaturer
+  le design en plus — au contraire, un vrai contraste reste nécessaire
+  pour rester lisible à table le soir (mesuré : 4.76:1 à 16.28:1 selon
+  les styles, contre 1.9-3.5:1 pour une première version désaturée
+  abandonnée). Trois formes de nuit selon le style (cf.
+  `_resolveNightStyle`) :
+  - recolorage simple atténué, une teinte (`soleil`, comme avant) ;
+  - bascule vers un autre style affiché tel quel (`ardoise` → `carbone`,
+    `grenat` → `mono`, `prisme` → `neon`) ;
+  - concept de nuit complet, indépendant du style de jour : "Aurore
+    Boréale" (`aurore`, une teinte par aiguille, aucune graduation),
+    "Bioluminescence" (`corail`, points de taille/éclat irréguliers),
+    "Chandelle" (`atlas`, aiguilles feuille, graduations en flamme
+    vacillante).
+  - Plus d'atténuation d'opacité supplémentaire sur ces nuits "vibrantes"
+    (CSS `:host(.night) .analog-clock` re-scopé `:not(.custom-night)`) —
+    seuls les styles sans `night` gardent l'opacité tamisée d'origine.
+- Style "saturne" et son anneau elliptique (`_renderOuterRing`)
+  retirés avec le reste du lot planétaire ; le moteur gagne en échange
+  `numerals.mode: "all"` (+ `fontFamily`), `ticks.shape: "diamond"`,
+  et des surcharges par position (`y1s`/`radii`/`opacities`) pour des
+  graduations irrégulières (rais, points de taille inégale, flamme).
+- Vérifié : les 11 styles (jour + nuit) et `auto` rendus sans erreur
+  console ; `custom-night` correctement posé/absent selon la présence
+  d'un bloc `night` ; suite de tests existante (bouton, alignement
+  minute, dérive seconde, sweep digital/analog × round/large × jour/nuit)
+  toujours au vert.
+
 ## 1.5.0
 
 Sept nouveaux styles de cadran analogique, un par jour de la semaine —

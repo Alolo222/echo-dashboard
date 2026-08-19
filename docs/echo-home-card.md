@@ -24,24 +24,25 @@ Un petit bouton à l'écran bascule de l'un à l'autre et retient le choix
 (`localStorage`) au-delà d'un rechargement de page — `clock_face` dans la
 config ne sert que de valeur de départ.
 
-## Douze styles pour le cadran analogique
+## Onze styles pour le cadran analogique
 
 Cinq styles "classiques" (`aurore`, `mono`, `clair`, `neon`, `ardoise`),
-et sept styles "planétaires" — un par jour de la semaine, sur le nom
-latin dont vient le jour français (lundi = Lune, mardi = Mars, mercredi =
-Mercure, jeudi = Jupiter, vendredi = Vénus, samedi = Saturne, dimanche =
-Soleil) :
+et six styles à thème libre (`corail`, `grenat`, `prisme`, `atlas`,
+`carbone`, `soleil`) :
 
-![Les sept styles planétaires](../packages/echo-home-card/docs/screenshot-round-analog-planets.png)
+![corail, grenat, prisme, atlas, carbone et soleil](../packages/echo-home-card/docs/screenshot-round-analog-styles2.png)
 
-`analog_style: auto` choisit tout seul le style planétaire du jour,
-recalculé à chaque rendu — l'horloge change de tête toute seule à
-minuit, sans reconfiguration. Les styles planétaires gardent en plus une
-identité propre la nuit (teinte sombre distincte par jour), là où les 5
-styles classiques retombent sur le traitement nuit uniforme habituel
-(rouge très atténué) :
+`analog_style: auto` choisit tout seul un style différent chaque jour de
+la semaine (dimanche `soleil`, lundi `aurore`, mardi `ardoise`, mercredi
+`corail`, jeudi `grenat`, vendredi `prisme`, samedi `atlas`), recalculé à
+chaque rendu — l'horloge change de tête toute seule à minuit, sans
+reconfiguration. Certains styles gardent en plus une identité propre la
+nuit — restée délibérément **vibrante** (pas atténuée : l'appareil baisse
+déjà la luminosité tout seul) pour rester lisible à table le soir — là où
+les styles sans cette identité propre retombent sur le traitement nuit
+uniforme habituel (rouge très atténué) :
 
-![Trois styles planétaires en mode nuit](../packages/echo-home-card/docs/screenshot-round-analog-planets-night.png)
+![aurore, corail et atlas en mode nuit](../packages/echo-home-card/docs/screenshot-round-analog-concepts-night.png)
 
 ## Deux mises en page
 

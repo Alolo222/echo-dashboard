@@ -167,17 +167,15 @@ clock_face: digital             # "digital" ou "analog" — disponible dans
                                  # prime sur cette option une fois tapé
 analog_style: aurore            # habillage du cadran analogique : "aurore"
                                  # (défaut), "mono", "clair", "neon",
-                                 # "ardoise", ou l'un des 7 styles
-                                 # "planétaires" ("lune", "mars", "mercure",
-                                 # "jupiter", "venus", "saturne", "soleil" —
-                                 # un par jour de la semaine) ; "auto" choisit
-                                 # tout seul le style planétaire du jour
-                                 # (voir "Horloge analogique" plus bas).
-                                 # Contrairement à clock_face, un seul
-                                 # réglage YAML — pas de bouton pour en
-                                 # changer à l'écran ni de mémorisation.
-                                 # Ignoré si analog_background a un type
-                                 # dynamique (voir "Arrière-plans")
+                                 # "ardoise", "corail", "grenat", "prisme",
+                                 # "atlas", "carbone" ou "soleil" ; "auto"
+                                 # choisit tout seul un style différent
+                                 # chaque jour de la semaine (voir "Horloge
+                                 # analogique" plus bas). Contrairement à
+                                 # clock_face, un seul réglage YAML — pas de
+                                 # bouton pour en changer à l'écran ni de
+                                 # mémorisation. Ignoré si analog_background
+                                 # a un type dynamique (voir "Arrière-plans")
 analog_background: null         # fond du mode ANALOGIQUE, indépendant de
                                  # background — voir "Arrière-plans" plus bas
 zoom: 1                         # facteur d'échelle manuel (CSS zoom) — filet
@@ -342,11 +340,11 @@ Le choix fait via ce bouton est retenu dans le navigateur (`localStorage`)
 au-delà d'un rechargement de page — `clock_face` dans la config ne sert
 que de valeur de départ, écrasée dès le premier tap sur le bouton.
 
-Douze habillages du cadran lui-même, choisis via `analog_style` dans la
+Onze habillages du cadran lui-même, choisis via `analog_style` dans la
 config (pas de bouton pour celui-ci — un seul style par installation) :
-cinq styles "classiques", et sept styles "planétaires" — un par jour de
-la semaine, sur le nom latin dont vient le jour français (lundi = Lune,
-mardi = Mars, ...).
+cinq styles "classiques", et six styles à thème libre — sept en comptant
+`soleil`, calés un par jour de la semaine via `analog_style: auto` (voir
+plus bas).
 
 ![Les cinq styles classiques du cadran analogique](docs/screenshot-round-analog-styles.png)
 
@@ -358,34 +356,48 @@ mardi = Mars, ...).
 | `neon` | Bleu nuit profond, cyan lumineux avec halo, seconde magenta — plus gadget, plus spectaculaire. |
 | `ardoise` | Aiguilles rectangulaires plutôt que des traits, seule l'heure 12 est marquée — plus architectural. |
 
-![Les sept styles planétaires, un par jour de la semaine](docs/screenshot-round-analog-planets.png)
+![corail, grenat, prisme, atlas, carbone et soleil](docs/screenshot-round-analog-styles2.png)
 
-| Style | Jour | |
-|---|---|---|
-| `lune` | lundi | Argenté et nocturne même de jour : bleu-gris profond, aiguilles blanc cassé, un croissant à la place du "12". |
-| `mars` | mardi | Martial et rouille : dégradé brique profond, aiguilles rectangulaires, accent rouge-orangé vif. |
-| `mercure` | mercredi | Vif-argent et véloce : dégradé métallique clair, aiguilles très fines sans chiffres, accent bleu rapide. |
-| `jupiter` | jeudi | Royal et doré : fond violet profond, chiffres et graduations or aux cardinaux, seconde blanche. |
-| `venus` | vendredi | Élégant et rose doré : fond champagne clair, aiguilles fines encre, seconde corail, aucune graduation. |
-| `saturne` | samedi | Lourd et cerclé : fond bronze/plomb mat, un fin anneau elliptique autour du cadran façon anneaux de Saturne. |
-| `soleil` | dimanche | Rayonnant et chaud : dégradé orange/jaune, graduations façon rayons de soleil, halo activé. |
+| Style | |
+|---|---|
+| `corail` | Récif turquoise vif, graduations sur les heures non cardinales, trotteuse corail. |
+| `grenat` | Bordeaux vif, graduations en petits diamants facettés, aiguilles blush, accent or. |
+| `prisme` | Fond clair neutre, une couleur par aiguille (bleu/violet/rose), aucune graduation ni chiffre. |
+| `atlas` | Horloge ancienne : 12 chiffres romains en police serif ("IIII" à 4h, convention traditionnelle), aiguilles en lame effilée, trotteuse en "lollipop". |
+| `carbone` | Noir profond, aiguilles rectangulaires façon chronographe, accent cyan électrique — surtout utilisé comme nuit d'`ardoise`. |
+| `soleil` | Dégradé orange/jaune, rayons alternés longs/courts façon icône soleil, halo activé. |
 
-`analog_style: auto` choisit tout seul le style planétaire du jour
-(recalculé à chaque rendu, donc change de lui-même à minuit) — pratique
-pour avoir une horloge différente chaque jour sans y retoucher :
+`analog_style: auto` choisit tout seul un style différent chaque jour de
+la semaine (recalculé à chaque rendu, donc change de lui-même à minuit) —
+pratique pour avoir une horloge différente chaque jour sans y retoucher :
 
 ```yaml
 analog_style: auto
 ```
 
-Contrairement aux cinq styles classiques (qui gardent tous le même
-traitement nuit uniforme, voir plus bas), les sept styles planétaires
-gardent une identité propre même la nuit — fond et couleur d'aiguilles
-distincts par jour, mais toujours très sombres et atténués (l'économie
-de lumière reste de mise, seule la teinte cesse d'être la même pour
-tous) :
+Calage par défaut : dimanche `soleil`, lundi `aurore`, mardi `ardoise`,
+mercredi `corail`, jeudi `grenat`, vendredi `prisme`, samedi `atlas`
+(voir `WEEKDAY_ANALOG_STYLES` dans `src/analog-styles.js` pour
+permuter).
 
-![Trois styles planétaires en mode nuit](docs/screenshot-round-analog-planets-night.png)
+Certains styles gardent une identité propre même la nuit plutôt que le
+traitement nuit uniforme habituel (voir plus bas) — et contrairement à
+un premier essai, ces nuits restent **vibrantes** plutôt qu'atténuées :
+l'appareil baisse déjà la luminosité tout seul la nuit, pas besoin de
+désaturer le design en plus, il doit surtout rester facile à lire à
+table le soir. Trois formes possibles : un recolorage simple atténué
+(`soleil`), une bascule vers un autre style affiché tel quel (`ardoise`
+→ `carbone`, `grenat` → `mono`, `prisme` → `neon`), ou un concept de nuit
+complet, indépendant du style de jour :
+
+![aurore (Aurore Boréale), corail (Bioluminescence), atlas (Chandelle) en mode nuit](docs/screenshot-round-analog-concepts-night.png)
+
+- **Aurore Boréale** (`aurore`) : une teinte différente par aiguille
+  (cyan/vert/violet), aucune graduation.
+- **Bioluminescence** (`corail`) : graduations de taille et d'éclat
+  irréguliers, comme des organismes qui s'allument plus ou moins fort.
+- **Chandelle** (`atlas`) : aiguilles en lame effilée, graduations à
+  opacité vacillante façon flamme.
 
 Le fond par défaut de chaque style se personnalise avec l'option
 `analog_background` (voir [Configuration complète](#configuration-complète))
@@ -404,8 +416,8 @@ card_mod:
 
 La nuit, ce fond n'est jamais utilisé — même en analogique, le mode nuit
 retombe sur son traitement habituel (fond quasi noir, peu de lumière
-émise), sauf pour les styles planétaires qui affichent alors leur propre
-fond de nuit, tout aussi sombre (voir ci-dessus). Comme en digital,
+émise), sauf pour les styles avec leur propre bloc `night` qui affichent
+alors leur propre fond de nuit (voir ci-dessus). Comme en digital,
 `show_weather`/`show_date` affichent la météo
 (icône + température de `weather_entity`) et la date sur le cadran —
 masquées la nuit comme en digital ; leur disposition diffère selon la

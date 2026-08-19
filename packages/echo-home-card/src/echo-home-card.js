@@ -491,25 +491,24 @@ class EchoHomeCard extends LitElement {
         ? ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
         : ANALOG_STYLES[resolvedStyleKey] || ANALOG_STYLES[DEFAULT_ANALOG_STYLE]
       : null;
-    // La nuit, un style "planétaire" (cf. analog-styles.js) garde sa propre
-    // identité (fond + couleur d'aiguilles/graduations/chiffres distincts)
-    // via son bloc `night`, plutôt que le traitement nuit uniforme habituel
-    // — cf. _applyNightPalette. Les 5 styles d'origine (aurore/mono/clair/
-    // neon/ardoise, sans `night`) gardent eux ce traitement uniforme
-    // inchangé : hasCustomNight reste false pour eux, donc renderStyle
-    // === analogStyle et les règles CSS :host(.night) (non exemptées faute
-    // de classe "custom-night", cf. plus bas) reprennent le dessus comme
-    // avant.
+    // La nuit, un style avec son propre bloc `night` (cf. analog-styles.js)
+    // garde une identité propre plutôt que le traitement nuit uniforme
+    // habituel — cf. _resolveNightStyle pour les 3 formes possibles
+    // (recolorage simple, bascule vers un autre style, concept complet).
+    // Les styles SANS `night` (mono/clair/neon) gardent eux ce traitement
+    // uniforme inchangé : hasCustomNight reste false pour eux, donc
+    // renderStyle === analogStyle et les règles CSS :host(.night) (non
+    // exemptées faute de classe "custom-night", cf. plus bas) reprennent
+    // le dessus comme avant.
     const hasCustomNight = isNightMode && showAnalog && !!analogStyle?.night;
-    const renderStyle = hasCustomNight ? this._applyNightPalette(analogStyle) : analogStyle;
-    // La nuit, même pour un style "planétaire" avec son propre `night`, le
-    // fond de ce bloc prime toujours sur un `analog_background` de type
-    // "css" éventuel — la sobriété nocturne (peu de lumière émise) reste
-    // prioritaire sur un fond personnalisé, seule sa teinte cesse d'être
-    // uniforme (cf. commentaire sur backgroundValue plus haut, toujours
-    // valable pour les styles SANS bloc `night`).
+    const renderStyle = hasCustomNight ? this._resolveNightStyle(analogStyle) : analogStyle;
+    // La nuit, même pour un style avec son propre `night`, le fond de ce
+    // bloc prime toujours sur un `analog_background` de type "css"
+    // éventuel — la sobriété nocturne reste prioritaire sur un fond
+    // personnalisé (cf. commentaire sur backgroundValue plus haut,
+    // toujours valable pour les styles SANS bloc `night`).
     const analogDefaultBg = hasCustomNight
-      ? analogStyle.night.background
+      ? renderStyle.background
       : cfg.analog_background.type === "css"
         ? cfg.analog_background.value
         : analogStyle?.background;
@@ -602,22 +601,38 @@ class EchoHomeCard extends LitElement {
     `;
   }
 
+  // Résout le style à rendre la nuit à partir du bloc `night` d'un style
+  // (cf. analog-styles.js) — 3 formes possibles :
+  // - { swap: "autreStyle" } : affiche cet autre style tel quel, à pleine
+  //   intensité (ex: "ardoise" -> "carbone") — aucun recolorage, c'est le
+  //   style visé qui s'applique intégralement.
+  // - un concept complet (contient déjà `hour`/`minute`/`second`/...) :
+  //   c'est ce bloc lui-même qui sert de style de nuit, indépendant de la
+  //   palette de jour (ex: "Aurore Boréale", "Chandelle").
+  // - { background, color } : recolorage simple et atténué, cf.
+  //   _applyNightPalette.
+  _resolveNightStyle(style) {
+    const night = style.night;
+    if (night.swap) return ANALOG_STYLES[night.swap] ?? style;
+    if (night.hour) return night;
+    return this._applyNightPalette(style, night);
+  }
+
   // Recolore un style pour la nuit à partir de son bloc `night` ({
-  // background, color }, cf. analog-styles.js) : mêmes formes/longueurs/
-  // épaisseurs que le style de jour (lisibilité, position des aiguilles
-  // inchangées), seules les couleurs de tout ce qui se dessine (aiguilles,
-  // graduations, chiffres, complications, éventuel anneau décoratif)
-  // basculent sur `night.color` — une seule teinte par style, sobre, plutôt
-  // que de redéfinir une palette nuit complète par élément. Le fond suit
-  // séparément (cf. analogDefaultBg dans render(), pas ici). glow désactivé
-  // : pas de halo la nuit, la sobriété prime sur l'esthétique (même
-  // principe que l'ancien traitement uniforme qu'il remplace pour ces
-  // styles).
-  _applyNightPalette(style) {
-    const c = style.night.color;
+  // background, color }) : mêmes formes/longueurs/épaisseurs que le style
+  // de jour (lisibilité, position des aiguilles inchangées), seules les
+  // couleurs de tout ce qui se dessine (aiguilles, graduations, chiffres,
+  // complications) basculent sur `night.color` — une seule teinte par
+  // style, sobre, plutôt que de redéfinir une palette nuit complète par
+  // élément. glow désactivé : pas de halo la nuit, la sobriété prime sur
+  // l'esthétique (même principe que l'ancien traitement uniforme qu'il
+  // remplace pour ces styles).
+  _applyNightPalette(style, night) {
+    const c = night.color;
     const recolor = (cfg) => (cfg ? { ...cfg, color: c } : cfg);
     return {
       ...style,
+      background: night.background,
       glow: false,
       ticks: recolor(style.ticks),
       numerals: recolor(style.numerals),
@@ -634,7 +649,6 @@ class EchoHomeCard extends LitElement {
         ring: style.center.ring ? { ...style.center.ring, color: c } : undefined,
       },
       comp: { ...style.comp, color: c },
-      outerRing: style.outerRing ? { ...style.outerRing, color: c } : undefined,
     };
   }
 
@@ -643,12 +657,14 @@ class EchoHomeCard extends LitElement {
   // au digital. Diamètre indépendant de --_clock-size (qui pilote une
   // taille de police, pas un diamètre) — cf. --_analog-size et
   // .card.round.analog .date, qui a donc sa propre position plutôt que
-  // de réutiliser le calcul basé sur --_clock-size. Douze habillages
+  // de réutiliser le calcul basé sur --_clock-size. Onze habillages
   // possibles (cf. src/analog-styles.js, choisis via `analog_style`, ou
   // "auto" pour un style par jour de la semaine) : mêmes primitives
-  // (graduations, chiffres, aiguilles), paramètres différents — sauf
-  // "ardoise"/"mars"/"saturne", seuls styles à aiguilles rectangulaires
-  // plutôt que des traits (cf. _renderRectHands).
+  // (graduations, chiffres, aiguilles), paramètres différents — sauf la
+  // forme des aiguilles, qui varie aussi : "ardoise"/"carbone" en
+  // rectangles (_renderRectHands), "atlas" en lame effilée
+  // (_renderLeafHands), le reste en traits classiques
+  // (_renderLineHands).
   //
   // Tout sous-template SVG (graduations, chiffres, aiguilles — construits
   // ici dans des méthodes séparées, donc interpolés dans le <svg>
@@ -689,10 +705,14 @@ class EchoHomeCard extends LitElement {
     // en continu plutôt que de ne jamais s'en rendre compte.
     const secondHandDelay = `-${seconds}s`;
 
-    const hands =
-      style.shape === "rect"
-        ? this._renderRectHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay)
-        : this._renderLineHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay);
+    // "rect" (ardoise/carbone), "leaf" (lame effilée, façon aiguille
+    // ancienne, style "atlas") ou par défaut un simple trait.
+    const handRenderers = {
+      rect: this._renderRectHands,
+      leaf: this._renderLeafHands,
+    };
+    const handRenderer = (handRenderers[style.shape] ?? this._renderLineHands).bind(this);
+    const hands = handRenderer(style, hourAngle, minuteAngle, secondAngle, secondHandDelay);
 
     return html`
       <svg
@@ -702,29 +722,10 @@ class EchoHomeCard extends LitElement {
         aria-label=${formatTime(now, locale, timeFormat)}
       >
         ${style.glow ? this._renderGlowFilter() : nothing}
-        ${style.outerRing ? this._renderOuterRing(style.outerRing) : nothing}
         ${this._renderTicks(style.ticks, style.glow)}
         ${this._renderNumerals(style.numerals)}
         ${hands}
       </svg>
-    `;
-  }
-
-  // Anneau décoratif (style "saturne" uniquement) : une ellipse inclinée
-  // façon anneaux de Saturne, rendue avant graduations/chiffres/aiguilles
-  // (cf. ordre d'appel dans _renderAnalogClock) pour ne jamais passer
-  // par-dessus et gêner leur lisibilité — juste un habillage de fond.
-  _renderOuterRing(cfg) {
-    return svg`
-      <ellipse
-        class="outer-ring"
-        cx="50" cy="50" rx=${cfg.rx} ry=${cfg.ry}
-        fill="none"
-        stroke=${cfg.color}
-        stroke-width=${cfg.width}
-        opacity=${cfg.opacity}
-        transform="rotate(${cfg.rotate} 50 50)"
-      />
     `;
   }
 
@@ -750,10 +751,15 @@ class EchoHomeCard extends LitElement {
     `;
   }
 
-  // Graduations : soit un trait fin proche du bord (style "aurore"
-  // d'origine), soit un simple point (les 4 autres styles) — sur les 12
-  // heures ("all"), les 8 non cardinales ("minor", pour laisser la place
-  // aux chiffres) ou les 4 cardinales seulement ("cardinal").
+  // Graduations : trait fin proche du bord ("line", style "aurore"),
+  // point ("dot") ou petit diamant façon pierre facettée ("diamond",
+  // style "grenat") — sur les 12 heures ("all"), les 8 non cardinales
+  // ("minor", pour laisser la place aux chiffres) ou les 4 cardinales
+  // seulement ("cardinal"). `y1s`/`radii`/`opacities` (optionnels, un
+  // tableau de 12 valeurs) remplacent la longueur/taille/opacité par
+  // position plutôt que le seul binaire cardinal/mineur — pour un rendu
+  // irrégulier (rais de lumière, points de taille inégale...) plutôt
+  // qu'une couronne parfaitement régulière.
   _renderTicks(cfg, glow) {
     if (!cfg) return nothing;
     const glowAttr = glow ? "url(#echo-home-analog-glow)" : undefined;
@@ -765,24 +771,38 @@ class EchoHomeCard extends LitElement {
       if (cfg.skip?.includes(i)) continue;
       const angle = i * 30;
       if (cfg.shape === "line") {
+        const y1 = cfg.y1s?.[i] ?? cfg.y1;
+        const o = cfg.opacities?.[i] ?? cfg.opacity;
         ticks.push(svg`
           <line
             class="tick hand"
             x1="50"
-            y1=${cfg.y1}
+            y1=${y1}
             x2="50"
             y2=${cfg.y2}
             stroke=${cfg.color}
             stroke-width=${cfg.width}
-            opacity=${cfg.opacity}
+            opacity=${o}
             filter=${glowAttr ?? nothing}
             transform="rotate(${angle} 50 50)"
           />
         `);
+      } else if (cfg.shape === "diamond") {
+        const p = this._polar(cfg.radius, angle);
+        const r = cfg.radii?.[i] ?? (isCardinal ? cfg.cardinalR : cfg.minorR);
+        const o = cfg.opacities?.[i] ?? (isCardinal ? cfg.cardinalOpacity : cfg.minorOpacity);
+        ticks.push(svg`
+          <rect
+            class="tick hand"
+            x=${p.x - r} y=${p.y - r} width=${r * 2} height=${r * 2}
+            fill=${cfg.color} opacity=${o} filter=${glowAttr ?? nothing}
+            transform="rotate(45 ${p.x} ${p.y})"
+          />
+        `);
       } else {
         const p = this._polar(cfg.radius, angle);
-        const r = isCardinal ? cfg.cardinalR : cfg.minorR;
-        const o = isCardinal ? cfg.cardinalOpacity : cfg.minorOpacity;
+        const r = cfg.radii?.[i] ?? (isCardinal ? cfg.cardinalR : cfg.minorR);
+        const o = cfg.opacities?.[i] ?? (isCardinal ? cfg.cardinalOpacity : cfg.minorOpacity);
         ticks.push(svg`
           <circle class="tick hand" cx=${p.x} cy=${p.y} r=${r} fill=${cfg.color} opacity=${o} filter=${glowAttr ?? nothing} />
         `);
@@ -791,26 +811,32 @@ class EchoHomeCard extends LitElement {
     return svg`<g class="ticks">${ticks}</g>`;
   }
 
-  // Chiffres : "quad" (12/3/6/9, style "aurore") ou "single" (12
-  // seulement, style "ardoise"). Même rayon que les graduations à chaque
-  // fois — les chiffres doivent être sur le même cercle qu'elles, pas
-  // ramenés vers le centre, sinon ils paraissent "flotter" au milieu du
-  // cadran au lieu de marquer l'heure à la même distance du bord
-  // (corrigé en 1.1.4 pour "aurore", appliqué d'emblée ici aux autres).
-  // `cfg.labels` (optionnel) remplace le texte par défaut à chaque
-  // position — un seul élément pour "single" (ex: "☾", style "lune"),
-  // jusqu'à quatre pour "quad", dans le même ordre que les positions par
-  // défaut (12, 3, 6, 9).
+  // Chiffres arabes en "quad" (12/3/6/9, style "aurore") ou "single" (12
+  // seulement, style "ardoise"), ou chiffres romains en "all" (les 12
+  // heures, style "atlas" — "IIII" plutôt que "IV" à 4h, convention
+  // d'horlogerie traditionnelle pour la symétrie visuelle avec "VIII").
+  // Même rayon que les graduations à chaque fois — les chiffres doivent
+  // être sur le même cercle qu'elles, pas ramenés vers le centre, sinon
+  // ils paraissent "flotter" au milieu du cadran au lieu de marquer
+  // l'heure à la même distance du bord (corrigé en 1.1.4 pour "aurore",
+  // appliqué d'emblée ici aux autres). `cfg.labels` (optionnel) remplace
+  // le texte par défaut à chaque position ; `cfg.fontFamily` (optionnel)
+  // remplace la police par défaut (utile pour une police serif, style
+  // "atlas").
   _renderNumerals(cfg) {
     if (!cfg) return nothing;
-    const defaultLabels = cfg.mode === "single" ? ["12"] : ["12", "3", "6", "9"];
-    const labels = cfg.labels ?? defaultLabels;
-    const positions =
+    const step = cfg.mode === "all" ? 30 : 90;
+    const defaultLabels =
       cfg.mode === "single"
-        ? [[labels[0], 0]]
-        : labels.map((n, i) => [n, i]);
-    const numerals = positions.map(([n, i]) => {
-      const p = this._polar(cfg.radius, i * 90);
+        ? ["12"]
+        : cfg.mode === "all"
+          ? ["XII", "I", "II", "III", "IIII", "V", "VI", "VII", "VIII", "IX", "X", "XI"]
+          : ["12", "3", "6", "9"];
+    const labels = cfg.labels ?? defaultLabels;
+    const positions = cfg.mode === "single" ? [[labels[0], 0]] : labels.map((n, i) => [n, i * step]);
+    const fontFamily = cfg.fontFamily ?? "inherit";
+    const numerals = positions.map(([n, angle]) => {
+      const p = this._polar(cfg.radius, angle);
       return svg`
         <text
           class="numeral hand"
@@ -818,6 +844,7 @@ class EchoHomeCard extends LitElement {
           y=${p.y}
           font-size=${cfg.size}
           font-weight=${cfg.weight}
+          font-family=${fontFamily}
           opacity=${cfg.opacity}
           fill=${cfg.color}
           text-anchor="middle"
@@ -944,6 +971,41 @@ class EchoHomeCard extends LitElement {
         transform="rotate(45 50 50)"
       />
     `;
+  }
+
+  // Aiguilles "feuille" (style "atlas" — cadran ancien) : lame effilée
+  // (étroite au pivot, large au tiers, étroite à la pointe) plutôt qu'un
+  // trait uniforme — silhouette de flamme/lame plutôt qu'un simple trait.
+  // Galbe volontairement discret (0.46/1.05, cf. constantes ci-dessous) :
+  // une version plus prononcée testée d'abord a été jugée trop
+  // excentrique. Trotteuse toujours un simple trait fin.
+  _renderLeafHands(style, hourAngle, minuteAngle, secondAngle, secondHandDelay) {
+    const leaf = (h, angle, extraClass) => {
+      const wide = 50 - h.len * 0.46;
+      const hw = h.width * 1.05;
+      return svg`
+        <polygon
+          class="hand ${extraClass}"
+          points="50,50 ${50 - hw},${wide} 50,${50 - h.len} ${50 + hw},${wide}"
+          fill=${h.color}
+          transform="rotate(${angle} 50 50)"
+        />
+      `;
+    };
+    const hour = leaf(style.hour, hourAngle, "hand-hour");
+    const minute = leaf(style.minute, minuteAngle, "hand-minute");
+    const s = style.second;
+    const tip = s.tipDot
+      ? svg`<circle class="hand" cx="50" cy=${50 - s.len} r=${s.tipDot.r} fill=${s.tipDot.fill} />`
+      : nothing;
+    const second = svg`
+      <g class="hand-second" style="animation-delay: ${secondHandDelay}; transform: rotate(${secondAngle}deg)">
+        <line class="hand" x1="50" y1=${50 + s.tail} x2="50" y2=${50 - s.len} stroke=${s.color} stroke-width=${s.width} stroke-linecap=${s.cap} opacity=${s.opacity} />
+        ${tip}
+      </g>
+    `;
+    const center = style.center;
+    return svg`${hour}${minute}${second}<circle class="hand" cx="50" cy="50" r=${center.r} fill=${center.color} />`;
   }
 
   // Petit bouton discret (round et large, masqué la nuit comme le reste
@@ -1221,8 +1283,9 @@ class EchoHomeCard extends LitElement {
 
     /* La nuit, on retombe sur le traitement nuit uniforme (fond quasi
        noir) plutôt que le fond du style choisi — SAUF pour les styles
-       "planétaires" qui définissent leur propre fond de nuit (bloc
-       "night", cf. analog-styles.js) : ceux-là portent la classe
+       qui définissent leur propre bloc "night" (cf. analog-styles.js,
+       3 formes possibles : recolorage simple, bascule vers un autre
+       style, ou concept complet) : ceux-là portent la classe
        "custom-night" (posée dans le JS, cf. render()) et sont donc
        exemptés ici, leur fond nuit passant par --_analog-default-bg
        comme en journée (cf. règle .card.analog juste au-dessus). */
@@ -1262,18 +1325,18 @@ class EchoHomeCard extends LitElement {
     }
 
     /* Couleurs et épaisseurs propres à chaque style posées directement en
-       attributs SVG par _renderLineHands/_renderRectHands/_renderTicks/
-       _renderNumerals, pas ici : contrairement à la version à un seul
-       style (< 1.2.0), il n'y a plus de couleur "currentColor" commune à
-       surcharger. L'opacité nuit (dimming) s'applique toujours, styles
-       "planétaires" compris : l'économie de lumière reste de mise même
-       quand ils gardent leur propre teinte (cf. règle suivante et
-       _applyNightPalette). Seule la couleur forcée ici est exemptée pour
-       eux (via "custom-night", cf. règle .card.analog plus haut) — pour
-       les 5 styles d'origine sans bloc "night", .hand regroupe toutes les
+       attributs SVG par _renderLineHands/_renderRectHands/_renderLeafHands/
+       _renderTicks/_renderNumerals, pas ici : contrairement
+       à la version à un seul style (< 1.2.0), il n'y a plus de couleur
+       "currentColor" commune à surcharger. Styles avec leur propre nuit
+       ("custom-night") : ni l'opacité ni la couleur ne sont forcées ici —
+       l'appareil baisse déjà la luminosité tout seul la nuit, donc ces
+       nuits restent volontairement "vibrantes" (pleine opacité, propres
+       couleurs) plutôt que doublement atténuées. Pour les styles SANS
+       bloc "night" (mono/clair/neon), .hand regroupe toutes les
        aiguilles/graduations/chiffres et retombe uniformément sur le rouge
        très atténué habituel, comme avant. */
-    :host(.night) .analog-clock {
+    :host(.night) .card.analog:not(.custom-night) .analog-clock {
       opacity: var(--_night-opacity);
     }
 
