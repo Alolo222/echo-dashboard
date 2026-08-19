@@ -1,5 +1,14 @@
 # echo-home-card
 
+> [!WARNING]
+> **Ce repo est archivé.** echo-home-card a été fusionné dans
+> [echo-dashboard](https://git.alocoq.fr/alois/echo-dashboard), qui
+> regroupe désormais echo-home-card, echo-player-card et
+> echo-weather-card en une seule installation HACS. Code, historique
+> complet et futures mises à jour continuent dans
+> [`packages/echo-home-card`](https://git.alocoq.fr/alois/echo-dashboard/src/branch/main/packages/echo-home-card)
+> de ce nouveau repo.
+
 > [!NOTE]
 > Projet à vocation personnelle : développé pour mes propres appareils
 > (Echo Show 5 / Echo Spot). Il ne sera pas activement maintenu et les
