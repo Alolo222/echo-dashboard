@@ -1,5 +1,11 @@
 # echo-dashboard
 
+> [!NOTE]
+> Projet à vocation personnelle : développé pour mes propres appareils
+> (Echo Show 5 / Echo Spot). Il ne sera pas activement maintenu et les
+> issues ne sont pas ouvertes. Envie de l'améliorer, de l'adapter ou
+> d'aller plus loin ? Forkez le dépôt !
+
 Bundle HACS unique regroupant 3 cartes Lovelace maison — **echo-home-card**
 (horloge + météo compacte), **echo-player-card** (lecteur média plein
 écran) et **echo-weather-card** (météo détaillée) — pour smart displays
