@@ -28,6 +28,22 @@ dashboard existant, elle affiche le dashboard par défaut. Aucun
 changement côté APK n'est nécessaire : une fois ce dashboard créé et
 l'attribut réglé côté HA, CoqPit le chargera automatiquement.
 
+## Aperçu
+
+| echo-home-card | echo-weather-card |
+|---|---|
+| ![echo-home-card, horloge + météo compacte](packages/echo-home-card/docs/screenshot.png) | ![echo-weather-card, météo détaillée](packages/echo-weather-card/docs/screenshot.png) |
+
+| echo-home-card (Echo Spot, round) | echo-weather-card (Echo Spot, round) |
+|---|---|
+| ![echo-home-card en mode round analogique](packages/echo-home-card/docs/screenshot-round-analog.png) | ![echo-weather-card en mode round](packages/echo-weather-card/docs/screenshot-round.png) |
+
+`echo-player-card` n'a pas encore de captures dans son README — voir
+[`packages/echo-player-card/README.md`](packages/echo-player-card/README.md)
+pour sa configuration en attendant. Chaque README de carte
+(`packages/<carte>/README.md`) contient davantage de captures détaillant
+ses différents modes et styles.
+
 ## 1. Installer echo-dashboard dans Home Assistant
 
 Une seule carte à ajouter (HACS → Frontend → dépôt personnalisé
