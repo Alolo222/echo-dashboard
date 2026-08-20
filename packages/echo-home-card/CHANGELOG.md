@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.6.5
+
+Docs uniquement, pas de changement de code : les noms des 4 styles de
+nuit dédiés (`aurore_night`, `corail_night`, `atlas_night`,
+`soleil_night`) n'étaient pas affichés clairement — la capture ne
+montrait que le nom du style de jour + celui du concept ("atlas —
+Chandelle"), pas la clé `analog_style` réellement sélectionnable, et
+`soleil_night` en était absent.
+
+- Capture `docs/screenshot-round-analog-concepts-night.png` régénérée :
+  chaque cadran porte maintenant sa clé exacte en légende
+  (`aurore_night`, `corail_night`, `atlas_night`, `soleil_night`), plus
+  le nom du concept en dessous.
+- README (`packages/echo-home-card` et l'aperçu monorepo
+  `docs/echo-home-card.md`) : le texte dispersé (trois formes de
+  traitement nuit expliquées en prose, puis les clés révélées dans un
+  paragraphe séparé) remplacé par un seul tableau — un style de jour par
+  ligne, sa forme de traitement nuit, et la commande YAML exacte à coller
+  pour le prévisualiser.
+- `src/const.js` : commentaire de `analog_style` mentionne désormais les
+  4 clés `*_night`.
+- Prévisualisé dans un artefact avant intégration (capture + tableau) ;
+  validé.
+
 ## 1.6.4
 
 Nouvelle option **`night_mode_entity`** : source alternative pour le

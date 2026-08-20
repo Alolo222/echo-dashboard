@@ -709,7 +709,11 @@ const ae = ft(class extends mt {
   // habillage du cadran analogique — "aurore"
   // (défaut, dégradé turquoise/bleu/violet), "mono", "clair", "neon",
   // "ardoise", "corail", "grenat", "prisme", "atlas", "carbone" ou
-  // "soleil" (cf. src/analog-styles.js pour le détail de chacun).
+  // "soleil" (cf. src/analog-styles.js pour le détail de chacun). Plus 4
+  // clés "*_night" ("aurore_night", "corail_night", "atlas_night",
+  // "soleil_night") qui prévisualisent le mode nuit dédié de ces 4
+  // styles en permanence, jour comme nuit — pratique pour les tester
+  // sans attendre la vraie nuit.
   // Valeur spéciale "auto" : choisit automatiquement un style différent
   // chaque jour de la semaine (lundi -> "aurore", mardi -> "ardoise",
   // etc., cf. WEEKDAY_ANALOG_STYLES dans analog-styles.js) — recalculé à

@@ -42,7 +42,12 @@ déjà la luminosité tout seul) pour rester lisible à table le soir — là o�
 les styles sans cette identité propre retombent sur le traitement nuit
 uniforme habituel (rouge très atténué) :
 
-![aurore, corail et atlas en mode nuit](../packages/echo-home-card/docs/screenshot-round-analog-concepts-night.png)
+![aurore_night, corail_night, atlas_night et soleil_night, les clés de prévisualisation du mode nuit](../packages/echo-home-card/docs/screenshot-round-analog-concepts-night.png)
+
+Chacun de ces 4 styles a une clé `*_night` dédiée (`aurore_night`,
+`corail_night`, `atlas_night`, `soleil_night`) pour prévisualiser son
+mode nuit sans attendre la vraie nuit — détail complet dans le tableau
+"Horloge analogique" du [README](../packages/echo-home-card/README.md#horloge-analogique).
 
 ## Deux mises en page
 
@@ -64,10 +69,13 @@ le README complet.
 
 ## Mode nuit
 
-Piloté par l'attribut `mode` de l'entité satellite View Assist (pas une
-config à part) : fond quasi noir, informations superflues masquées
-(météo, date, bouton de bascule), très peu de lumière émise — pensé pour
-un écran de chevet. Voir
+Par défaut, piloté par l'attribut `mode` de l'entité satellite View
+Assist — mais `night_mode_entity` permet de brancher une source plus
+simple à la place (entité `sun.*`, ou n'importe quelle entité
+booléenne) si cet attribut est pénible à localiser selon l'intégration
+installée. Dans les deux cas : fond quasi noir, informations superflues
+masquées (météo, date, bouton de bascule), très peu de lumière émise —
+pensé pour un écran de chevet. Voir
 [Mode nuit](../packages/echo-home-card/README.md#mode-nuit).
 
 ## Statut

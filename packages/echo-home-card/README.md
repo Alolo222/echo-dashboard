@@ -366,9 +366,11 @@ que de valeur de départ, écrasée dès le premier tap sur le bouton.
 
 Onze habillages du cadran lui-même, choisis via `analog_style` dans la
 config (pas de bouton pour celui-ci — un seul style par installation) :
-cinq styles "classiques", et six styles à thème libre — sept en comptant
-`soleil`, calés un par jour de la semaine via `analog_style: auto` (voir
-plus bas).
+cinq styles "classiques" et six styles à thème libre, dont sept (deux
+classiques + cinq libres) calés un par jour de la semaine via
+`analog_style: auto` (voir plus bas). Quatre d'entre eux ont en plus une
+clé `*_night` dédiée pour prévisualiser leur mode nuit sans attendre la
+vraie nuit (voir plus bas).
 
 ![Les cinq styles classiques du cadran analogique](docs/screenshot-round-analog-styles.png)
 
@@ -405,35 +407,40 @@ mercredi `corail`, jeudi `grenat`, vendredi `prisme`, samedi `atlas`
 permuter).
 
 Certains styles gardent une identité propre même la nuit plutôt que le
-traitement nuit uniforme habituel (voir plus bas) — et contrairement à
-un premier essai, ces nuits restent **vibrantes** plutôt qu'atténuées :
-l'appareil baisse déjà la luminosité tout seul la nuit, pas besoin de
-désaturer le design en plus, il doit surtout rester facile à lire à
-table le soir. Trois formes possibles : un recolorage simple atténué
-(`soleil`), une bascule vers un autre style affiché tel quel (`ardoise`
-→ `carbone`, `grenat` → `mono`, `prisme` → `neon`), ou un concept de nuit
-complet, indépendant du style de jour :
+traitement nuit uniforme habituel (fond quasi noir, rouge très atténué —
+voir [Mode nuit](#mode-nuit) plus haut) — et contrairement à un premier
+essai, ces nuits restent **vibrantes** plutôt qu'atténuées : l'appareil
+baisse déjà la luminosité tout seul la nuit, pas besoin de désaturer le
+design en plus, il doit surtout rester facile à lire à table le soir.
 
-![aurore (Aurore Boréale), corail (Bioluminescence), atlas (Chandelle) en mode nuit](docs/screenshot-round-analog-concepts-night.png)
+| Style (jour) | La nuit | Prévisualiser sans attendre la nuit |
+|---|---|---|
+| `aurore` | concept dédié **Aurore Boréale** — une teinte par aiguille, aucune graduation | `analog_style: aurore_night` |
+| `corail` | concept dédié **Bioluminescence** — graduations de taille/éclat irréguliers | `analog_style: corail_night` |
+| `atlas` | concept dédié **Chandelle** — aiguilles fines, graduations en flamme vacillante | `analog_style: atlas_night` |
+| `soleil` | concept dédié **Braises** — recolorage indigo/ambre du même dégradé | `analog_style: soleil_night` |
+| `ardoise` | bascule, affiché tel quel en `carbone` | `analog_style: carbone` |
+| `grenat` | bascule, affiché tel quel en `mono` | `analog_style: mono` |
+| `prisme` | bascule, affiché tel quel en `neon` | `analog_style: neon` |
+| `mono`, `clair`, `neon`, `carbone` | traitement nuit standard (fond quasi noir, rouge très atténué) | — |
 
-- **Aurore Boréale** (`aurore`) : une teinte différente par aiguille
-  (cyan/vert/violet), aucune graduation.
-- **Bioluminescence** (`corail`) : graduations de taille et d'éclat
-  irréguliers, comme des organismes qui s'allument plus ou moins fort.
-- **Chandelle** (`atlas`) : aiguilles en lame effilée, graduations à
-  opacité vacillante façon flamme.
+![aurore_night (Aurore Boréale), corail_night (Bioluminescence), atlas_night (Chandelle), soleil_night (Braises)](docs/screenshot-round-analog-concepts-night.png)
 
-Le mode nuit dépend de l'entité `satellite_entity` (voir plus bas) — pas
-pratique pour prévisualiser un thème sans attendre la vraie nuit. Ces 3
-concepts sont donc aussi exposés en clé à part, sélectionnable comme
-n'importe quel autre style : `aurore_night`, `corail_night`,
-`atlas_night` (et `soleil_night` pour le recolorage simple) restent
-identiques à eux-mêmes jour comme nuit, pratiques pour les tester
-directement :
+Les 4 styles avec un concept dédié ou un recolorage (ci-dessus) sont donc
+aussi exposés en clé à part `*_night`, sélectionnable comme n'importe
+quel autre style — pratique pour les tester sans attendre la vraie nuit
+ni forcer `satellite_entity`/`night_mode_entity` :
 
 ```yaml
 analog_style: atlas_night   # affiche "Chandelle" en permanence, pour tester
 ```
+
+Ces 4 clés `aurore_night`/`corail_night`/`atlas_night`/`soleil_night`
+restent identiques à elles-mêmes jour comme nuit. À l'inverse,
+`carbone`/`mono`/`neon` restent leurs styles de jour normaux,
+sélectionnables tels quels : `ardoise`/`grenat`/`prisme` en empruntent
+juste l'apparence la nuit, ils ne "deviennent" pas ces styles pour de
+bon.
 
 Le fond par défaut de chaque style se personnalise avec l'option
 `analog_background` (voir [Configuration complète](#configuration-complète))
