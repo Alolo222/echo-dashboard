@@ -8,6 +8,14 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.4.0
+
+`echo-player-card` passe à 0.2.0 : recherche tactile sur l'anneau de
+progression en mise en page `round` (Echo Spot), et boutons/texte
+agrandis d'environ 25-30 % dans cette même mise en page. Détail complet
+dans
+[packages/echo-player-card/CHANGELOG.md](packages/echo-player-card/CHANGELOG.md#020).
+
 ## 1.3.1
 
 Documentation uniquement, aucun changement de code/dist : nouvelle

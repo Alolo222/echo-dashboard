@@ -25,6 +25,9 @@ class EchoPlayerCard extends LitElement {
     // l'intégration ne fournit pas une URL différente (cf. _hasArt)
     _sourcesOpen: { state: true },
     _groupOpen: { state: true },
+    _seekDragFrac: { state: true }, // 0-1 position while dragging the round ring
+    // (see _renderRound/_onRingPointer*) - null when not dragging, so the ring
+    // falls back to the real, HA-reported position.
   };
 
   constructor() {
@@ -32,6 +35,7 @@ class EchoPlayerCard extends LitElement {
     this._artFailedUrl = null;
     this._sourcesOpen = false;
     this._groupOpen = false;
+    this._seekDragFrac = null;
   }
 
   // Aucune entité n'est requise pour que setConfig réussisse — sans
@@ -195,6 +199,50 @@ class EchoPlayerCard extends LitElement {
       seek_position: Number(event.target.value),
     });
   }
+
+  // Recherche tactile sur l'anneau (mode round) — le range HTML natif de
+  // _renderProgress (mise en page large) n'a pas d'équivalent circulaire,
+  // donc drag au doigt géré à la main via Pointer Events : down capture le
+  // pointeur sur l'anneau et fige _seekDragFrac (le rendu suit alors le
+  // doigt, pas l'état HA réel) ; move met à jour cette fraction ; up envoie
+  // le seek réel puis relâche - un seul appel de service en fin de geste,
+  // pas un par pixel (même logique que l'input range en large : @change,
+  // pas @input). setPointerCapture sur down garantit que move/up
+  // continuent d'arriver même si le doigt sort du cercle en cours de
+  // geste (comportement standard d'un slider).
+  _onRingPointerDown(stateObj, event) {
+    if (!this._supports(stateObj, FEATURE.SEEK)) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    this._seekDragFrac = this._fracFromPointerEvent(event);
+  }
+  _onRingPointerMove(event) {
+    if (this._seekDragFrac == null) return;
+    this._seekDragFrac = this._fracFromPointerEvent(event);
+  }
+  _onRingPointerUp(stateObj, event) {
+    if (this._seekDragFrac == null) return;
+    const duration = stateObj.attributes.media_duration;
+    const frac = this._seekDragFrac;
+    this._seekDragFrac = null;
+    if (duration != null) {
+      this._call("media_player", "media_seek", stateObj.entity_id, {
+        seek_position: frac * duration,
+      });
+    }
+  }
+  // Angle depuis midi (12h), sens horaire, normalisé en fraction 0-1 - même
+  // convention que le remplissage de l'anneau (stroke-dasharray sur un
+  // cercle tourné de -90deg, cf. styles). atan2(dx, -dy) plutôt que le
+  // atan2(dy, dx) habituel : place directement le zéro en haut et fait
+  // croître l'angle dans le sens horaire, sans étape de conversion en plus.
+  _fracFromPointerEvent(event) {
+    const rect = event.currentTarget.closest("svg").getBoundingClientRect();
+    const dx = event.clientX - (rect.left + rect.width / 2);
+    const dy = event.clientY - (rect.top + rect.height / 2);
+    let angle = Math.atan2(dx, -dy);
+    if (angle < 0) angle += 2 * Math.PI;
+    return angle / (2 * Math.PI);
+  }
   _selectSource(stateObj, source) {
     this._call("media_player", "select_source", stateObj.entity_id, { source });
     this._sourcesOpen = false;
@@ -265,7 +313,17 @@ class EchoPlayerCard extends LitElement {
     const hasArt = this._hasArt(stateObj);
     const duration = attrs.media_duration;
     const position = currentPosition(stateObj);
-    const frac = duration ? Math.min(1, (position || 0) / duration) : 0;
+    const seekable = this._supports(stateObj, FEATURE.SEEK) && duration != null;
+    // Pendant un drag, l'anneau et le temps affiché suivent le doigt
+    // (_seekDragFrac), pas l'état HA réel - qui ne bouge de toute façon pas
+    // avant le _seek envoyé au relâchement (cf. _onRingPointerUp).
+    const dragging = seekable && this._seekDragFrac != null;
+    const frac = dragging
+      ? this._seekDragFrac
+      : duration
+        ? Math.min(1, (position || 0) / duration)
+        : 0;
+    const displayPosition = dragging ? frac * duration : position;
 
     return html`
       <div class="art-layer ${hasArt ? "" : "no-art"}">
@@ -279,7 +337,7 @@ class EchoPlayerCard extends LitElement {
           : this._renderVinyl(isPlaying)}
       </div>
       ${hasArt ? html`<div class="scrim"></div>` : nothing}
-      <svg class="ring" viewBox="0 0 100 100">
+      <svg class="ring ${dragging ? "dragging" : ""}" viewBox="0 0 100 100">
         <circle class="track" cx="50" cy="50" r="48" pathLength="100"></circle>
         <circle
           class="fill"
@@ -289,10 +347,24 @@ class EchoPlayerCard extends LitElement {
           pathLength="100"
           style="stroke-dasharray:${(frac * 100).toFixed(2)} 100"
         ></circle>
+        ${seekable
+          ? html`<circle
+              class="hit-area"
+              cx="50"
+              cy="50"
+              r="48"
+              pathLength="100"
+              aria-label="Position de lecture"
+              @pointerdown=${(e) => this._onRingPointerDown(stateObj, e)}
+              @pointermove=${(e) => this._onRingPointerMove(e)}
+              @pointerup=${(e) => this._onRingPointerUp(stateObj, e)}
+              @pointercancel=${(e) => this._onRingPointerUp(stateObj, e)}
+            ></circle>`
+          : nothing}
       </svg>
       <div class="content">
         ${duration != null
-          ? html`<span class="time">${formatDuration(position)} / ${formatDuration(duration)}</span>`
+          ? html`<span class="time">${formatDuration(displayPosition)} / ${formatDuration(duration)}</span>`
           : nothing}
         <div class="track-title">${attrs.media_title || "—"}</div>
         ${attrs.media_artist ? html`<div class="track-artist">${attrs.media_artist}</div>` : nothing}
@@ -854,6 +926,25 @@ class EchoPlayerCard extends LitElement {
       transform-origin: 50% 50%;
       transition: stroke-dasharray 1s linear;
     }
+    /* Pendant un drag, le doigt doit être suivi immédiatement : la
+       transition normale (qui lisse l'avancée automatique entre deux
+       updates HA) donnerait un anneau "en retard" sur le geste. */
+    .card.round .ring.dragging .fill {
+      transition: none;
+    }
+    /* Cercle invisible plus épais que le trait visible, posé par-dessus
+       l'anneau pour agrandir la zone tactile réellement saisissable au
+       doigt (2.2 de trait est bien trop fin à viser sur un écran rond de
+       montre/Echo Spot). pointer-events: stroke plutôt que "all" pour
+       ne capter que la bande de l'anneau, pas tout le disque intérieur
+       (qui doit rester cliquable pour play/pause au centre). */
+    .card.round .ring .hit-area {
+      stroke: transparent;
+      stroke-width: 22;
+      pointer-events: stroke;
+      cursor: grab;
+      touch-action: none;
+    }
     .card.round .content {
       position: absolute;
       left: 0;
@@ -868,13 +959,13 @@ class EchoPlayerCard extends LitElement {
       text-align: center;
     }
     .card.round .time {
-      font-size: 0.68rem;
+      font-size: 0.85rem;
       color: rgba(255, 255, 255, 0.55);
       margin-bottom: 2px;
     }
     .card.round .track-title {
       font-weight: 600;
-      font-size: clamp(0.95rem, 4.6vw, 1.15rem);
+      font-size: clamp(1.15rem, 5.6vw, 1.4rem);
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
@@ -886,24 +977,24 @@ class EchoPlayerCard extends LitElement {
       font-weight: 500;
     }
     .card.round .track-artist {
-      font-size: 0.78rem;
+      font-size: 0.95rem;
       color: rgba(255, 255, 255, 0.72);
     }
     .card.round .transport {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 18px;
       margin-top: 6px;
     }
     .card.round .ctrl.small {
-      width: 30px;
-      height: 30px;
-      font-size: 15px;
+      width: 38px;
+      height: 38px;
+      font-size: 19px;
     }
     .card.round .ctrl.play {
-      width: 46px;
-      height: 46px;
-      font-size: 22px;
+      width: 58px;
+      height: 58px;
+      font-size: 28px;
       background: #fff;
       color: #14100c;
       border: none;

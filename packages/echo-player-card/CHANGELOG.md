@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+Mise en page `round` (Echo Spot) : recherche tactile sur l'anneau de
+progression (glisser le doigt le long de l'anneau pour choisir la
+position de lecture, comme le slider de la mise en page large — seek
+au relâchement du doigt, uniquement si l'intégration le supporte) ;
+boutons de transport et texte (titre, artiste, temps) agrandis
+d'environ 25-30 % pour rester lisibles/atteignables sur le petit écran
+rond.
+
 ## 0.1.0
 
 Première version.
