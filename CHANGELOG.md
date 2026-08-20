@@ -8,6 +8,16 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.4.1
+
+`echo-player-card` passe à 0.2.1 : la recherche tactile sur l'anneau
+round (ajoutée en 0.2.0) ne fonctionnait en réalité pas du tout sur la
+WebView système d'un Echo Spot — remplacée par une zone tactile HTML
+avec repli Touch Events, vérifiée par un test DOM automatisé. Texte
+encore agrandi, pochette légèrement en retrait de l'anneau plutôt que
+pleine cadre. Détail complet dans
+[packages/echo-player-card/CHANGELOG.md](packages/echo-player-card/CHANGELOG.md#021).
+
 ## 1.4.0
 
 `echo-player-card` passe à 0.2.0 : recherche tactile sur l'anneau de

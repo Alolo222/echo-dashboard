@@ -202,24 +202,64 @@ class EchoPlayerCard extends LitElement {
 
   // Recherche tactile sur l'anneau (mode round) — le range HTML natif de
   // _renderProgress (mise en page large) n'a pas d'équivalent circulaire,
-  // donc drag au doigt géré à la main via Pointer Events : down capture le
-  // pointeur sur l'anneau et fige _seekDragFrac (le rendu suit alors le
-  // doigt, pas l'état HA réel) ; move met à jour cette fraction ; up envoie
-  // le seek réel puis relâche - un seul appel de service en fin de geste,
-  // pas un par pixel (même logique que l'input range en large : @change,
-  // pas @input). setPointerCapture sur down garantit que move/up
-  // continuent d'arriver même si le doigt sort du cercle en cours de
-  // geste (comportement standard d'un slider).
+  // donc drag au doigt géré à la main : down fige _seekDragFrac (le rendu
+  // suit alors le doigt, pas l'état HA réel) ; move met à jour cette
+  // fraction ; l'arrêt du geste envoie le seek réel puis relâche - un
+  // seul appel de service en fin de geste, pas un par pixel (même logique
+  // que l'input range en large : @change, pas @input).
+  //
+  // Pointer Events *et* Touch Events, en double, sur la même zone : la
+  // cible n'est plus une forme SVG (cf. _renderRound, hit-area est
+  // maintenant un <div> HTML superposé) car pointer-events/setPointerCapture
+  // sur un élément SVG s'est avéré peu fiable sur la WebView système d'un
+  // Echo Spot sous LineageOS (pas de mise à jour WebView via Play Store) -
+  // le geste ne déclenchait tout simplement rien. Touch Events est l'API
+  // historique, plus largement supportée ; on la garde en repli même si
+  // Pointer Events fonctionne ailleurs, plutôt que de parier sur un seul
+  // mécanisme pour un appareil qu'on ne peut pas tester nous-même.
   _onRingPointerDown(stateObj, event) {
     if (!this._supports(stateObj, FEATURE.SEEK)) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    this._seekDragFrac = this._fracFromPointerEvent(event);
+    // setPointerCapture peut ne pas exister/échouer silencieusement selon
+    // la WebView - le drag reste fonctionnel sans lui tant que le doigt ne
+    // sort pas de la zone (le fallback touch ci-dessous n'en a pas besoin).
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    this._seekDragFrac = this._fracFromPoint(event.currentTarget, event.clientX, event.clientY);
   }
   _onRingPointerMove(event) {
     if (this._seekDragFrac == null) return;
-    this._seekDragFrac = this._fracFromPointerEvent(event);
+    this._seekDragFrac = this._fracFromPoint(event.currentTarget, event.clientX, event.clientY);
   }
   _onRingPointerUp(stateObj, event) {
+    this._commitSeek(stateObj);
+  }
+  // pointercancel = geste repris par autre chose (ex: scroll de la page) -
+  // on abandonne sans envoyer de seek plutôt que de committer une position
+  // potentiellement issue d'un dernier move non représentatif du doigt.
+  _onRingPointerCancel() {
+    this._seekDragFrac = null;
+  }
+
+  _onRingTouchStart(stateObj, event) {
+    if (!this._supports(stateObj, FEATURE.SEEK)) return;
+    event.preventDefault();
+    const t = event.touches[0];
+    this._seekDragFrac = this._fracFromPoint(event.currentTarget, t.clientX, t.clientY);
+  }
+  _onRingTouchMove(event) {
+    if (this._seekDragFrac == null) return;
+    event.preventDefault();
+    const t = event.touches[0];
+    this._seekDragFrac = this._fracFromPoint(event.currentTarget, t.clientX, t.clientY);
+  }
+  _onRingTouchEnd(stateObj, event) {
+    event.preventDefault();
+    this._commitSeek(stateObj);
+  }
+  _onRingTouchCancel() {
+    this._seekDragFrac = null;
+  }
+
+  _commitSeek(stateObj) {
     if (this._seekDragFrac == null) return;
     const duration = stateObj.attributes.media_duration;
     const frac = this._seekDragFrac;
@@ -235,10 +275,12 @@ class EchoPlayerCard extends LitElement {
   // cercle tourné de -90deg, cf. styles). atan2(dx, -dy) plutôt que le
   // atan2(dy, dx) habituel : place directement le zéro en haut et fait
   // croître l'angle dans le sens horaire, sans étape de conversion en plus.
-  _fracFromPointerEvent(event) {
-    const rect = event.currentTarget.closest("svg").getBoundingClientRect();
-    const dx = event.clientX - (rect.left + rect.width / 2);
-    const dy = event.clientY - (rect.top + rect.height / 2);
+  // Indépendant du rayon (seul l'angle compte) : peu importe où sur le
+  // disque le doigt appuie, pas seulement sur le trait de l'anneau lui-même.
+  _fracFromPoint(el, clientX, clientY) {
+    const rect = el.getBoundingClientRect();
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
     let angle = Math.atan2(dx, -dy);
     if (angle < 0) angle += 2 * Math.PI;
     return angle / (2 * Math.PI);
@@ -347,21 +389,25 @@ class EchoPlayerCard extends LitElement {
           pathLength="100"
           style="stroke-dasharray:${(frac * 100).toFixed(2)} 100"
         ></circle>
-        ${seekable
-          ? html`<circle
-              class="hit-area"
-              cx="50"
-              cy="50"
-              r="48"
-              pathLength="100"
-              aria-label="Position de lecture"
-              @pointerdown=${(e) => this._onRingPointerDown(stateObj, e)}
-              @pointermove=${(e) => this._onRingPointerMove(e)}
-              @pointerup=${(e) => this._onRingPointerUp(stateObj, e)}
-              @pointercancel=${(e) => this._onRingPointerUp(stateObj, e)}
-            ></circle>`
-          : nothing}
       </svg>
+      ${seekable
+        ? html`<div
+            class="hit-area"
+            role="slider"
+            aria-label="Position de lecture"
+            aria-valuemin="0"
+            aria-valuemax=${duration}
+            aria-valuenow=${Math.round(displayPosition || 0)}
+            @pointerdown=${(e) => this._onRingPointerDown(stateObj, e)}
+            @pointermove=${(e) => this._onRingPointerMove(e)}
+            @pointerup=${(e) => this._onRingPointerUp(stateObj, e)}
+            @pointercancel=${() => this._onRingPointerCancel()}
+            @touchstart=${(e) => this._onRingTouchStart(stateObj, e)}
+            @touchmove=${(e) => this._onRingTouchMove(e)}
+            @touchend=${(e) => this._onRingTouchEnd(stateObj, e)}
+            @touchcancel=${() => this._onRingTouchCancel()}
+          ></div>`
+        : nothing}
       <div class="content">
         ${duration != null
           ? html`<span class="time">${formatDuration(displayPosition)} / ${formatDuration(duration)}</span>`
@@ -890,9 +936,20 @@ class EchoPlayerCard extends LitElement {
     .card.round {
       background: radial-gradient(130% 140% at 18% -10%, #24406a 0%, #14233c 45%, #0a1424 100%);
     }
+    /* Pochette (et vinyle de repli) légèrement en retrait de l'anneau
+       plutôt que pleine cadre jusqu'au bord de la carte : inset 4.5%
+       donne un disque dont le bord tombe juste à l'intérieur du bord
+       intérieur de l'anneau (~46.9/50, cf. .ring .track/.fill r=48
+       stroke-width 2.2), avec un léger espace visible entre les deux.
+       border-radius + overflow: hidden ici (plutôt que compter sur le
+       clip circulaire de .card, qui touche le bord exact de la carte)
+       pour que ce nouveau disque plus petit garde sa propre forme ronde,
+       image comme vinyle. */
     .card.round .art-layer {
       position: absolute;
-      inset: 0;
+      inset: 4.5%;
+      border-radius: 50%;
+      overflow: hidden;
     }
     .card.round .art-img {
       position: absolute;
@@ -932,16 +989,19 @@ class EchoPlayerCard extends LitElement {
     .card.round .ring.dragging .fill {
       transition: none;
     }
-    /* Cercle invisible plus épais que le trait visible, posé par-dessus
-       l'anneau pour agrandir la zone tactile réellement saisissable au
-       doigt (2.2 de trait est bien trop fin à viser sur un écran rond de
-       montre/Echo Spot). pointer-events: stroke plutôt que "all" pour
-       ne capter que la bande de l'anneau, pas tout le disque intérieur
-       (qui doit rester cliquable pour play/pause au centre). */
-    .card.round .ring .hit-area {
-      stroke: transparent;
-      stroke-width: 22;
-      pointer-events: stroke;
+    /* Zone tactile de la recherche : un <div> HTML plein disque plutôt
+       qu'une forme SVG (cf. render) - seul l'angle compte pour le calcul
+       de position (_fracFromPoint), pas le rayon, donc pas besoin de
+       limiter la zone à la bande de l'anneau elle-même. z-index 1 comme
+       .ring (peint au-dessus grâce à l'ordre du DOM) mais toujours
+       en-dessous de .content (z-index 2) : les boutons/texte du centre
+       restent cliquables normalement, cette zone ne les recouvre pas
+       visuellement en priorité. */
+    .card.round .hit-area {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      z-index: 1;
       cursor: grab;
       touch-action: none;
     }
@@ -959,13 +1019,13 @@ class EchoPlayerCard extends LitElement {
       text-align: center;
     }
     .card.round .time {
-      font-size: 0.85rem;
+      font-size: 1.3rem;
       color: rgba(255, 255, 255, 0.55);
       margin-bottom: 2px;
     }
     .card.round .track-title {
       font-weight: 600;
-      font-size: clamp(1.15rem, 5.6vw, 1.4rem);
+      font-size: clamp(1.7rem, 8.4vw, 2.1rem);
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
@@ -977,7 +1037,7 @@ class EchoPlayerCard extends LitElement {
       font-weight: 500;
     }
     .card.round .track-artist {
-      font-size: 0.95rem;
+      font-size: 1.4rem;
       color: rgba(255, 255, 255, 0.72);
     }
     .card.round .transport {

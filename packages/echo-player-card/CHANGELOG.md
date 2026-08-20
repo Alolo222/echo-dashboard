@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.1
+
+Suite aux retours sur 0.2.0, mise en page `round` (Echo Spot) :
+
+- **Recherche tactile enfin fonctionnelle.** La zone tactile de 0.2.0
+  était une forme SVG (`<circle>` + `pointer-events: stroke`) : le geste
+  ne déclenchait rien du tout sur la WebView système d'un Echo Spot sous
+  LineageOS (pas de mise à jour WebView via Play Store). Remplacée par
+  un `<div>` HTML classique superposé à l'anneau, avec Pointer Events
+  *et* Touch Events en repli l'un de l'autre (Touch Events étant l'API
+  historique, plus largement supportée). Vérifié par un test DOM réel
+  (happy-dom) simulant les deux séquences de gestes de bout en bout,
+  jusqu'à l'appel `media_seek`.
+- **Texte encore agrandi** (~1.5× par rapport à 0.2.0) : temps, titre,
+  artiste.
+- **Pochette légèrement en retrait de l'anneau** plutôt que pleine cadre
+  jusqu'au bord de la carte — laisse un espace visible entre le disque
+  et l'anneau de progression, comme demandé.
+
 ## 0.2.0
 
 Mise en page `round` (Echo Spot) : recherche tactile sur l'anneau de
