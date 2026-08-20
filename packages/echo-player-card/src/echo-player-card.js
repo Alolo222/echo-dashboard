@@ -6,6 +6,14 @@ import { formatDuration, formatClockTime, currentPosition } from "./format.js";
 // fois ici, pas besoin de l'exposer plus largement.
 const SELECT_SOURCE = 2048;
 
+// Pont CoqPit (mass-bridge-plan.md) : au-delà de ce délai sans nouvelle
+// poussée d'état natif, on considère le pont silencieusement mort et on
+// retombe sur hass plutôt que de garder un dernier état figé à l'écran.
+// Généreux par rapport au rythme normal des poussées metadata@v1 (à chaque
+// server/state, largement plus fréquent que ça en lecture) - un vrai
+// garde-fou, pas un mécanisme de fraîcheur fin.
+const BRIDGE_STALE_MS = 20_000;
+
 // Réplique en vraie carte Lit du lecteur média View Assist par défaut
 // (custom:button-card qui agrandit la carte native `media-control` de
 // Lovelace en plein écran sur fond noir) — même rôle, mais dans le
@@ -28,6 +36,9 @@ class EchoPlayerCard extends LitElement {
     _seekDragFrac: { state: true }, // 0-1 position while dragging the round ring
     // (see _renderRound/_onRingPointer*) - null when not dragging, so the ring
     // falls back to the real, HA-reported position.
+    _bridgeState: { state: true }, // dernier état poussé par CoqPit (pont natif
+    // Sendspin/Music Assistant, cf. _onBridgeState) - null tant que rien n'est
+    // arrivé, ou hors de CoqPit (l'événement n'existe simplement jamais).
   };
 
   constructor() {
@@ -36,6 +47,10 @@ class EchoPlayerCard extends LitElement {
     this._sourcesOpen = false;
     this._groupOpen = false;
     this._seekDragFrac = null;
+    this._bridgeState = null;
+    this._bridgeStateAt = 0; // pas une propriété réactive (Date.now(), pas de
+    // sens à re-rendre dessus) - seulement lue pour juger la fraîcheur
+    this._onBridgeStateBound = this._onBridgeState.bind(this);
   }
 
   // Aucune entité n'est requise pour que setConfig réussisse — sans
@@ -110,17 +125,54 @@ class EchoPlayerCard extends LitElement {
     this._positionTimer = setInterval(() => {
       if (this._stateObj()?.state === "playing") this.requestUpdate();
     }, 1000);
+    // Pont CoqPit (mass-bridge-plan.md) : un CustomEvent sur `window`, pas un
+    // canal propre à la carte - au cas où plusieurs instances de la carte
+    // coexistent (peu probable mais pas exclu) elles écoutent chacune, et si
+    // aucune n'est montée l'événement natif ne fait juste rien (dispatchEvent
+    // sur window est un no-op sans listener). N'existe que dans la WebView
+    // CoqPit ; ailleurs (HA depuis un navigateur, l'appli HA mobile...)
+    // l'événement n'est simplement jamais émis - _bridgeState reste null pour
+    // toujours, _stateObj() retombe alors sur hass sans branche spéciale.
+    window.addEventListener("coqpit-player-state", this._onBridgeStateBound);
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     clearInterval(this._positionTimer);
+    window.removeEventListener("coqpit-player-state", this._onBridgeStateBound);
+  }
+
+  _onBridgeState(event) {
+    this._bridgeState = event.detail; // null = CoqPit a explicitement demandé
+    // d'oublier le pont (Sendspin déconnecté, cf. CustomWebView.pushPlayerState)
+    this._bridgeStateAt = Date.now();
+  }
+
+  // Fusionne l'état poussé par CoqPit par-dessus le stateObj HA normal, tant
+  // qu'il est raisonnablement frais - au-delà, on préfère retomber sur hass
+  // plutôt que de figer l'affichage indéfiniment sur une dernière valeur
+  // potentiellement obsolète si le natif s'arrête de pousser sans le signaler
+  // explicitement (garde-fou en plus du signal explicite de déconnexion).
+  //
+  // Hypothèse assumée : l'entité configurée (media_player_entity) EST le
+  // lecteur Sendspin de cet appareil-ci - vrai dans l'usage normal (un
+  // dashboard Echo affiche sa propre pièce), mais jamais vérifié côté carte
+  // (le pont ne transporte pas d'entity_id à comparer). Une carte configurée
+  // pour le lecteur d'une AUTRE pièce afficherait par erreur l'état de cet
+  // appareil-ci si jamais elle tournait dans une WebView CoqPit - situation
+  // jugée suffisamment improbable pour ne pas complexifier le pont avec une
+  // vérification d'identité pour l'instant.
+  _bridgeFresh() {
+    return this._bridgeState != null && Date.now() - this._bridgeStateAt < BRIDGE_STALE_MS;
   }
 
   _stateObj() {
-    return this._config?.media_player_entity
+    const real = this._config?.media_player_entity
       ? this._hass?.states[this._config.media_player_entity]
       : undefined;
+    if (!real || !this._bridgeFresh()) return real;
+    const { state: bridgeState, ...bridgeAttrs } = this._bridgeState;
+    return { ...real, state: bridgeState, attributes: { ...real.attributes, ...bridgeAttrs } };
   }
 
   set hass(hass) {
@@ -168,7 +220,43 @@ class EchoPlayerCard extends LitElement {
   }
 
   _call(domain, service, entityId, data) {
+    if (domain === "media_player" && this._sendBridgeCommand(service, data)) return;
     this._hass.callService(domain, service, { entity_id: entityId, ...(data || {}) });
+  }
+
+  // Pont CoqPit, sens carte -> natif (mass-bridge-plan.md) : traduit le petit
+  // sous-ensemble de services media_player que CoqPit sait relayer
+  // directement à Music Assistant (join/unjoin, select_source, shuffle_set,
+  // repeat_set n'ont pas d'équivalent recherché côté MA - ceux-là passent
+  // toujours par hass, comme avant). `verb`/`args` restent volontairement
+  // minimaux : c'est CustomWebView (natif) qui connaît le nom de commande
+  // MA exact et où mettre queue_id/player_id, pas la carte - si l'API MA
+  // change un jour, seul le natif a besoin d'être retouché.
+  //
+  // Retourne true si la commande est partie par le pont (pas de fallback
+  // hass), false sinon - _call retombe alors sur hass.callService comme
+  // avant. Fire-and-forget : aucune confirmation attendue ici, le prochain
+  // état (pont ou hass) est ce qui "corrige" l'affichage si jamais la
+  // commande n'a pas abouti côté MA.
+  _sendBridgeCommand(service, data) {
+    if (typeof window.ViewAssistApp?.sendEvent !== "function" || !this._bridgeFresh()) return false;
+    const verb = {
+      media_play_pause: "play_pause",
+      media_next_track: "next",
+      media_previous_track: "previous",
+      media_seek: "seek",
+      volume_set: "volume_set",
+    }[service];
+    if (!verb) return false;
+
+    const args = {};
+    if (service === "media_seek") args.position = Math.round(data.seek_position);
+    // HA/echo-player-card utilisent 0-1 (cf. le <input type=range min=0 max=1>
+    // de _renderVolume) ; l'API Music Assistant attend 0-100.
+    if (service === "volume_set") args.volume_level = Math.round(data.volume_level * 100);
+
+    window.ViewAssistApp.sendEvent("player_command", JSON.stringify({ verb, args }));
+    return true;
   }
 
   _playPause(stateObj) {

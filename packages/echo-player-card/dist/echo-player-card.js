@@ -6,7 +6,7 @@ var O = (n, e, t) => we(n, typeof e != "symbol" ? e + "" : e, t);
  * Copyright 2019 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const H = globalThis, X = H.ShadowRoot && (H.ShadyCSS === void 0 || H.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, J = Symbol(), Y = /* @__PURE__ */ new WeakMap();
+const L = globalThis, X = L.ShadowRoot && (L.ShadyCSS === void 0 || L.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype, J = Symbol(), Y = /* @__PURE__ */ new WeakMap();
 let ge = class {
   constructor(e, t, i) {
     if (this._$cssResult$ = !0, i !== J) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
@@ -25,7 +25,7 @@ let ge = class {
     return this.cssText;
   }
 };
-const ke = (n) => new ge(typeof n == "string" ? n : n + "", void 0, J), Ae = (n, ...e) => {
+const Ae = (n) => new ge(typeof n == "string" ? n : n + "", void 0, J), ke = (n, ...e) => {
   const t = n.length === 1 ? n[0] : e.reduce((i, r, s) => i + ((o) => {
     if (o._$cssResult$ === !0) return o.cssText;
     if (typeof o == "number") return o;
@@ -35,23 +35,23 @@ const ke = (n) => new ge(typeof n == "string" ? n : n + "", void 0, J), Ae = (n,
 }, Ee = (n, e) => {
   if (X) n.adoptedStyleSheets = e.map((t) => t instanceof CSSStyleSheet ? t : t.styleSheet);
   else for (const t of e) {
-    const i = document.createElement("style"), r = H.litNonce;
+    const i = document.createElement("style"), r = L.litNonce;
     r !== void 0 && i.setAttribute("nonce", r), i.textContent = t.cssText, n.appendChild(i);
   }
 }, Z = X ? (n) => n : (n) => n instanceof CSSStyleSheet ? ((e) => {
   let t = "";
   for (const i of e.cssRules) t += i.cssText;
-  return ke(t);
+  return Ae(t);
 })(n) : n;
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const { is: Se, defineProperty: Pe, getOwnPropertyDescriptor: Ce, getOwnPropertyNames: Te, getOwnPropertySymbols: Re, getPrototypeOf: ze } = Object, $ = globalThis, j = $.trustedTypes, Me = j ? j.emptyScript : "", V = $.reactiveElementPolyfillSupport, C = (n, e) => n, G = { toAttribute(n, e) {
+const { is: Se, defineProperty: Pe, getOwnPropertyDescriptor: Ce, getOwnPropertyNames: Te, getOwnPropertySymbols: Re, getPrototypeOf: Me } = Object, $ = globalThis, j = $.trustedTypes, ze = j ? j.emptyScript : "", V = $.reactiveElementPolyfillSupport, C = (n, e) => n, G = { toAttribute(n, e) {
   switch (e) {
     case Boolean:
-      n = n ? Me : null;
+      n = n ? ze : null;
       break;
     case Object:
     case Array:
@@ -79,7 +79,7 @@ const { is: Se, defineProperty: Pe, getOwnPropertyDescriptor: Ce, getOwnProperty
 } }, fe = (n, e) => !Se(n, e), ee = { attribute: !0, type: String, converter: G, reflect: !1, useDefault: !1, hasChanged: fe };
 var ce, de;
 (ce = Symbol.metadata) != null || (Symbol.metadata = Symbol("metadata")), (de = $.litPropertyMetadata) != null || ($.litPropertyMetadata = /* @__PURE__ */ new WeakMap());
-let A = class extends HTMLElement {
+let k = class extends HTMLElement {
   static addInitializer(e) {
     var t;
     this._$Ei(), ((t = this.l) != null ? t : this.l = []).push(e);
@@ -111,7 +111,7 @@ let A = class extends HTMLElement {
   }
   static _$Ei() {
     if (this.hasOwnProperty(C("elementProperties"))) return;
-    const e = ze(this);
+    const e = Me(this);
     e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
   }
   static finalize() {
@@ -288,15 +288,15 @@ let A = class extends HTMLElement {
   }
 };
 var he;
-A.elementStyles = [], A.shadowRootOptions = { mode: "open" }, A[C("elementProperties")] = /* @__PURE__ */ new Map(), A[C("finalized")] = /* @__PURE__ */ new Map(), V == null || V({ ReactiveElement: A }), ((he = $.reactiveElementVersions) != null ? he : $.reactiveElementVersions = []).push("2.1.2");
+k.elementStyles = [], k.shadowRootOptions = { mode: "open" }, k[C("elementProperties")] = /* @__PURE__ */ new Map(), k[C("finalized")] = /* @__PURE__ */ new Map(), V == null || V({ ReactiveElement: k }), ((he = $.reactiveElementVersions) != null ? he : $.reactiveElementVersions = []).push("2.1.2");
 /**
  * @license
  * Copyright 2017 Google LLC
  * SPDX-License-Identifier: BSD-3-Clause
  */
-const T = globalThis, te = (n) => n, L = T.trustedTypes, ie = L ? L.createPolicy("lit-html", { createHTML: (n) => n }) : void 0, me = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, ve = "?" + v, Ue = `<${ve}>`, k = document, z = () => k.createComment(""), M = (n) => n === null || typeof n != "object" && typeof n != "function", Q = Array.isArray, Ne = (n) => Q(n) || typeof (n == null ? void 0 : n[Symbol.iterator]) == "function", I = `[ 	
-\f\r]`, P = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, re = /-->/g, se = />/g, y = RegExp(`>|${I}(?:([^\\s"'>=/]+)(${I}*=${I}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`, "g"), oe = /'/g, ne = /"/g, $e = /^(?:script|style|textarea|title)$/i, De = (n) => (e, ...t) => ({ _$litType$: n, strings: e, values: t }), h = De(1), E = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), ae = /* @__PURE__ */ new WeakMap(), x = k.createTreeWalker(k, 129);
+const T = globalThis, te = (n) => n, H = T.trustedTypes, ie = H ? H.createPolicy("lit-html", { createHTML: (n) => n }) : void 0, me = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, ve = "?" + v, Ue = `<${ve}>`, A = document, M = () => A.createComment(""), z = (n) => n === null || typeof n != "object" && typeof n != "function", Q = Array.isArray, Ne = (n) => Q(n) || typeof (n == null ? void 0 : n[Symbol.iterator]) == "function", B = `[ 	
+\f\r]`, P = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, re = /-->/g, se = />/g, y = RegExp(`>|${B}(?:([^\\s"'>=/]+)(${B}*=${B}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g"), oe = /'/g, ne = /"/g, $e = /^(?:script|style|textarea|title)$/i, De = (n) => (e, ...t) => ({ _$litType$: n, strings: e, values: t }), h = De(1), E = Symbol.for("lit-noChange"), d = Symbol.for("lit-nothing"), ae = /* @__PURE__ */ new WeakMap(), x = A.createTreeWalker(A, 129);
 function ye(n, e) {
   if (!Q(n) || !n.hasOwnProperty("raw")) throw Error("invalid template strings array");
   return ie !== void 0 ? ie.createHTML(e) : e;
@@ -327,14 +327,14 @@ class U {
       if (r.nodeType === 1) {
         if (r.hasAttributes()) for (const c of r.getAttributeNames()) if (c.endsWith(me)) {
           const _ = p[o++], g = r.getAttribute(c).split(v), f = /([.?@])?(.*)/.exec(_);
-          a.push({ type: 1, index: s, name: f[2], strings: g, ctor: f[1] === "." ? Le : f[1] === "?" ? qe : f[1] === "@" ? Oe : q }), r.removeAttribute(c);
+          a.push({ type: 1, index: s, name: f[2], strings: g, ctor: f[1] === "." ? He : f[1] === "?" ? qe : f[1] === "@" ? Oe : q }), r.removeAttribute(c);
         } else c.startsWith(v) && (a.push({ type: 6, index: s }), r.removeAttribute(c));
         if ($e.test(r.tagName)) {
           const c = r.textContent.split(v), _ = c.length - 1;
           if (_ > 0) {
-            r.textContent = L ? L.emptyScript : "";
-            for (let g = 0; g < _; g++) r.append(c[g], z()), x.nextNode(), a.push({ type: 2, index: ++s });
-            r.append(c[_], z());
+            r.textContent = H ? H.emptyScript : "";
+            for (let g = 0; g < _; g++) r.append(c[g], M()), x.nextNode(), a.push({ type: 2, index: ++s });
+            r.append(c[_], M());
           }
         }
       } else if (r.nodeType === 8) if (r.data === ve) a.push({ type: 2, index: s });
@@ -346,7 +346,7 @@ class U {
     }
   }
   static createElement(e, t) {
-    const i = k.createElement("template");
+    const i = A.createElement("template");
     return i.innerHTML = e, i;
   }
 }
@@ -354,10 +354,10 @@ function S(n, e, t = n, i) {
   var o, l, a;
   if (e === E) return e;
   let r = i !== void 0 ? (o = t._$Co) == null ? void 0 : o[i] : t._$Cl;
-  const s = M(e) ? void 0 : e._$litDirective$;
+  const s = z(e) ? void 0 : e._$litDirective$;
   return (r == null ? void 0 : r.constructor) !== s && ((l = r == null ? void 0 : r._$AO) == null || l.call(r, !1), s === void 0 ? r = void 0 : (r = new s(n), r._$AT(n, t, i)), i !== void 0 ? ((a = t._$Co) != null ? a : t._$Co = [])[i] = r : t._$Cl = r), r !== void 0 && (e = S(n, r._$AS(n, e.values), r, i)), e;
 }
-class He {
+class Le {
   constructor(e, t) {
     this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
   }
@@ -369,7 +369,7 @@ class He {
   }
   u(e) {
     var u;
-    const { el: { content: t }, parts: i } = this._$AD, r = ((u = e == null ? void 0 : e.creationScope) != null ? u : k).importNode(t, !0);
+    const { el: { content: t }, parts: i } = this._$AD, r = ((u = e == null ? void 0 : e.creationScope) != null ? u : A).importNode(t, !0);
     x.currentNode = r;
     let s = x.nextNode(), o = 0, l = 0, a = i[0];
     for (; a !== void 0; ) {
@@ -379,7 +379,7 @@ class He {
       }
       o !== (a == null ? void 0 : a.index) && (s = x.nextNode(), o++);
     }
-    return x.currentNode = k, r;
+    return x.currentNode = A, r;
   }
   p(e) {
     let t = 0;
@@ -407,7 +407,7 @@ class N {
     return this._$AB;
   }
   _$AI(e, t = this) {
-    e = S(this, e, t), M(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== E && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ne(e) ? this.k(e) : this._(e);
+    e = S(this, e, t), z(e) ? e === d || e == null || e === "" ? (this._$AH !== d && this._$AR(), this._$AH = d) : e !== this._$AH && e !== E && this._(e) : e._$litType$ !== void 0 ? this.$(e) : e.nodeType !== void 0 ? this.T(e) : Ne(e) ? this.k(e) : this._(e);
   }
   O(e) {
     return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -416,14 +416,14 @@ class N {
     this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
   }
   _(e) {
-    this._$AH !== d && M(this._$AH) ? this._$AA.nextSibling.data = e : this.T(k.createTextNode(e)), this._$AH = e;
+    this._$AH !== d && z(this._$AH) ? this._$AA.nextSibling.data = e : this.T(A.createTextNode(e)), this._$AH = e;
   }
   $(e) {
     var s;
     const { values: t, _$litType$: i } = e, r = typeof i == "number" ? this._$AC(e) : (i.el === void 0 && (i.el = U.createElement(ye(i.h, i.h[0]), this.options)), i);
     if (((s = this._$AH) == null ? void 0 : s._$AD) === r) this._$AH.p(t);
     else {
-      const o = new He(r, this), l = o.u(this.options);
+      const o = new Le(r, this), l = o.u(this.options);
       o.p(t), this.T(l), this._$AH = o;
     }
   }
@@ -435,7 +435,7 @@ class N {
     Q(this._$AH) || (this._$AH = [], this._$AR());
     const t = this._$AH;
     let i, r = 0;
-    for (const s of e) r === t.length ? t.push(i = new N(this.O(z()), this.O(z()), this, this.options)) : i = t[r], i._$AI(s), r++;
+    for (const s of e) r === t.length ? t.push(i = new N(this.O(M()), this.O(M()), this, this.options)) : i = t[r], i._$AI(s), r++;
     r < t.length && (this._$AR(i && i._$AB.nextSibling, r), t.length = r);
   }
   _$AR(e = this._$AA.nextSibling, t) {
@@ -463,11 +463,11 @@ class q {
   _$AI(e, t = this, i, r) {
     const s = this.strings;
     let o = !1;
-    if (s === void 0) e = S(this, e, t, 0), o = !M(e) || e !== this._$AH && e !== E, o && (this._$AH = e);
+    if (s === void 0) e = S(this, e, t, 0), o = !z(e) || e !== this._$AH && e !== E, o && (this._$AH = e);
     else {
       const l = e;
       let a, u;
-      for (e = s[0], a = 0; a < s.length - 1; a++) u = S(this, l[i + a], t, a), u === E && (u = this._$AH[a]), o || (o = !M(u) || u !== this._$AH[a]), u === d ? e = d : e !== d && (e += (u != null ? u : "") + s[a + 1]), this._$AH[a] = u;
+      for (e = s[0], a = 0; a < s.length - 1; a++) u = S(this, l[i + a], t, a), u === E && (u = this._$AH[a]), o || (o = !z(u) || u !== this._$AH[a]), u === d ? e = d : e !== d && (e += (u != null ? u : "") + s[a + 1]), this._$AH[a] = u;
     }
     o && !r && this.j(e);
   }
@@ -475,7 +475,7 @@ class q {
     e === d ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e != null ? e : "");
   }
 }
-class Le extends q {
+class He extends q {
   constructor() {
     super(...arguments), this.type = 3;
   }
@@ -517,16 +517,16 @@ class Ve {
     S(this, e);
   }
 }
-const B = T.litHtmlPolyfillSupport;
+const I = T.litHtmlPolyfillSupport;
 var ue;
-B == null || B(U, N), ((ue = T.litHtmlVersions) != null ? ue : T.litHtmlVersions = []).push("3.3.3");
-const Ie = (n, e, t) => {
+I == null || I(U, N), ((ue = T.litHtmlVersions) != null ? ue : T.litHtmlVersions = []).push("3.3.3");
+const Be = (n, e, t) => {
   var s, o;
   const i = (s = t == null ? void 0 : t.renderBefore) != null ? s : e;
   let r = i._$litPart$;
   if (r === void 0) {
     const l = (o = t == null ? void 0 : t.renderBefore) != null ? o : null;
-    i._$litPart$ = r = new N(e.insertBefore(z(), l), l, void 0, t != null ? t : {});
+    i._$litPart$ = r = new N(e.insertBefore(M(), l), l, void 0, t != null ? t : {});
   }
   return r._$AI(n), r;
 };
@@ -536,7 +536,7 @@ const Ie = (n, e, t) => {
  * SPDX-License-Identifier: BSD-3-Clause
  */
 const w = globalThis;
-class R extends A {
+class R extends k {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
   }
@@ -547,7 +547,7 @@ class R extends A {
   }
   update(e) {
     const t = this.render();
-    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ie(t, this.renderRoot, this.renderOptions);
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Be(t, this.renderRoot, this.renderOptions);
   }
   connectedCallback() {
     var e;
@@ -633,7 +633,7 @@ function F(n) {
   const e = Math.floor(n), t = Math.floor(e / 3600), i = Math.floor(e % 3600 / 60), r = e % 60, s = (o) => String(o).padStart(2, "0");
   return t > 0 ? `${t}:${s(i)}:${s(r)}` : `${i}:${s(r)}`;
 }
-function Be(n, e, t) {
+function Ie(n, e, t) {
   const i = t === "12";
   try {
     return new Intl.DateTimeFormat(e, {
@@ -657,10 +657,10 @@ function le(n) {
   }
   return e.media_duration != null && (t = Math.min(t, e.media_duration)), Math.max(0, t);
 }
-const Ke = 2048;
+const Ke = 2048, Ge = 2e4;
 class W extends R {
   constructor() {
-    super(), this._artFailedUrl = null, this._sourcesOpen = !1, this._groupOpen = !1, this._seekDragFrac = null;
+    super(), this._artFailedUrl = null, this._sourcesOpen = !1, this._groupOpen = !1, this._seekDragFrac = null, this._bridgeState = null, this._bridgeStateAt = 0, this._onBridgeStateBound = this._onBridgeState.bind(this);
   }
   // Aucune entité n'est requise pour que setConfig réussisse — sans
   // media_player_entity, la carte affiche juste un état "aucun lecteur
@@ -695,14 +695,37 @@ class W extends R {
     super.connectedCallback(), this._positionTimer = setInterval(() => {
       var e;
       ((e = this._stateObj()) == null ? void 0 : e.state) === "playing" && this.requestUpdate();
-    }, 1e3);
+    }, 1e3), window.addEventListener("coqpit-player-state", this._onBridgeStateBound);
   }
   disconnectedCallback() {
-    super.disconnectedCallback(), clearInterval(this._positionTimer);
+    super.disconnectedCallback(), clearInterval(this._positionTimer), window.removeEventListener("coqpit-player-state", this._onBridgeStateBound);
+  }
+  _onBridgeState(e) {
+    this._bridgeState = e.detail, this._bridgeStateAt = Date.now();
+  }
+  // Fusionne l'état poussé par CoqPit par-dessus le stateObj HA normal, tant
+  // qu'il est raisonnablement frais - au-delà, on préfère retomber sur hass
+  // plutôt que de figer l'affichage indéfiniment sur une dernière valeur
+  // potentiellement obsolète si le natif s'arrête de pousser sans le signaler
+  // explicitement (garde-fou en plus du signal explicite de déconnexion).
+  //
+  // Hypothèse assumée : l'entité configurée (media_player_entity) EST le
+  // lecteur Sendspin de cet appareil-ci - vrai dans l'usage normal (un
+  // dashboard Echo affiche sa propre pièce), mais jamais vérifié côté carte
+  // (le pont ne transporte pas d'entity_id à comparer). Une carte configurée
+  // pour le lecteur d'une AUTRE pièce afficherait par erreur l'état de cet
+  // appareil-ci si jamais elle tournait dans une WebView CoqPit - situation
+  // jugée suffisamment improbable pour ne pas complexifier le pont avec une
+  // vérification d'identité pour l'instant.
+  _bridgeFresh() {
+    return this._bridgeState != null && Date.now() - this._bridgeStateAt < Ge;
   }
   _stateObj() {
-    var e, t;
-    return (e = this._config) != null && e.media_player_entity ? (t = this._hass) == null ? void 0 : t.states[this._config.media_player_entity] : void 0;
+    var r, s;
+    const e = (r = this._config) != null && r.media_player_entity ? (s = this._hass) == null ? void 0 : s.states[this._config.media_player_entity] : void 0;
+    if (!e || !this._bridgeFresh()) return e;
+    const { state: t, ...i } = this._bridgeState;
+    return { ...e, state: t, attributes: { ...e.attributes, ...i } };
   }
   set hass(e) {
     var p, c, _, g;
@@ -736,7 +759,35 @@ class W extends R {
     this._artFailedUrl = e;
   }
   _call(e, t, i, r) {
-    this._hass.callService(e, t, { entity_id: i, ...r || {} });
+    e === "media_player" && this._sendBridgeCommand(t, r) || this._hass.callService(e, t, { entity_id: i, ...r || {} });
+  }
+  // Pont CoqPit, sens carte -> natif (mass-bridge-plan.md) : traduit le petit
+  // sous-ensemble de services media_player que CoqPit sait relayer
+  // directement à Music Assistant (join/unjoin, select_source, shuffle_set,
+  // repeat_set n'ont pas d'équivalent recherché côté MA - ceux-là passent
+  // toujours par hass, comme avant). `verb`/`args` restent volontairement
+  // minimaux : c'est CustomWebView (natif) qui connaît le nom de commande
+  // MA exact et où mettre queue_id/player_id, pas la carte - si l'API MA
+  // change un jour, seul le natif a besoin d'être retouché.
+  //
+  // Retourne true si la commande est partie par le pont (pas de fallback
+  // hass), false sinon - _call retombe alors sur hass.callService comme
+  // avant. Fire-and-forget : aucune confirmation attendue ici, le prochain
+  // état (pont ou hass) est ce qui "corrige" l'affichage si jamais la
+  // commande n'a pas abouti côté MA.
+  _sendBridgeCommand(e, t) {
+    var s;
+    if (typeof ((s = window.ViewAssistApp) == null ? void 0 : s.sendEvent) != "function" || !this._bridgeFresh()) return !1;
+    const i = {
+      media_play_pause: "play_pause",
+      media_next_track: "next",
+      media_previous_track: "previous",
+      media_seek: "seek",
+      volume_set: "volume_set"
+    }[e];
+    if (!i) return !1;
+    const r = {};
+    return e === "media_seek" && (r.position = Math.round(t.seek_position)), e === "volume_set" && (r.volume_level = Math.round(t.volume_level * 100)), window.ViewAssistApp.sendEvent("player_command", JSON.stringify({ verb: i, args: r })), !0;
   }
   _playPause(e) {
     this._call("media_player", "media_play_pause", e.entity_id);
@@ -975,7 +1026,7 @@ class W extends R {
             <ha-icon icon="mdi:speaker"></ha-icon>
             <span>${r.friendly_name || ""}</span>
           </div>
-          ${i.show_clock ? h`<span class="clock">${Be(/* @__PURE__ */ new Date(), u, p)}</span>` : d}
+          ${i.show_clock ? h`<span class="clock">${Ie(/* @__PURE__ */ new Date(), u, p)}</span>` : d}
         </div>
         <div class="title-block">
           ${c ? h`<span class="eyebrow-src">${c}</span>` : d}
@@ -1194,11 +1245,15 @@ O(W, "properties", {
   // l'intégration ne fournit pas une URL différente (cf. _hasArt)
   _sourcesOpen: { state: !0 },
   _groupOpen: { state: !0 },
-  _seekDragFrac: { state: !0 }
+  _seekDragFrac: { state: !0 },
   // 0-1 position while dragging the round ring
   // (see _renderRound/_onRingPointer*) - null when not dragging, so the ring
   // falls back to the real, HA-reported position.
-}), O(W, "styles", Ae`
+  _bridgeState: { state: !0 }
+  // dernier état poussé par CoqPit (pont natif
+  // Sendspin/Music Assistant, cf. _onBridgeState) - null tant que rien n'est
+  // arrivé, ou hors de CoqPit (l'événement n'existe simplement jamais).
+}), O(W, "styles", ke`
     :host {
       display: block;
       height: 100%;

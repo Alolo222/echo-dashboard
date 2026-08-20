@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0
+
+Pont optionnel avec CoqPit (requiert la version CoqPit correspondante,
+docs/mass-bridge-plan.md côté CoqPit) : quand la carte tourne dans la
+WebView de CoqPit et que le pont est configuré côté appareil, l'état du
+lecteur (titre/artiste/position/pochette) et les commandes
+lecture/pause/seek/volume passent directement par le Sendspin/Music
+Assistant natif de l'appareil au lieu de faire l'aller-retour par Home
+Assistant - qui pour cet appareil précis repart en fait vers lui-même.
+Purement additif : sans CoqPit (navigateur, appli HA mobile...) ou sans
+le pont configuré, comportement strictement identique à avant (100%
+Home Assistant).
+
 ## 0.2.1
 
 Suite aux retours sur 0.2.0, mise en page `round` (Echo Spot) :
