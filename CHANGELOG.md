@@ -8,6 +8,15 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.3.0
+
+`echo-home-card` passe à 1.7.0 : menu de configuration visuel dans
+l'éditeur de carte Lovelace (entités, navigation, éléments affichés,
+mise en page/cadran, localisation, zoom) — plus besoin d'écrire le YAML
+à la main pour l'essentiel. Fonds personnalisés/icônes restent YAML
+uniquement. Détail complet dans
+[packages/echo-home-card/CHANGELOG.md](packages/echo-home-card/CHANGELOG.md#170).
+
 ## 1.2.5
 
 `echo-home-card` passe à 1.6.5 : docs uniquement (pas de changement de

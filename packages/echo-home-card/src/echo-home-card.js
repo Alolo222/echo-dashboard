@@ -10,6 +10,12 @@ import {
   normalizeBackgroundConfig,
   validateBackgroundConfig,
 } from "./background.js";
+// Import statique (pas dynamique) : le build embarque tout dans un seul
+// fichier (cf. vite.config.js, "dist/echo-home-card.js" attendu par
+// Lovelace/HACS) — un import() dynamique produirait un second chunk.
+// Se contente d'enregistrer l'élément personnalisé <echo-home-card-editor>,
+// cf. getConfigElement() plus bas.
+import "./echo-home-card-editor.js";
 
 // Choix digital/analogique retenu au-delà du rechargement de page — un
 // device (Echo Spot) ne montre en pratique qu'une seule instance de la
@@ -187,6 +193,16 @@ class EchoHomeCard extends LitElement {
       id.startsWith("weather.")
     );
     return weatherEntity ? { weather_entity: weatherEntity } : {};
+  }
+
+  // Menu de config visuel dans l'éditeur Lovelace, à la place du YAML
+  // brut — options les plus courantes uniquement (entités, navigation,
+  // éléments affichés, présentation, localisation, zoom) ; fonds
+  // personnalisés/icônes restent YAML (cf. echo-home-card-editor.js).
+  // Le bouton "Modifier en YAML" de Lovelace reste toujours disponible à
+  // côté, quelle que soit la config.
+  static getConfigElement() {
+    return document.createElement("echo-home-card-editor");
   }
 
   getCardSize() {

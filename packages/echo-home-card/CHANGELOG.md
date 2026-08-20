@@ -1,5 +1,42 @@
 # Changelog
 
+## 1.7.0
+
+**Menu de configuration visuel** dans l'éditeur de carte Lovelace, à la
+place du YAML brut obligatoire jusqu'ici — demandé pour retrouver le
+confort des cartes intégrées à HA.
+
+- Nouveau `echo-home-card-editor.js` : implémente `static
+  getConfigElement()` sur la carte, retourne un élément qui pilote
+  plusieurs `<ha-form>` (composant de formulaire schéma-driven du
+  frontend HA, pas une dépendance du paquet) groupés par section —
+  entités, navigation (bloc météo cliquable), éléments affichés, mise en
+  page/cadran, localisation, zoom.
+- **Portée volontairement limitée aux options courantes** : les fonds
+  personnalisés (`background`/`analog_background`, forme `{type, ...}`
+  variable selon le type — url/media_folder/unsplash...) et `icons`
+  restent YAML uniquement, mal adaptés à un formulaire plat. Un bouton
+  "Modifier en YAML" reste de toute façon toujours disponible à côté de
+  l'éditeur visuel dans Lovelace, quelle que soit la config — rien n'est
+  perdu, juste pas encore d'éditeur dédié pour ces options-là.
+- La liste des styles analogiques du formulaire (`analog_style`)
+  réutilise directement les `label` déjà maintenus dans
+  `analog-styles.js` plutôt que d'en dupliquer une copie qui finirait
+  par diverger (comme la doc l'avait fait avant 1.6.5).
+- Import statique de l'éditeur dans `echo-home-card.js` (pas
+  `import()` dynamique) : le build reste un seul fichier
+  `dist/echo-home-card.js`, attendu tel quel par Lovelace/HACS — un
+  import dynamique aurait produit un second chunk.
+- Vérifié (Playwright) : la carte s'enregistre avec
+  `getConfigElement()`, l'éditeur (`echo-home-card-editor`) se monte et
+  se met à jour sans erreur console, la traduction des repères de
+  formulaire (`layout`/`time_format`, dont les vraies valeurs sont
+  `null`/absent plutôt que des chaînes vides) fonctionne dans les deux
+  sens, les champs texte/entité revenus vides sont bien retirés de la
+  config plutôt que d'y laisser une chaîne vide ; suite de régression
+  existante (rendu digital/analogique × round/large × jour/nuit)
+  toujours au vert.
+
 ## 1.6.5
 
 Docs uniquement, pas de changement de code : les noms des 4 styles de

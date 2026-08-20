@@ -115,6 +115,21 @@ et les attributs lus sur l'entité satellite (`mode`, `background`) sont
 les mêmes que ceux du template par défaut, donc rien d'autre à changer
 côté automatisations/View Assist.
 
+## Menu de configuration visuel
+
+Pas besoin d'écrire le YAML à la main pour les options les plus
+courantes : ajouter la carte (⋮ → « Modifier le tableau de bord » →
+« Ajouter une carte » → Echo Home Card, ou éditer une carte existante)
+ouvre un formulaire — entités, navigation, éléments affichés, mise en
+page/cadran, localisation, zoom. Le bouton « Modifier en YAML » de
+Lovelace reste disponible à côté à tout moment pour tout le reste.
+
+Les fonds personnalisés (`background`/`analog_background`, voir
+[Arrière-plans](#arrière-plans)) et `icons` n'ont pas encore d'éditeur
+dédié — leur forme change selon le type choisi (`url`, `media_folder`,
+`unsplash`...), mal adaptée à un formulaire plat. Ceux-là restent à
+régler en YAML.
+
 ## Configuration complète
 
 ```yaml

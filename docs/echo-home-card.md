@@ -24,6 +24,15 @@ Un petit bouton à l'écran bascule de l'un à l'autre et retient le choix
 (`localStorage`) au-delà d'un rechargement de page — `clock_face` dans la
 config ne sert que de valeur de départ.
 
+## Menu de configuration visuel
+
+Les options courantes (entités, navigation, éléments affichés, mise en
+page/cadran, localisation, zoom) se règlent via l'éditeur de carte
+Lovelace, sans toucher au YAML — fonds personnalisés et icônes restent
+YAML uniquement (bouton « Modifier en YAML » toujours disponible à
+côté). Voir [Menu de configuration
+visuel](../packages/echo-home-card/README.md#menu-de-configuration-visuel).
+
 ## Onze styles pour le cadran analogique
 
 Cinq styles "classiques" (`aurore`, `mono`, `clair`, `neon`, `ardoise`),
