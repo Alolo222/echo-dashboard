@@ -147,3 +147,58 @@ Echo Show rectangulaire, retire ces lignes `layout: round` (ou passe à
 `layout: null`) sur les cartes concernées — potentiellement en dupliquant
 le dashboard (un par forme d'écran) si les deux types d'appareils
 partagent le même Home Assistant.
+
+## Police (Nunito ou autre) pour tout le dashboard
+
+Chaque carte hérite de `--primary-font-family` (variable de thème
+standard Home Assistant) si le thème actif la définit — pas besoin de
+régler une police par carte (`--echo-home-font-family` etc., voir le
+README de chaque carte) une fois ceci en place. Deux étapes séparées :
+charger la police dans le navigateur (aucune police "custom" comme
+Nunito n'est déjà installée sur l'appareil), puis dire au thème de
+l'utiliser.
+
+### 1. Charger la police
+
+Home Assistant n'a pas de champ dédié pour ça — le plus fiable est un
+petit module JS ajouté comme ressource Lovelace, qui injecte le
+`<link>`/`@font-face` dans le vrai `<head>` du document (contrairement à
+un style posé sur une seule carte, ça traverse alors les shadow DOM de
+toutes les cartes du dashboard, pas juste celle où le style est posé).
+
+**Rapide (Google Fonts, l'appareil doit avoir accès à internet)** —
+`<config>/www/load-font.js` :
+
+```js
+const link = document.createElement("link");
+link.rel = "stylesheet";
+link.href =
+  "https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap";
+document.head.appendChild(link);
+```
+
+**Auto-hébergée (recommandée pour un appareil kiosque — pas de
+dépendance à un CDN externe qui peut tomber ou être bloqué)** :
+télécharger les `.woff2` (par ex. via
+[google-webfonts-helper](https://gwfh.mranftl.com/fonts/nunito)) dans
+`<config>/www/fonts/`, puis un module similaire qui injecte un `<style>`
+avec les `@font-face` correspondants plutôt qu'un `<link>`.
+
+Dans les deux cas : **Paramètres → Tableaux de bord → ⋮ → Ressources →
+Ajouter une ressource**, URL `/local/load-font.js`, type **Module
+JavaScript**.
+
+### 2. Appliquer la police via un thème
+
+**Paramètres → Apparence → Thèmes** (ou `themes.yaml`) :
+
+```yaml
+Nunito:
+  primary-font-family: "Nunito", sans-serif
+```
+
+À activer sur le profil qui affiche ce dashboard. Si l'appareil se
+connecte via un profil/kiosque dédié plutôt qu'un compte personnel, plus
+fiable de fixer le thème directement sur le dashboard (`theme: Nunito`
+en tête du YAML — voir [`dashboard.yaml`](dashboard.yaml)) plutôt que sur
+le profil utilisateur, qui ne s'applique alors qu'à ce dashboard précis.

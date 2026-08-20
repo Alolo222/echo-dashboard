@@ -258,8 +258,11 @@ card_mod:
     }
 ```
 
-La police doit être chargée par ailleurs (import `<link>` dans le thème,
-accès internet à Google Fonts, ou police déjà présente sur l'appareil).
+La police doit être chargée par ailleurs (elle n'est pas installée sur
+l'appareil par défaut) — pour la charger et l'appliquer à tout le
+dashboard plutôt qu'à cette seule carte, voir le [README du
+bundle](../../README.md#police-nunito-ou-autre-pour-tout-le-dashboard),
+section "Police pour tout le dashboard".
 
 ## Variables CSS (theming)
 

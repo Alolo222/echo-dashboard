@@ -8,6 +8,18 @@ il avance à chaque changement du fichier livré, quelle que soit la carte
 [echo-player-card](packages/echo-player-card/CHANGELOG.md),
 [echo-weather-card](packages/echo-weather-card/CHANGELOG.md).
 
+## 1.3.1
+
+Documentation uniquement, aucun changement de code/dist : nouvelle
+section **"Police pour tout le dashboard"** dans ce README — comment
+charger une police (Nunito ou autre, pas installée sur l'appareil par
+défaut) et l'appliquer via un thème HA à tout le dashboard, plutôt que
+par carte. Manquait complètement jusqu'ici (chaque carte se contentait
+de dire qu'elle hérite de `--primary-font-family` si définie, sans dire
+comment la définir). `dashboard.yaml` gagne un exemple `theme:` commenté
+en tête ; les README de echo-home-card/echo-weather-card/echo-player-card
+pointent désormais vers cette section plutôt que de laisser deviner.
+
 ## 1.3.0
 
 `echo-home-card` passe à 1.7.0 : menu de configuration visuel dans

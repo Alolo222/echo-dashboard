@@ -23,6 +23,9 @@
 # (swipe intact) tout en cachant le chrome visuellement plutôt que structurellement.
 
 title: ViewAssist
+# theme: Nunito    # optionnel - applique une police à tout le dashboard plutôt qu'au profil
+                    # utilisateur, pratique pour un appareil kiosque ; suppose d'avoir créé ce
+                    # thème au préalable, voir README.md section "Police pour tout le dashboard"
 views:
   # --- Vue "home" : horloge + météo compacte, remplace clock.yaml -----------------------------
   # path "home" (pas préfixé par le dashboard) : convention View Assist d'origine, confirmée dans

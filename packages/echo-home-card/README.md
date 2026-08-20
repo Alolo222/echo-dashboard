@@ -584,6 +584,11 @@ card_mod:
     }
 ```
 
+Pour appliquer une police à tout le dashboard plutôt qu'à cette seule
+carte (et charger la police elle-même, pas juste la nommer), voir le
+[README du bundle](../../README.md#police-nunito-ou-autre-pour-tout-le-dashboard),
+section "Police pour tout le dashboard".
+
 ## Variables CSS (theming)
 
 Toutes optionnelles — la carte a des valeurs par défaut complètes sans

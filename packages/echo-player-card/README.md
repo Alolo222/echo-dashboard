@@ -197,6 +197,11 @@ selon l'entité configurée.
 | `--echo-player-night-opacity` | Opacité du texte en mode nuit | `0.55` |
 | `--echo-player-font-family` | Police — sinon `--primary-font-family` du thème HA | hérité |
 
+Pour charger une police (Nunito ou autre) et l'appliquer à tout le
+dashboard plutôt qu'à cette seule carte, voir le [README du
+bundle](../../README.md#police-nunito-ou-autre-pour-tout-le-dashboard),
+section "Police pour tout le dashboard".
+
 ## Licence
 
 MIT — voir [LICENSE](LICENSE).
